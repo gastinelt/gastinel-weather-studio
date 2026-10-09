@@ -1,0 +1,11 @@
+{
+  "id": "carte3d",
+  "name": "Carte 3D",
+  "version": "1.0.2",
+  "description": "Relief 3D (MNT IGN LiDAR HD) drapé du Plan IGN, avec les points du projet à leur altitude réelle. Rotation, zoom, inclinaison.",
+  "api_version": 1,
+  "library": "carte3d.dll",
+  "ui_entry": "index.html",
+  "hook": "map_view",
+  "permissions": ["db_read", "network"]
+}

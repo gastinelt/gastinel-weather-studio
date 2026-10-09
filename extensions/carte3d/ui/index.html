@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Carte 3D</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0f1720; color: #e8edf3;
+      font-family: "Inter", system-ui, "Segoe UI", sans-serif; font-size: 13px; }
+    [hidden] { display: none !important; }
+    canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    #etiquettes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .etq { position: absolute; transform: translate(-50%, -135%); white-space: nowrap; padding: 2px 6px;
+      border-radius: 4px; background: rgba(15, 23, 32, 0.78); font-size: 11px; line-height: 1.3; }
+    .etq small { color: #a9b6c4; }
+    #barre { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 14px; align-items: center;
+      padding: 8px 12px; border-radius: 8px; background: rgba(15, 23, 32, 0.82); }
+    #barre label { display: flex; gap: 6px; align-items: center; }
+    #barre button { background: #243241; color: inherit; border: 1px solid #3a4b5d; border-radius: 6px;
+      padding: 4px 10px; cursor: pointer; font: inherit; }
+    #aide { position: absolute; right: 12px; bottom: 12px; color: #a9b6c4; font-size: 11px; text-align: right; }
+    #statut { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 24px; color: #c9d4df; }
+    #source { position: absolute; right: 12px; top: 10px; color: #7f8e9d; font-size: 10px; }
+    #barre select { background: #243241; color: inherit; border: 1px solid #3a4b5d; border-radius: 6px;
+      padding: 3px 6px; font: inherit; }
+    /* Fenêtre de chargement au premier plan. */
+    #chargement { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(8, 12, 18, 0.55); z-index: 10; }
+    #chargement .carte { display: flex; gap: 14px; align-items: center; min-width: 300px; max-width: 80%;
+      padding: 16px 20px; border-radius: 10px; background: #16212d; border: 1px solid #2c3c4d;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); animation: apparition 0.18s ease-out; }
+    #chargement .roue { width: 22px; height: 22px; flex: none; border-radius: 50%;
+      border: 3px solid #2c3c4d; border-top-color: #38bdf8; animation: tour 0.8s linear infinite; }
+    #chargement strong { display: block; margin-bottom: 2px; }
+    #chargement-texte { color: #a9b6c4; }
+    @keyframes tour { to { transform: rotate(360deg); } }
+    @keyframes apparition { from { opacity: 0; transform: translateY(6px); } }
+  </style>
+</head>
+<body>
+  <canvas id="gl"></canvas>
+  <div id="etiquettes"></div>
+  <div id="statut"></div>
+  <div id="chargement" hidden role="status" aria-live="polite">
+    <div class="carte"><div class="roue"></div>
+      <div><strong>Chargement en cours</strong><span id="chargement-texte"></span></div></div>
+  </div>
+  <div id="barre" hidden>
+    <label>Relief ×<input type="range" id="exag" min="1" max="4" step="0.5" value="1.5" /><span id="exag-val">1,5</span></label>
+    <label>Fond <select id="fond" disabled>
+      <option value="topo">Plan IGN</option><option value="altitude">Teinte d'altitude</option></select></label>
+    <label><input type="checkbox" id="noms" checked /> Noms</label>
+    <button type="button" id="recentrer">Recentrer</button>
+  </div>
+  <div id="aide">Glisser : tourner · Clic droit / Maj + glisser : déplacer · Molette : zoom</div>
+  <div id="source">Relief : IGN (data.geopf.fr)</div>
+  <script src="carte3d.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "id": "thermique",
+  "name": "Analyse thermique",
+  "version": "1.0.0",
+  "description": "Gradient thermique vertical (inversions), détecteur d'épisodes radiatifs et profil vertical de température, calculés à partir des mesures du projet. Lecture seule.",
+  "api_version": 1,
+  "library": "thermique.dll",
+  "ui_entry": "index.html",
+  "hook": "map_view",
+  "permissions": ["db_read"]
+}

@@ -1,0 +1,1154 @@
+﻿id,nom,latitude,longitude,altitude_m,departement,reseau,api_disponible,donnees_recentes,licence,raison,source
+00001,Saint-Médard-d'Aunis,46.15,-0.96,20,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00002,Le Vigan,43.99,3.602,245,30,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00003,Besse sur Issole,43.34,6.17,275,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00004,Granges lès Beaumont,45.05,4.98,155,26,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00005,Saint-Palais-sur-Mer,45.64,-1.08,20,17,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00008,Steenwerck,50.7,2.77,22,59,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00009,Bouvesse-Quirieu,45.781,5.44,222,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00010,Le Grau-du-Roi - Repausset-Levant,43.533,4.147,1,30,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00012,Echiré,46.392,-0.416,48,79,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00014,Saint-Martin-d'Hères,45.167,5.767,220,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00015,Corte,42.322,9.15,470,2B,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00017,Carbay,47.733,-1.217,70,49,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00018,Ferrals-lès-Corbières,43.15,2.733,72,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00023,Saint-Yrieix-le-Déjalat,45.45,1.967,750,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00027,Cardo,42.702,9.428,300,2B,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00028,Sainte-Anne-sur-Gervonde,45.504,5.217,470,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00029,Jarny,49.155,5.869,211,54,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00032,Bressols,43.967,1.333,92,82,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00033,Véretz,47.367,0.8,50,37,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00034,Tulette,44.283,4.933,120,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00035,Rochegude,44.25,4.83,107,26,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00038,Fontenay-le-Comte,46.467,-0.817,43,85,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00039,Le-Péage-de-Roussillon - Plateau de Louze,45.376,4.797,256,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00041,Lamballe,48.427,-2.517,55,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00042,Sandillon,47.846,2.034,100,45,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00047,Plabennec,48.503,-4.425,80,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00049,Saint-Symphorien - Verrières,44.84,3.626,1220,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00051,Cramchaban,46.219,-0.722,10,17,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00052,Armentières,50.689,2.877,16,59,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00053,La Réole,44.596,-0.062,50,33,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00054,Corny-sur-Moselle,49.03,6.056,180,57,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00055,Pic-du-Midi,42.936,0.143,2877,65,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00057,Toulon-Le Baou,43.152,5.893,118,83,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00059,Niort,46.324,-0.463,16,79,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00060,Canéjan,44.764,-0.652,49,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00061,Evry-Courcouronnes,48.618,2.408,80,91,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00063,La Teste de Buch,44.633,-1.144,10,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00065,Soumoulou,43.266,-0.188,290,64,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00067,Melle,46.223,-0.143,145,79,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00070,Montigny-lès-Metz,49.109,6.183,182,57,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00072,Briançon,44.896,6.636,1320,05,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00074,Saint-Jean-de-la-Haize,48.7,-1.362,22,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00075,Peypin,43.391,5.551,300,13,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00076,Le-Péage-de-Roussillon,45.376,4.797,156,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00080,Angliers,46.211,-0.951,5,17,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00081,Verneuil-sur-Seine,48.981,1.973,40,78,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00083,Saint-Véran,44.701,6.868,2040,05,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+00086,Saint-Malo-des-Trois-Fontaines,48.014,-2.471,60,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00088,Orange Centre,44.137,4.81,44,84,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00089,Villemoisson-sur-Orge,48.688,2.334,80,91,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00092,Mûr-de-Bretagne,48.202,-2.986,160,22,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00093,Brignoles Ouest,43.417,6.03,275,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00094,Miribel-les-Echelles,45.429,5.709,760,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00095,Quimper,47.995,-4.109,30,29,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00096,Le-Sappey (Mt Salève),46.089,6.167,900,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00097,Trizac,45.247,2.524,950,15,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00098,Plouguerneau,48.6,-4.5,12,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+00099,Crempigny-Bonneguête,45.953,5.904,502,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000A1,Cernay,46.83,0.3,81,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000A3,Entrechaux,44.2,5.1,305,84,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000A5,Sablons,45.319,4.774,138,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000A9,Rablay-sur-Layon,47.295,-0.575,51,49,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AA,Castels,44.872,1.057,185,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AB,Landser,47.684,7.394,267,68,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AC,Connerré,48.054,0.471,64,72,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AD,Saint-Michel-sur-Ternoise,50.377,2.356,87,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AE,Piedigriggio,42.446,9.198,210,2B,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AF,Boisredon,45.315,-0.538,50,17,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000AH,Gambsheim,48.692,7.883,132,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000AI,Millau (1),44.1,3.06,475,12,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000AJ,Léran,42.987,1.91,380,09,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AK,Saint-André-de-Corcy,45.926,4.952,296,01,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AL,Siegen - Kaidenbourg,48.958,8.041,168,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000AR,Paulhac,45.006,2.905,1125,15,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AS,Ile-d'Yeu - Port Joinville,46.725,-2.349,16,85,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000AT,Sausseuzemare-en-Caux,49.666,0.342,129,76,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AU,Chézy-sur-Marne,48.989,3.368,70,02,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AV,Baye,48.854,3.763,177,51,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AX,Saint-Laurent-de-Cognac,45.697,-0.409,40,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000AY,Les Pennes-Mirabeau,43.41,5.313,142,13,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000B0,La Chaux ,47.021,6.426,900,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000B3,Mulhouse,47.746,7.343,255,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000B4,Chalampé,47.83,7.546,216,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000B5,Saint-Sorlin-en-Valloire,45.269,4.943,340,26,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000B6,Salins,45.191,2.391,660,15,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000B8,Augy-sur-Aubois,46.77,2.83,245,18,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000B9,Gouzon,46.194,2.238,379,23,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BA,Grandfresnoy,49.372,2.652,72,60,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000BB,Hohrod,48.054,7.125,417,68,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000BE,Laruns-Artouste-Fabrèges,42.88,-0.397,1270,64,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BG,ENS - Lyon 7ème,45.733,4.833,169,69,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BI,Les Salces - Bonnecombe,44.533,3.161,1330,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BL,Marseille - Saména,43.229,5.35,7,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BM,Theys (760m),45.301,5.995,760,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BN,Voiron - Centre ville,45.364,5.592,300,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BO,Arces,45.584,-0.832,36,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BP,Périgueux,45.183,0.717,83,24,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BQ,Colombé-le-Sec,48.255,4.783,229,10,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BR,Mérens-les-Vals,42.65,1.833,1070,09,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BS,Cabestany,42.681,2.941,38,66,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BU,Saint-Maximin-la-Sainte-Baume - Les Terriers,43.463,5.885,330,83,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BV,"Paris 5ème - Tour Zamansky, Jussieu",48.847,2.356,122,75,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000BX,Paimpol,48.778,-3.044,22,22,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000BY,Cabannes,43.867,4.95,50,13,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000BZ,Saint-Hilaire-de-Brethmas,44.08,4.125,130,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000C0,Buhl-Lorraine,48.724,7.086,260,57,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000C1,Trelly,48.96,-1.42,45,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000C4,Marseille-Corniche,43.275,5.36,10,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000C5,Laillé,47.969,-1.746,18,35,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000C6,Saint-Philbert-de-Grand-Lieu,47.036,-1.64,19,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000C7,Chenecey-Buillon,47.14,5.96,280,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000C9,Sain-Bel,45.817,4.596,300,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000CA,Leigné-les-Bois,46.759,0.708,140,86,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000CC,Manglieu,45.612,3.352,430,63,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000CD,St-Christophe-sur-Guiers - Le Habert de la Ruchère,45.4,5.801,1150,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CE,Campistrous - Centre de Recherches Atmosphériques,43.124,0.364,601,65,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000CF,Prudhomat - Castelnau,44.896,1.815,129,46,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CI,Anglars-Saint-Félix,44.423,2.219,465,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CJ,Granier,45.573,6.651,1260,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CK,Lagarde-d'Apt - Observatoire SIRENE,44.001,5.488,1100,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000CL,Gréasque - La Diote,43.428,5.538,385,13,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CM,Saint-Bonnet-le-Troncy,46.086,4.428,730,69,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CN,Tournon-sur-Rhône,45.064,4.846,123,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CO,Nostang,47.75,-3.188,17,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CP,Pressagny-l'Orgueilleux,49.133,1.45,39,27,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CR,Almenêches,48.697,0.11,170,61,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000CT,Paris 6ème - Saint Germain des Prés,48.852,2.335,60,75,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CU,Seltz,48.895,8.108,112,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000CW,Mussidan,45.035,0.363,90,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CX,Saint-Philbert-sur-Risle,49.296,0.649,50,27,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000CY,Lapte - Verne,45.169,4.254,885,43,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000CZ,Peaugres,45.288,4.729,460,07,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000D2,Kernoues,48.588,-4.348,28,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000D3,Plounéventer,48.5,-4.2,97,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000D5,Naintré,46.758,0.481,62,86,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000D7,Grambois,43.763,5.59,385,84,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000D8,Brest,48.4,-4.483,30,29,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DA,Combs-la-Ville,48.664,2.578,89,77,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DB,Recoules-de-Fumas,44.641,3.345,1040,48,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000DC,Firmi,44.548,2.312,320,12,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DD,Vinon,47.285,2.824,170,18,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000DE,Passy,45.92,6.688,890,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DF,Arvert (2),45.745,-1.124,20,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DG,Verchaix,46.098,6.679,895,74,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DI,Saint-Saturnin-lès-Apt,43.933,5.383,318,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DJ,Veyrins-Thuellin,45.617,5.533,240,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000DM,Saint-Georges-d'Oléron,45.968,-1.361,6,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DN,Butot,49.611,1.022,176,76,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000DP,Montréal,43.2,2.141,250,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DQ,Saint-Nazaire-d'Aude,43.245,2.894,21,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DR,Sainte-Feyre,46.139,1.915,418,23,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DS,Néris-les-Bains,46.287,2.659,385,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000DV,Grenay,45.663,5.08,290,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000DX,Burdignes,45.27,4.568,1000,42,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000DZ,Lacanau-Océan,45.001,-1.194,8,33,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000E0,Origné,47.95,-0.717,100,53,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000E2,Saint-Martinien,46.338,2.473,390,03,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000E7,Saint-Jean-de-Védas - La Fermaude,43.583,3.833,50,34,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000E8,Hadigny-les-Verrières,48.317,6.467,325,88,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000EB,Valennes,47.996,0.81,163,72,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EC,Fort-Mahon - Plage,50.333,1.55,5,80,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ED,Arc-sous-Cicon - 850m,47.06,6.427,850,25,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EE,Fougerolles,47.885,6.405,325,70,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EF,Cavalaire-sur-Mer,43.174,6.527,14,83,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000EG,Les Salles-de-Castillon,44.917,0.031,30,33,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000EH,Annot,43.962,6.665,750,04,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000EI,Saint-Loup-de-Varennes,46.725,4.862,190,71,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000EK,Saclas,48.358,2.123,90,91,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EL,Omonville,49.796,1.049,125,76,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EN,Osséja,42.414,1.982,1350,66,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EO,Pourrières - La Beyssanne,43.469,5.739,282,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EP,Villefontaine,45.613,5.146,321,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EQ,Montredon-des-Corbières,43.183,2.933,35,11,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000ET,Riotord,45.232,4.404,866,43,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000EU,Vernosc-lès-Annonay,45.217,4.713,406,07,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000EV,Le Teich,44.632,-1.022,12,33,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000EW,Paris 20ème - Porte de Vincennes,48.848,2.409,65,75,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000F3,Agde - Le Grau,43.283,3.465,10,34,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000F8,Belin-Béliet,44.506,-0.764,55,33,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FB,Neuville-de-Poitou,46.683,0.25,105,86,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FC,Rimbach-près-Masevaux,47.828,6.952,560,68,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FD,Chapelle-des-Bois,46.593,6.091,1072,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FE,La Javie,44.167,6.35,820,04,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FG,Pélussin,45.418,4.682,400,42,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FI,Ambérieu-en-Bugey,45.959,5.343,255,01,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FK,Malbosc,44.347,4.074,480,07,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FL,Saint-Pierre-du-Chemin,46.695,-0.701,200,85,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000FM,Cernay-la-Ville,48.673,1.974,174,78,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000FN,Saint-Glen,48.358,-2.523,145,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FO,Pomérols,43.391,3.499,40,34,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000FP,Ségur-le-Château,45.431,1.302,367,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FR,Borne - La Croix de Bauzon,44.629,4.089,1370,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FS,Dontreix,45.983,2.567,717,23,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FT,Blacé,46.032,4.645,460,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FU,Saint-Paul-Trois-Châteaux,44.349,4.766,107,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FV,Bélesta,42.902,1.933,485,09,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FW,Massiac,45.256,3.198,545,15,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FX,Pont-d'Ain,46.048,5.337,236,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000FY,Sainte-Ouenne,46.443,-0.448,76,79,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000FZ,Guéret,46.178,1.875,422,23,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000G1,Gros-Réderching,49.07,7.213,299,57,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000G2,Gries,48.754,7.814,143,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000G3,Le Mesnil-Esnard,49.417,1.15,152,76,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000G4,Niederbronn-les-Bains,48.955,7.635,217,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000G6,Aigrefeuille-d'Aunis,46.117,-0.933,20,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000G7,Saint-Haon,44.85,3.75,1005,43,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GB,Wintersbourg,48.786,7.19,320,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GC,Annonay,45.236,4.677,310,07,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000GF,Castres,43.66,2.22,276,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GG,Clans,43.996,7.148,665,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000GH,Ilonse,44.029,7.099,1000,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000GI,Hédé-Bazouges ,48.3,-1.8,70,35,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GJ,Arcizans-Avant,42.983,-0.1,645,65,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GK,Thoiras,44.082,3.918,200,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GL,Aytré-Plage,46.12,-1.124,2,17,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GM,Yzeron,45.707,4.59,723,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GN,Vieux-Moulin,48.395,6.999,404,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GO,Mirebeau,46.787,0.183,150,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GP,L'Huisserie,48.025,-0.769,100,53,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GQ,Charnas,45.337,4.744,300,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GR,Kogenheim,48.337,7.543,162,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GS,Lans-en-Vercors - Les Allières,45.095,5.6,1449,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GT,Bouliac,44.817,-0.484,80,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000GU,Pleslin-Trigavou,48.533,-2.067,62,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GV,Ergué-Gabéric,47.996,-4.022,128,29,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000GX,Neulliac,48.128,-2.983,78,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GY,Le Hinglé,48.393,-2.078,72,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000GZ,Plestin-les-Grèves,48.658,-3.631,45,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000H2,Rupt-sur-Moselle,47.925,6.658,432,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000H3,Les Estables,44.9,4.167,1350,43,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000H4,Meillers,46.5,3.083,320,03,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000H5,Nantes,47.215,-1.605,51,44,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000H6,Les Buteaux,46.985,3.972,670,58,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000H8,Montpellier,43.6,3.883,40,34,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000H9,Juziers,48.994,1.848,82,78,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HB,Nonaville,45.533,-0.083,68,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HC,Variscourt,49.417,3.986,60,02,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HD,Nice - Pessicart,43.722,7.242,190,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000HF,Toulouse - Cité de l'Espace,43.586,1.493,140,31,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000HH,Saint-Germain-Laprade,45.039,3.97,680,43,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000HJ,Réaumur,46.72,-0.804,155,85,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HL,Vence,43.72,7.091,322,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000HM,Yssingeaux,45.133,4.117,830,43,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000HO,Estrées-la-Campagne,49.017,-0.233,99,14,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HQ,Villy-le-Bouveret,46.044,6.163,791,74,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000HR,La Chapelle-Saint-Florent,47.334,-1.056,55,49,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000HT,Engins,45.18,5.617,905,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000HU,Kernascléden,48.006,-3.32,108,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000I1,Laroque,43.917,3.733,150,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000I2,Prades-sur-Vernazobre,43.45,2.983,110,34,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000I4,Guidel,47.789,-3.487,41,56,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000I5,Bulson,49.633,4.917,285,08,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000I7,Eygliers,44.677,6.619,934,05,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000I9,Foussais-Payré,46.533,-0.683,75,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000IA,Méaudre,45.131,5.529,976,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000IB,Eu,50.046,1.421,40,76,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000IC,Auvers-le-Hamon,47.902,-0.352,80,72,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ID,Molières,44.19,1.401,200,82,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000IF,Châtelus-Malvaleix,46.3,2.017,461,23,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000II,Boulaincourt,48.372,6.083,300,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000IK,Perche en Nocé - Courboyer,48.397,0.672,180,61,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000J0,Le Luc,43.393,6.315,175,83,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000J1,Senlis,49.2,2.583,65,60,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000J2,Villebret,46.267,2.638,397,03,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000J4,L'Isle-sur-la-Sorgue - Velorgues,43.903,5.052,65,84,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000J6,Le Castellet,43.203,5.776,123,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000J8,Béziers,43.348,3.219,50,34,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000J9,Nogentel,49.016,3.4,70,02,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000K0,Viriat,46.255,5.216,231,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000K1,L'Isle-d'Abeau,45.618,5.235,250,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000K2,L'Isle-sur-la-Sorgue - Lycée agricole,43.922,5.051,55,84,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000K3,Valence,44.108,0.891,67,82,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000K4,Phalsbourg,48.767,7.267,322,57,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000K5,Saint-Nicolas-la-Chapelle,45.808,6.498,930,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000K6,Hestrud,50.199,4.152,232,59,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000K7,Saint-Léger-les-Mélèzes,44.644,6.2,1245,05,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000L1,Cheylade - Vallée de la Rhue,45.175,2.7,1000,15,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000L2,Saramon,43.523,0.763,190,32,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000L3,Saint-Saturnin-lès-Avignon,43.955,4.925,60,84,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000L4,Roquevaire - Vallon du Gaudissard,43.344,5.573,227,13,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000L5,Valflaunès,43.8,3.872,155,34,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000L7,Aniane,43.685,3.587,64,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000L9,Genac,45.795,0.029,75,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LM,Ancey,47.326,4.827,380,21,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LO,Daglan,44.742,1.192,104,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LP,Vern-d'Anjou,47.601,-0.834,43,49,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000LQ,Beaucroissant,45.342,5.469,425,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000LR,Saint-Cirq-Souillaguet,44.706,1.461,330,46,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LS,Monswiller,48.755,7.377,177,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LU,Frontenay-Rohan-Rohan,46.253,-0.538,30,79,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000LV,Saint-Denis-d'Oléron,46.035,-1.379,10,17,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000LY,Monts-sur-Guesnes,46.919,0.211,140,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000LZ,Saint-Hilaire,43.422,1.278,195,31,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000M2,Bourg-lès-Valence,44.956,4.91,150,26,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000M4,Ciran,47.061,0.889,84,37,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000M6,Arvert (1),45.745,-1.126,22,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000M7,Ploeren,47.657,-2.864,45,56,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000M8,Saint-Maximin-la-Sainte-Baume - Saint Mitre,43.478,5.844,307,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000M9,Sanary-sur-Mer,43.141,5.812,67,83,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MA,Beaumont-du-Ventoux - Mont Serein,44.183,5.262,1386,84,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MB,Tour-en-Sologne,47.54,1.505,82,41,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MD,Lemberg,49.008,7.387,420,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MF,Calignac,44.134,0.415,135,47,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MG,Romilly-sur-Aigre,47.982,1.283,101,28,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MI,Périgny,48.697,2.555,93,94,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MJ,Petiville,49.461,0.587,15,76,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MK,Nay,43.183,-0.267,304,64,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ML,Chassors,45.714,-0.204,31,16,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MN,Gruissan,43.106,3.101,8,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MO,Belmont - Champ du Feu,48.408,7.261,1002,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MP,Continvoir,47.388,0.218,81,37,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MQ,Priay,46.002,5.288,277,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MR,Mortagne-sur-Sèvre,46.992,-0.947,131,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MS,Xonrupt-Longemer - Le Poli,48.076,6.919,785,88,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MT,Amiens - Dury,49.874,2.272,80,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MU,Bussy,49.627,2.984,50,60,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000MV,Millau,44.1,3.083,475,12,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MW,Le Grand-Pressigny,46.92,0.804,72,37,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000MX,Saint-Vallier-de-Thiey,43.695,6.844,723,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000MY,Sallanches,45.944,6.632,571,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000MZ,Saint-Just-le-Martel,45.864,1.388,320,87,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000N3,Crest,44.728,5.027,310,26,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000N4,Aizenay,46.74,-1.608,69,85,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000N5,Oletta,42.632,9.342,110,2B,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000N6,Nans-les-Pins,43.372,5.784,400,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000N9,Les Herbiers,46.887,-1.009,180,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NB,Pouzauges,46.779,-0.836,125,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NC,Mairy-sur-Marne,48.881,4.411,93,51,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ND,Mirepoix,43.088,1.874,305,09,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NF,Cipières,43.781,6.952,823,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NG,Saint-Germain-la-Poterie,49.449,1.981,172,60,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NH,Pertuis - Le Farigoulier,43.666,5.525,195,84,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NI,Sallèles-d'Aude,43.26,2.946,21,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NJ,Tence,45.115,4.292,891,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NK,Geishouse,47.88,7.058,660,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NL,Saint-Paul-sur-Ubaye - Maljasset,44.593,6.84,1900,04,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NM,Priziac,48.067,-3.417,150,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NP,Simiane-Collongue,43.441,5.442,240,13,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NQ,Camaret-sur-Mer,48.275,-4.596,43,29,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000NR,Seichamps,48.711,6.262,226,54,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NT,Le Falgoux,45.15,2.617,978,15,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NU,Louargat,48.516,-3.333,192,22,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000NV,Triel-sur-Seine - L'Hautil,48.999,2.016,177,78,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NW,Charleville-Mézières - Mohon,49.747,4.735,146,08,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000NX,Saint-Léon,44.271,0.246,144,47,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000NZ,Chepniers,45.255,-0.308,87,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000O2,Cerisiers,48.133,3.485,150,89,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000O3,Saint-Brevin-les-Pins,47.25,-2.167,5,44,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000O4,Saint-Angel,45.5,2.233,662,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000O5,Bard,45.591,4.003,805,42,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000O7,Saint-Bonnet-le-Château,45.424,4.067,870,42,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000O8,Saint-Clément-de-Rivière,43.683,3.833,115,34,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000O9,Recoubeau-Jansac,44.655,5.415,510,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OA,Obersteinbach,49.035,7.698,241,67,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OB,Sauteyrargues,43.837,3.919,150,34,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000OF,Publier,46.388,6.544,530,74,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OG,Orçay,47.291,2.112,155,41,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OH,Plumergat,47.741,-2.915,50,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OI,Quimperlé,47.867,-3.564,51,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000OJ,La Lande-sur-Eure,48.557,0.865,235,61,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000OK,Schirrhoffen,48.806,7.922,138,67,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000OM,Le Perreux-sur-Marne,48.842,2.511,55,94,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ON,Montret,46.682,5.115,205,71,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000OO,Saint-Antonin-du-Var,43.507,6.287,202,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OP,Mareuil,45.773,-0.142,72,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OQ,Obernai,48.469,7.506,179,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OR,Drachenbronn-Birlenbach,48.983,7.867,240,67,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OS,Saint-Julien-en-Quint,44.838,5.292,574,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OT,Saint-Bihy,48.379,-2.97,220,22,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OW,Montaren-et-Saint-Médiers,44.029,4.38,112,30,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000OX,Veauchette,45.562,4.265,359,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000OZ,Gallargues-le-Montueux,43.717,4.167,30,30,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000P1,Maisonnisses,46.062,1.898,576,23,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000P2,Besançon,47.249,6.018,355,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000P4,Ferrières sur Sichon - Cheval Rigon,46.04,3.608,586,03,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000P6,Saint-Germain-le-Guillaume,48.206,-0.826,110,53,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000P7,Argenteuil,48.95,2.25,104,95,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000P8,Issou,48.99,1.793,85,78,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000P9,Saint-Michel-Mont-Mercure,46.829,-0.883,235,85,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000PA,Petersbach,48.869,7.268,355,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PD,Die,44.75,5.367,400,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PG,Valouse,44.463,5.193,767,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PH,Vengeons,48.749,-0.898,340,50,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PI,Muirancourt,49.644,3.01,60,60,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PJ,Charmant,45.495,0.174,148,16,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PK,Gilette - La Clave,43.848,7.15,150,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PM,Montvalezan,45.612,6.846,1270,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PN,Senantes,48.667,1.567,119,28,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PO,Biot - Polytech Nice Sophia,43.616,7.07,130,06,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PP,Gourin,48.139,-3.608,150,56,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PQ,Voinémont,48.523,6.162,239,54,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000PS,Téthieu,43.75,-0.983,20,40,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000PT,Blois - L'Arrou,47.586,1.303,98,41,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PU,Castanet-Tolosan,43.52,1.512,150,31,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PW,Burdignes,45.247,4.521,1230,42,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000PX,Annonay - Chatinais,45.246,4.638,540,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PY,Thorrenc,45.242,4.758,368,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000PZ,"Glacier du Pisaillas, Val-d'Isère/Bonneval-sur-Arc",45.422,7.06,3119,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Q2,Sénébret,47.841,-3.359,69,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Q3,Perpignan - Moulin à Vent,42.698,2.895,43,66,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000Q4,Villefort - Mas de la Barque,44.386,3.875,1420,48,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Q6,Mouilleron-le-Captif,46.719,-1.455,77,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Q7,Aigrefeuille-d'Aunis - Château-d'eau,46.115,-0.937,62,17,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Q8,Castres,43.6,2.233,174,81,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000Q9,Pourrières,43.506,5.735,283,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QA,Fontenermont,48.824,-1.105,212,14,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QB,Caix,49.812,2.657,65,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QC,Cerisy-la-Forêt,49.195,-0.937,114,50,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QD,[MAE] Château-Renault - Collège André Bauchant,47.598,0.917,120,37,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000QE,Jarrier - La Tuvière,45.286,6.306,1333,73,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QF,Besné,47.371,-2.042,11,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QG,Nérac,44.111,0.307,72,47,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QH,Seythenex,45.727,6.299,780,74,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000QI,Noyarey,45.248,5.628,261,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QJ,Lasfaillades,43.555,2.502,710,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QM,Saint-Martin-de-Londres,43.783,3.733,251,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QN,Boulc,44.648,5.568,830,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QO,Bourth,48.768,0.809,207,27,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QR,La Meyze,45.616,1.214,352,87,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000QS,Bannay,47.388,2.884,215,18,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QT,Hochstatt,47.703,7.276,280,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QU,Brion,45.294,5.337,673,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QV,Ristolas,44.766,6.984,1670,05,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000QW,Ste-Colombe-de-la-Commanderie,42.618,2.725,302,66,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QX,"Donnemarie-Dontilly, Bescherelles",48.49,3.111,100,77,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000QY,Chuzelles,45.585,4.878,248,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000QZ,Niederbronn-les-Bains (Sud),48.945,7.653,223,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000R1,Brassy,47.271,3.903,412,58,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000R2,Digne-les-Bains,44.104,6.232,610,04,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000R3,Gérardmer,48.073,6.878,700,88,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000R4,Lagarrigue,43.578,2.278,208,81,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000R5,Bergues,50.968,2.441,17,59,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000R6,Saint-Jean-de-Maurienne,45.283,6.35,540,73,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000RA,Chamant,49.22,2.612,79,60,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RB,Buellas,46.211,5.132,255,01,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RC,Jussy,49.717,3.236,77,02,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RD,Faverolles-et-Coëmy,49.235,3.793,100,51,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RE,Colombiers,46.701,2.539,182,18,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RF,La Chapelle-Aubareil,45.017,1.18,257,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RG,Donges,47.318,-2.075,11,44,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RH,La Douze,45.062,0.865,198,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RI,Yvoy-le-Marron,47.632,1.853,130,41,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RJ,Luzinay,45.589,4.958,222,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RL,Mazinghem,50.603,2.405,20,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RM,Lignerolles,46.283,2.567,309,03,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RN,Ota,42.258,8.746,350,2A,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000RO,Vicdessos,42.769,1.495,712,09,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RQ,Breuillet,45.695,-1.07,15,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RS,Saint-Remy-en-Bouzemont-Saint-Genest-et-Isson,48.633,4.65,109,51,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RT,Cauterets,42.883,-0.117,906,65,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RX,Font-Romeu-Odeillo-Via,42.516,2.06,1788,66,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000RY,Bannalec,47.932,-3.698,93,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000RZ,Gourin - Rue Saint-Nicolas,48.144,-3.601,142,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S0,Luz-Saint-Sauveur,42.872,-0.003,670,65,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S1,Goldbach-Altenbach,47.882,7.093,705,68,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S2,Saint-Tricat,50.893,1.831,11,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000S3,Les Ormes,46.975,0.605,40,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S4,Sorcy-Bauthémont,49.539,4.537,112,08,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000S6,Treuzy-Levelay,48.278,2.802,84,77,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000S7,Ladiville,45.512,-0.07,130,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S8,Willer-sur-Thur - Grand Ballon,47.904,7.102,1355,68,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000S9,Les Fourgs,46.835,6.4,1140,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SB,Taupont,47.96,-2.439,79,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SC,Auffargis,48.7,1.887,157,78,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000SD,Theys (850m),45.301,5.995,849,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SE,Jarnages,46.181,2.084,473,23,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SF,Le Pertuis,45.096,4.058,950,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000SG,Toulouse - Saint-Simon,43.559,1.383,160,31,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SH,Saint-Paul-lès-Durance,43.683,5.7,269,13,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000SK,Gros-Réderching - Singling,49.049,7.218,331,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SL,Déservillers,47.003,6.071,773,25,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SM,Saint-Saud-Lacoussière,45.544,0.819,345,24,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SN,Saorge,43.987,7.553,547,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000SO,Santa-Severa,42.889,9.473,7,2B,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000SP,Montagny,45.627,4.758,200,69,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SR,"Chausey, Granville",48.877,-1.835,20,50,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000SS,Mandailles-Saint-Julien,45.084,2.67,1052,15,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ST,Pointe de Châtelaillon,46.062,-1.093,3,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SU,Perriers-en-Beauficel,48.737,-0.996,220,50,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000SV,Caro,47.864,-2.319,54,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000SW,Lapoutroie,48.153,7.167,420,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SX,Vars - Col de Jaffueil,44.558,6.65,2510,05,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000SY,Thurey,46.743,5.123,209,71,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000SZ,Busseaut,47.737,4.648,302,21,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000T0,Lans-en-Vercors - Les Bruyères,45.1,5.57,990,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000T1,Vouillé,46.316,-0.368,71,79,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000T3,Lautenbachzell,47.926,7.119,690,68,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000T5,Serémange-Erzange,49.319,6.09,210,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000T6,La Marche,47.14,3.034,170,58,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000T7,La Beaume,44.553,5.638,811,05,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000T8,Xertigny,48.046,6.407,461,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000T9,Moncoutie,44.537,1.473,333,46,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TA,Villarembert - Les Fromentières,45.245,6.272,1430,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TB,Calce,42.758,2.754,238,66,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TC,Plaisir (2),48.823,1.954,120,78,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TD,Douzy,49.671,5.042,160,08,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TE,Sologny - Le Bois Clair,46.384,4.672,396,71,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TG,Névache,45.018,6.622,1588,05,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TH,"Île de Quéménès, Le Conquet",48.374,-4.9,7,29,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000TJ,Alvignac,44.827,1.695,368,46,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TL,Clermont-l'Hérault,43.629,3.433,100,34,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TM,Saint-Germain-du-Puch,44.85,-0.317,57,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TN,Saint-Romain-de-Colbosc,49.531,0.357,118,76,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TO,Arc-sous-Cicon - Crêt Monniot,47.036,6.412,1100,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TP,Le Val,43.444,6.009,295,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TQ,Nieul-sur-Mer - Pointe du Plomb,46.203,-1.206,3,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TR,Charrin,46.788,3.598,224,58,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TS,Corpe,46.505,-1.183,30,85,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TU,Villemer,48.301,2.824,77,77,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000TW,Montrodat,44.55,3.329,915,48,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TX,Marie - Caïre Gros,44.047,7.2,1921,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000TY,Kitzing,49.451,6.41,228,57,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000TZ,Asnelles,49.34,-0.583,3,14,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U0,Asnières-sur-Oise,49.134,2.356,51,95,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000U1,Frontenac,44.738,-0.163,84,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U2,Puy-Saint-Pierre,44.893,6.627,1560,05,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000U3,Saint-Didier-en-Velay,45.302,4.276,834,43,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U4,Fleurie,46.192,4.697,290,69,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000U6,Orcières - Chauffarel,44.681,6.294,1257,05,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U7,Peyrus,44.914,5.109,430,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U8,Viviers,44.485,4.687,90,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000U9,Bras,43.472,5.957,327,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UA,Les Estables,44.906,4.155,1380,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UB,Valleraugue,44.083,3.621,400,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UC,Le Loroux-Bottereau,47.238,-1.35,50,44,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UD,Bellemagny,47.689,7.059,330,68,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UE,Besson - Chassignolles,46.47,3.283,244,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UF,La Chapelle-en-Vercors -  Combe-de-l'Oscence,44.972,5.384,975,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UH,Saint-Paul-des-Landes,44.944,2.314,552,15,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000UI,Herbouilly,45.027,5.478,1272,26,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UJ,Chusclan,44.148,4.666,38,30,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UK,Lanarce - Tourbière de Sagne Redonde,44.731,4.005,1230,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UL,Lussan - Audabiac,44.132,4.404,220,30,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UM,Berné - Vallée du Scorff,47.984,-3.332,108,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UN,Barr,48.405,7.424,281,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UO,Eguisheim,48.047,7.312,210,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UQ,Avrigny,49.384,2.58,87,60,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000US,La Bastide-l'Evêque,44.34,2.136,580,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UT,Abbeville - centre ,50.1,1.833,5,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UU,Spézet - Roch-Toullaëron,48.171,-3.631,303,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000UW,Comus,42.812,1.89,1171,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UX,Aiguilles,44.781,6.869,1479,05,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000UY,Courcelles-de-Touraine,47.482,0.308,100,37,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000UZ,Carquefou,47.307,-1.426,29,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000V0,Innimond,45.783,5.573,890,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000V2,Xonrupt-Longemer - Refuge du Sotré,48.043,7.003,1200,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000V3,Stutzheim-Offenheim,48.629,7.624,163,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000V4,La Bruffière,47.015,-1.197,75,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000V6,Basse-sur-le-Rupt (Croix des Moinats),47.987,6.816,900,88,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000V7,Pertuis,43.696,5.507,206,84,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000V8,Miquelon,47.1,-56.381,6,975,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VA,Cessieu,45.575,5.385,490,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VB,Bessé-sur-Braye,47.822,0.739,77,72,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VC,Montreuillon - Chassy ,47.169,3.838,265,58,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VE,Mas-Saint-Chély - Causse Méjean,44.267,3.396,923,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VF,Goulles,45.006,2.095,568,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VI,Apremont,46.211,5.667,905,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VJ,Amiens - Hortillonnages,49.896,2.318,24,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000VL,Juré,45.887,3.903,640,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VM,Sail-les-Bains,46.238,3.847,317,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VN,Yèvres,48.211,1.187,173,28,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VP,Jugon-les-Lacs,48.411,-2.321,25,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000VQ,Dent de Rez,44.429,4.502,710,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VT,Cantenay-Epinard,47.535,-0.571,29,49,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VV,Forceville,50.06,2.56,121,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000VW,Sainte-Croix-en-Plaine,48.009,7.386,197,68,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000VX,Cours-la-Ville,46.13,4.347,682,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000VY,Quistinic,47.903,-3.082,117,56,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000W1,Val-d'Isère,45.45,6.978,1850,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000W2,Artonne,46.002,3.144,405,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000W5,Vieillevie,44.645,2.42,210,15,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000W6,Quillan,42.876,2.182,276,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000W7,Roquefeuil,42.855,2.007,885,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000W8,Orvilliers,48.86,1.648,131,78,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000W9,Gap,44.537,6.044,788,05,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000WB,Île du Levant - Heliopolis,43.031,6.469,96,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WD,Concoules,44.378,3.939,655,30,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000WE,Jonchery,48.137,5.086,278,52,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WG,Saint-Léger-sur-Sarthe,48.495,0.328,149,61,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WI,Neubois,48.306,7.338,288,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000WJ,Bouvante - Combe de Derbounouse,44.923,5.358,1400,26,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WK,Amiens - Fossé Noyon,49.883,2.311,42,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000WL,Taninges - Praz de Lys,46.148,6.593,1450,74,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WM,Sisteron - Plan de la Baume,44.212,5.943,487,04,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000WN,Saint-Martin-la-Sauveté,45.85,3.901,650,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WW,Amiens - UPJV Citadelle,49.904,2.299,43,80,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000WX,Uzerche,45.431,1.571,369,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WY,Saint-Jean-sur-Couesnon,48.29,-1.368,62,35,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000WZ,Chaumont,48.113,5.144,321,52,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X0,Trégueux,48.483,-2.733,101,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000X1,Bourg-Saint-Andéol,44.376,4.643,140,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X2,Colonzelle,44.393,4.901,152,26,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X3,Montroy,46.155,-1.011,38,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X4,Lhospitalet,44.35,1.417,280,46,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X5,Saint-Alban-sur-Limagnole,44.775,3.387,930,48,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000X6,Saint-Gonlay,48.113,-2.066,78,35,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000X7,Saint-Éloi-de-Fourques,49.231,0.796,148,27,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000X8,Grosbreuil,46.539,-1.617,41,85,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000X9,Six-Fours-les-Plages (Pont du Brusc),43.095,5.833,35,83,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000XB,Montferrat,45.486,5.591,556,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XD,Ris-Orangis,48.66,2.407,40,91,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XE,Plonévez-du-Faou,48.29,-3.866,147,29,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000XF,Wimmenau,48.913,7.427,210,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XH,Morteau,47.052,6.597,756,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XI,Villaudric,43.835,1.444,145,31,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XJ,Bréménil,48.524,6.919,321,54,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XK,Laval-sur-Vologne,48.198,6.692,450,88,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XM,Caille,43.778,6.736,1126,06,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XN,La Turbie,43.75,7.412,430,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XO,Wiesviller,49.079,7.165,269,57,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XP,Lamoura,46.403,5.985,1172,39,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XR,Rochechouart,45.817,0.817,236,87,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XW,Lebiez,50.47,1.983,51,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000XX,Aucun,42.975,-0.19,860,65,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XY,Trévoux,45.941,4.767,174,01,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000XZ,Saint-Martin-du-Bec,49.602,0.211,91,76,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Y1,La Bastide - Montagne de Lachens,43.745,6.653,1680,83,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Y3,Mont-Dore - Puy de Sancy,45.532,2.819,1660,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Y4,La Bourboule,45.589,2.741,855,63,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Y5,Briord (Vérizieu),45.777,5.487,281,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Y9,Six-Fours-les-Plages (Bucarin),43.104,5.823,15,83,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YB,Vialas - Nojaret,44.34,3.91,680,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YD,Allos,44.278,6.577,1710,04,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YE,Tigery,48.643,2.508,81,91,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YF,Nogent,48.033,5.35,402,52,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YG,Varennes-le-Grand,46.719,4.869,178,71,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YH,Sixt-Fer-a-Cheval - Nambride,46.071,6.811,852,74,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YI,Lanfains,48.357,-2.917,320,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YJ,Plouha,48.707,-2.934,84,22,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000YK,Saint-Julien,48.428,-2.829,165,22,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000YL,Chaptuzat,46.031,3.18,374,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YM,Sorgues,44.01,4.874,30,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YN,Rovagny,45.828,6.238,806,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YO,Saint-Saturnin-lès-Avignon,43.955,4.925,66,84,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000YQ,Langé,47.078,1.492,153,36,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YU,Vensac,45.408,-1.037,7,33,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YW,Archingeay,45.941,-0.713,9,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YX,Aunay-sous-Auneau - Nélu,48.431,1.831,157,28,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000YY,Sars-et-Rosières,50.444,3.33,19,59,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000YZ,Sospel,43.888,7.476,470,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Z0,Trept,45.686,5.316,265,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Z1,Saint-Igneuc,48.416,-2.345,85,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Z2,Aouste-sur-Sye (Saint-Pierre),44.717,5.055,206,26,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000Z4,Ringendorf,48.807,7.555,215,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Z6,Brigueuil,45.964,0.844,250,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Z7,La Chapelle-Montreuil,46.533,0.117,150,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000Z8,Aix-en-Provence,43.511,5.459,153,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000Z9,Voiron,45.364,5.592,390,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000ZB,Saint-Paul-les-Fonts,44.084,4.615,80,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZC,Tende - Castérino,44.097,7.506,1550,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ZE,Les Pontets,46.719,6.173,1008,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZF,Granges-Narboz,46.896,6.311,810,25,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZG,Dommartin,46.923,6.316,810,25,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZH,La Chaux (Village) ,47.019,6.434,880,25,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZI,Saint-André-d'Allas,44.899,1.157,222,24,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZJ,[MAE] Flers - Collège Saint-Thomas d'Aquin,48.747,-0.56,206,61,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ZK,Châtillon-en-Diois - Cirque d'Archiane,44.745,5.506,747,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZL,Colombey-les-Deux-Eglises,48.223,4.888,350,52,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZM,Houesville,49.351,-1.287,11,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZN,Galargues,43.77,4.021,54,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZO,Bressolles,45.863,5.09,280,01,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+000ZP,Le Cercueil,48.595,-0.004,335,61,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZQ,Gentelles,49.843,2.447,117,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ZR,Plouasne,48.293,-1.964,156,22,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZS,Brezons,44.969,2.807,834,15,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ZU,Montréal-du-Gers,43.924,0.168,160,32,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZV,Gougenheim,48.702,7.563,198,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+000ZW,Lussan - La Lèque,44.189,4.36,255,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+000ZX,Vaux-et-Chantegrue,46.808,6.255,865,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+00DDU,Dumont d'Urville - Terre Adélie,-66.67,140,43,999,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+CAYOLLE,Cirque de la Grande Cayolle - Uvernet-Fours,44.269,6.712,2687,04,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+ENTRAUNES,Entraunes - Cabanes de la Boulière (Réserve Intégrale de Roche Grande),44.197,6.798,1932,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+ME001,[MAE] Lycée Roz Glas - QUIMPERLE,47.886,-3.555,59,29,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME003,[MAE] Lycée Emile Zola - AIX EN PROVENCE,43.511,5.459,143,13,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME004,[MAE] Collège Charlotte Delbo - TRONGET,46.421,3.067,460,03,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME005,[MAE] Lycée Curie - Château-Gontier,47.833,-0.698,38,53,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME006,[MAE] Collège des Milles Etangs - MELISEY,47.751,6.571,330,70,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME007,[MAE] Collège Fernand Lagrange - PIERRE BUFFIERE,45.693,1.361,315,87,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME008,[MAE] Collège Frédéric Mistral - BORMES LES MIMOSAS,43.141,6.347,18,83,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME009,[MAE] Collège Boris Vian - TALANT,47.34,4.993,346,21,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME010,[MAE] Collège André Chêne - FLEURY LES AUBRAIS,47.933,1.912,127,45,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME011,[MAE] Collège Jean Paul De Dadelsen - HIRSINGUE,47.591,7.252,316,68,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME012,[MAE] Collège Lavoisier - OUCQUES,47.822,1.298,124,41,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME013,[MAE] Lycée Clément Ader - BERNAY,49.097,0.608,132,27,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME014,[MAE] Lycée Alexandre Ribot - SAINT OMER,50.748,2.259,20,62,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME015,[MAE] Collège L'Eeau Vive - BREIL-SUR-ROYA,43.94,7.514,308,06,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME016,[MAE] Collège Joseph Anglade - LEZIGNAN,43.198,2.764,50,11,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME017,[MAE] Lycée Saint Exupéry - LA ROCHELLE,46.155,-1.176,12,17,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME018,[MAE] Collège de Porto-Vecchio - PORTO-VECCHIO,41.602,9.271,27,2A,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME019,[MAE] Collège Antonin Perbosc - AUTERIVE,43.357,1.464,188,31,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME020,[MAE] Lycée Joseph Vallot - LODEVE,43.73,3.314,171,24,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME021,[MAE] Collège André Malraux - ST JEAN DE LA RUELLE,47.904,1.866,105,45,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME022,[MAE] Collège Jean-Baptiste Carpeaux - VALENCIENNE,50.36,3.519,25,59,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME023,[MAE] Collège Abel Didelet - ESTREES SAINT DENIS,49.426,2.645,69,60,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME024,[MAE] Collège et Lycée Lavoisier - AUCHEL,50.507,2.476,90,62,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME025,[MAE] Collège Alphonse Daudet - LA VALETTE DU VAR,43.139,5.981,69,83,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME026,[MAE] MFR les 4 Vents - RAMONCHAMP,47.898,6.736,480,88,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME027,[MAE] Collège Les Gâtines - René Cassin - SAVIGNY ,48.686,2.333,87,91,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME028,[MAE] Collège Jean Moulin - MONTREUIL,48.859,2.45,77,93,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME029,[MAE] Lycée Antoine Bourdelle - MONTAUBAN,44.014,1.371,108,82,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME030,[MAE] Collège Louise Michel - CHAGNY,46.905,4.76,234,71,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME031,[MAE] Lycée Alexis de Tocqueville - CHERBOURG,49.629,-1.604,36,50,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME032,[MAE] Lycée Bourg Chevreau Ste Anne - SEGRE,47.68,-0.874,26,49,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME033,[MAE] Collège Kerzouar - SAINT RENAN,48.427,-4.618,52,29,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME034,[MAE] Lycée Victor Louis - TALENCE,44.801,-0.59,21,33,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME035,[MAE] Lycée Louis Astier - PARAY LE MONIAL,46.459,4.113,245,71,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME036,[MAE] Lycée Raoul Follereau - NEVERS,47.005,3.161,200,58,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME038,[MAE] Collège Jean Bouzet - PONTACQ,43.185,-0.109,360,64,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME039,[MAE] Collège Roland Dorgelès - LONGVIC,47.295,5.061,229,21,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME040,[MAE] Lycée Pablo Picasso - PERPIGNAN,42.697,2.927,43,66,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME041,[MAE] Collège Belle Etoile - SAINT JOSEPH,14.674,-61.033,220,972,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME042,[MAE] Collège Firmin Roz - LIMOGES,45.868,1.291,351,87,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME043,[MAE] Lycée Henri Matisse - CUGNAUX,43.591,1.353,174,31,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME044,[MAE] Lycée Bertrand d'Argentré - VITRE,48.12,-1.213,106,35,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME045,[MAE] Collège René Char - SAINT JOACHIM,47.382,-2.192,2,44,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME046,[MAE] Ecole Normale Supérieure - LYON,45.733,4.833,164,69,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME047,[MAE] Lycée Polyvalent Chevrollier - ANGERS,47.454,-0.561,39,49,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME048,[MAE] Collège Letot - BAYEUX,49.275,-0.712,59,14,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME049,[MAE] Lycée André Honnorat - BARCELONNETTE,44.388,6.641,1132,04,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME050,[MAE] Collège Le Chapitre - CHENÔVE,47.296,5.003,268,21,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME051,[MAE] Lycée des Graves - GRADIGNAN,44.76,-0.621,45,33,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME052,[MAE] Collège Thalassa - ERQUY,48.63,-2.464,9,22,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME054,[MAE] Collège Belle Etoile - SAINT JOSEPH,14.674,-61.033,219,972,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME057,[MAE] AJACCIO,41.919,8.739,123,00,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME098,[MAE] ESPE - PARIS,48.846,2.267,36,75,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME101,[MAE] Collège Alphonse Karr - SAINT RAPHAEL,43.434,6.769,2,83,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME102,[MAE] Collège Les Mattons - VIZILLE,45.087,5.775,297,38,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME103,[MAE] Collège du Lignon - CHAMBON SUR LIGNON,45.059,4.299,930,43,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME104,[MAE] Collège Jean Rostand - LES MARTRES DE VEYRE,45.694,3.198,332,63,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME105,[MAE] Collège l'Oiseau Blanc - CRIQUETOT L'ESNEVAL,49.642,0.264,119,76,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME106,[MAE] Collège Jacques Prévert - NOUVION,50.215,1.781,36,80,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME107,[MAE] Collège Lou Castellas - SOLLIES-PONT,43.192,6.045,83,83,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME108,[MAE] Collège La Ponétie - AURILLAC,44.904,2.449,600,15,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME109,[MAE] Collège les Hautes Pailles - ECHENON,47.112,5.272,184,21,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME110,[MAE] Collège Jean Moulin - SAINT MEMMIE,48.947,4.388,83,51,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME111,[MAE] Coll. M. Leclerc de Hauteclocque - Beaucamps,49.84,1.785,190,80,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME112,[MAE] Collège Jules Ferry - CONTY,49.735,2.149,95,80,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME113,[MAE] Lycée Parc de Vilgénis - MASSY,48.732,2.253,83,91,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME114,[MAE] Collège Amiral de Rigny - TOUL,48.678,5.889,212,54,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME115,[MAE] Collège les Saules - GUYANCOURT,48.785,2.054,164,78,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME116,[MAE] Collège Léo Ferré - AMBRIERES LES VALLEES ,48.398,-0.634,139,53,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME117,[MAE] Cité Scolaire Jean Moulin - CHATEAULIN,48.194,-4.088,39,29,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME118,[MAE] Collège Joseph Anglade - LEZIGNAN CORBIERES,43.197,2.766,50,11,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME119,[MAE] Cité Scolaire Alfred Kastler - STENAY,49.486,5.197,195,55,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME120,[MAE] Lycée de la Mer - GUJAN-MESTRAS ,44.644,-1.059,2,33,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME121,[MAE] Lycée Agricole de Théza - Théza,42.646,2.938,15,66,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME123,[MAE] Collège Lou Blazer - MONTBÉLIARD ,47.498,6.79,349,25,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME124,[MAE] Collège Les Eyquems - MERIGNAC,44.827,-0.645,38,33,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME125,[MAE] Collège de SAINT-ETIENNE-DE-CUINES,45.341,6.291,495,73,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME126,Lycée Couffignal - Strasbourg,48.561,7.748,141,67,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME127,[MAE] Lycée Léon de Lepervanche - LE PORT ,-20.931,55.306,15,974,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME128,[MAE] Collège Honoré De Balzac - VENISSIEUX,45.726,4.862,174,69,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME129,[MAE] EREA MC Leriche - VILLENEUVE-SUR-LOT,44.409,0.745,67,47,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME130,[MAE] Collège Jules Vallès - PORTET SUR GARONNE,43.53,1.41,150,31,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME131,[MAE] Collège Lavoisier - AUCHEL,50.507,2.476,89,62,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME132,[MAE] Collège Paul Valéry - ROQUEMAURE ,44.048,4.78,24,30,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME134,[MAE] Lycée Marguerite Filhol - FUMEL ,44.498,0.958,128,47,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME135,[MAE] Collège Louis Blériot - TOURY,48.19,1.929,134,28,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME136,[MAE] Lycée André Honnorat - BARCELONNETTE,44.389,6.653,1145,04,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME137,[MAE] Collège Les Provinces - BLOIS,47.601,1.339,108,41,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME138,[MAE] Centre International de Valbonne - VALBONNE,43.622,7.041,175,06,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME139,[MAE] Collège Jean-de-la-Fontaine - LAXOU,48.699,6.135,343,54,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME146,[MAE] Collège Camille Guérin - Saint-Méen-le-Grand,48.192,-2.192,115,35,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME151,[MAE] - Collège Pierre et Marie Curie - Hennebont,47.808,-3.258,41,56,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME152,[MAE] - Collège Jean Vilar - Saint Gilles,43.686,4.432,26,30,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME153,[MAE] - Collège Jean-Pierre Calloc'h - Locminé,47.879,-2.848,95,56,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME154,[MAE] - Lycée et Centre de formation Kerplouz La Salle - Auray,47.657,-2.973,10,56,StatIC (ME),True,False,CC BY,,opendata/stations_xhr.php
+ME155,[MAE] - Lycée Maison Blanche - SAINT-PAUL,-21.036,55.289,499,974,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME156,[MAE] - Lycée des métiers Jeannette Guyot - Chalon-sur-Saône,46.779,4.843,183,71,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+ME161,[MAE] Lycée Jeanne d'Arc - Pontivy,48.062,-2.963,86,56,StatIC (ME),True,True,CC BY,,opendata/stations_xhr.php
+STATIC0001,Herblay,48.991,2.179,68,95,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0002,Provenchères-sur-Fave,48.306,7.077,404,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0005,Saint-Quentin-la-Poterie,44.041,4.445,111,30,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0006,Lunel,43.678,4.136,12,34,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0007,Corbas,45.664,4.898,193,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0008,Brignoles-Est,43.384,6.15,315,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0009,Sérézin-de-la-Tour,45.551,5.341,385,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0010,Hazebrouck,50.734,2.545,31,59,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0011,Vouzan,45.579,0.353,179,16,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0012,Tordouet,49.047,0.328,170,14,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0014,Saint-Sauveur,44.524,6.523,1140,05,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0015,Reculfoz - Combe,46.707,6.154,1010,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0016,Rosis,43.621,3.003,786,34,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0019,Bollène,44.289,4.786,58,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0021,Hillion,48.522,-2.676,32,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0022,Dourgne,43.484,2.14,270,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0023,Bonneil,49.009,3.352,91,02,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0024,Aillon-le-Vieux,45.63,6.087,920,73,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0025,Molsheim,48.55,7.504,182,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0029,Luc - La Maguelone,44.665,3.88,982,48,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0030,Brézins,45.352,5.307,363,38,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0031,Potte,49.788,2.91,67,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0032,Saint-Étienne-en-Dévoluy - Vallon d'Ane,44.649,5.945,1695,05,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0033,Vence - Avenue Giraud,43.722,7.112,349,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0035,Samatan,43.493,0.93,205,32,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0036,Lacroix-sur-Meuse,48.973,5.511,212,55,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0037,Amiens - UPJV St-Leu,49.898,2.297,33,80,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0038,Saint-Quentin-en-Tourmont,50.264,1.586,14,80,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0039,Saint-Sauveur,49.935,2.208,17,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0041,Niederhaslach,48.538,7.34,300,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0044,Hendaye - Domaine d'Abbadia,43.377,-1.754,45,64,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0046,Grosville,49.51,-1.755,103,50,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0047,Heugueville-sur-Sienne,49.042,-1.523,20,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0048,Droue-sur-Drouette,48.602,1.692,150,28,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0050,Rimbach-près-Masevaux,47.825,6.951,561,68,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0051,Ganzeville,49.737,0.411,32,76,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0052,Gérardmer,48.052,6.866,840,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0053,Neuvic,45.407,2.245,620,19,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0054,Martigues,43.407,5.055,65,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0058,Meyrignac - l'Église,45.4,1.852,550,19,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0059,Mégevette,46.2,6.497,977,74,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0060,Plaintel,48.423,-2.796,137,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0061,[MAE] Paris 12ème - Porte Dorée,48.84,2.408,65,75,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0062,Mézos,44.07,-1.159,25,40,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0065,Soucieu-en-Jarrest,45.674,4.692,378,69,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0066,Saint-Julien-la-Geneste,46.046,2.752,688,63,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0067,Magescq,43.781,-1.217,40,40,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0068,Trèves,45.533,4.667,290,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0069,Luri,42.905,9.376,450,2B,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0070,Fontcouverte,45.762,-0.617,11,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0071,Dampierre-sous-Brou,48.24,1.092,211,28,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0073,Issanlas,44.764,4.024,1186,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0074,Léon,43.872,-1.327,15,40,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0075,L'Herm,42.972,1.712,575,09,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0076,Baerenthal,48.982,7.517,211,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0079,Viry,46.299,5.738,769,39,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0082,Pouzilhac,44.045,4.579,221,30,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0084,Piedicroce,42.373,9.369,610,2B,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0085,Bernay,49.073,0.59,160,27,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0086,Duppigheim,48.535,7.609,160,67,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0087,Camurac,42.775,1.928,1635,11,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0091,Longeville-en-Barrois,48.727,5.191,333,55,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0092,Saint-Bonnet-de-Four,46.299,2.923,472,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0093,Champneuville,49.234,5.322,197,55,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0095,Ile-d'Arz,47.589,-2.804,6,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0096,Lachamp-Raphaël,44.81,4.289,1330,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0098,Montjoyer,44.476,4.851,310,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0099,Saint-Arnoult-des-Bois,48.494,1.267,203,28,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0100,Le Soulié - le Moulinet ,43.542,2.736,900,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0101,Menglon,44.679,5.457,540,26,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0103,Lesches,48.922,2.801,90,77,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0105,Chivy-lès-Étouvelles,49.526,3.585,72,02,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0106,Tournefeuille,43.589,1.319,189,31,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0107,Gargenville,48.994,1.818,82,78,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0108,Montaigut-sur-Save,43.683,1.246,182,31,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0109,La Chaux - Village,47.021,6.436,875,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0111,Veyre-Monton,45.676,3.156,490,63,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0113,Belgentier,43.246,6.001,185,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0114,Besson - La Barillette,46.479,3.276,274,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0116,Schirrhein,48.803,7.896,138,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0117,Châteaufort,44.259,6.004,687,04,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0118,Clarac,43.104,0.623,399,31,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0120,Lachapelle-Graillouse - Moulin de Courbet,44.814,4.02,1135,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0122,Saint-André-de-Lidon,45.599,-0.747,22,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0123,Bannalec,47.921,-3.662,94,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0124,Châtelaillon-Plage - Hippodrome,46.076,-1.078,3,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0125,Châtelneuf,45.634,3.954,957,42,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0126,Leigné-les-Bois,46.754,0.688,128,86,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0128,Niederbronn-les-Bains - Grand Wintersberg ,48.979,7.615,578,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0129,Plélo,48.572,-2.932,116,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0130,Sainte-Marie-aux-Mines - Col des Bagenelles,48.193,7.114,905,68,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0131,La Chapelle,46.081,3.577,485,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0132,Bouzon-Gellenave,43.698,0.024,139,32,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0133,Chéraute,43.252,-0.822,250,64,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0134,Ile d'Aix,46.013,-1.177,7,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0136,Gérardmer - Les Xettes,48.081,6.867,820,88,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0138,Sorèze - Le Causse,43.446,2.045,330,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0139,Brullioles,45.762,4.467,512,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0141,Fougères-sur-Bièvre,47.449,1.342,86,41,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0142,Saint-Sulpice-le-Guérétois,46.201,1.828,395,23,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0144,Saintes-Maries-de-la-Mer - Pioch Badet,43.527,4.399,3,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0145,Sorèze,43.452,2.068,260,81,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0146,Isola,44.185,7.056,870,06,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0147,Tauxigny,47.203,0.828,89,37,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0148,Venelles,43.598,5.485,360,13,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0149,Malviès,43.121,2.183,214,11,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0150,Petite-Île - Charrié,-21.33,55.567,645,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0151,Carmaux,44.07,2.164,328,81,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0152,Saint Paul - Grand Fond,-21.043,55.219,10,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0153,Saint Benoît - Bras Madeleine,-21.053,55.696,100,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0154,Saint Philippe - École du Tremblet,-21.317,55.801,105,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0155,Saint Pierre - Ravine des Cabris,-21.287,55.475,250,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0156,Saint Joseph - Parc à Moutons,-21.359,55.663,290,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0157,Le Tampon - Trois Mares,-21.267,55.496,490,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0158,L'Étang-Salé - Les Hauts,-21.237,55.379,550,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0159,Saint Benoît - Piton Armand Les Hauts,-21.122,55.704,575,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0160,Salazie - Mare à Vieille Place,-21.026,55.516,860,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0161,Le Tampon - Notre Dame de la Paix,-21.251,55.585,1520,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0163,Saint Paul - Mafate (Marla),-21.101,55.43,1570,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0164,Plouigneau,48.564,-3.695,154,29,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0165,Commana,48.401,-3.967,205,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0166,Pont-Hébert,49.177,-1.137,52,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0167,Sainte-Christine,46.366,-0.648,2,85,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0170,Grâces,48.544,-3.152,72,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0171,Sainte-Soulle,46.186,-1.02,33,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0172,Planguenoual,48.554,-2.577,93,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0174,Castellar,43.799,7.506,390,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0175,Lantosque,43.953,7.329,730,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0178,Les Rosaires,48.553,-2.762,88,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0179,Mazeyrat-d'Allier,45.121,3.53,630,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0180,Boqueho - Col de Marhalla,48.487,-2.994,284,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0181,Lavars,44.849,5.674,735,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0182,Saint-Jeures,45.092,4.208,1014,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0183,Sainte-Radegonde,44.338,2.602,667,12,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0184,Cessières-Suzy - Tourbière de Cessières-Montbavin,49.545,3.511,69,02,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0185,La Freissinouse,44.529,6.007,1005,05,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0186,Anglards-de-Salers,45.222,2.407,765,15,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0188,Avène (Serviès),43.722,3.063,545,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0189,Roqueredonde - Mas de Grezes,43.8,3.213,670,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0190,Saint-Fiacre-sur-Maine,47.139,-1.399,39,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0191,Saint-Dolay - Cran,47.558,-2.13,8,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0192,Saint-Claude,46.436,5.852,840,39,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0193,Sacy-le-Grand,49.355,2.545,45,60,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0194,Casabianda,42.095,9.503,36,2B,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0196,Sainte-Bazeille,44.538,0.129,80,47,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0198,La Bâtie-Vieille,44.555,6.158,1002,05,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0200,Nanchez (Prénovel),46.513,5.845,905,39,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0202,Saint-Nazaire-le-Désert,44.578,5.275,580,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0203,Marignac-en-Diois,44.809,5.349,600,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0204,La Genête,46.55,5.044,193,71,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0205,Tarsac,43.668,-0.112,105,32,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0206,Commarin,47.254,4.654,380,21,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0207,Saint-Martial - Condas,44.879,4.294,697,07,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0208,Ladignac-le-Long,45.584,1.114,386,87,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0209,Les Estables - Mont d'Alambre,44.919,4.154,1691,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0211,Albertville,45.678,6.38,346,73,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0212,Pré-en-Pail - Le Souprat -PNRNM,48.457,-0.156,393,53,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0213,La-Chapelle-en-Vercors - Combe de Darbounouse,44.968,5.477,1282,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0214,Bazoches-les-Gallerandes,48.18,2.064,129,45,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0215,Sturzelbronn,49.054,7.618,252,57,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0216,Saint-Pancrasse,45.293,5.862,1000,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0217,Saint-Cyr-la-Roche,45.271,1.391,160,19,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0218,Vergéal,48.037,-1.267,84,35,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0219,La Lande-de-Goult - Bois-de-Goult-PNRNM,48.579,-0.066,364,61,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0220,Levier,46.952,6.107,720,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0222,Sagnes-et-Goudoulet,44.796,4.186,1172,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0223,Genac - Pontour,45.816,0.037,55,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0224,Chamboeuf,47.229,4.903,476,21,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0225,Mazet-Saint-Voy,45.049,4.247,1020,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0226,Chassignolles,46.541,1.94,285,36,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0228,Poisy,45.928,6.069,540,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0231,Huahine,-16.733,-151.041,25,987,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0233,Saint-Pierre-de-la-Fage,43.794,3.425,622,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0234,Rugny,47.898,4.148,296,89,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0235,Sainte-Croix-sur-Aizier,49.408,0.637,123,27,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0237,Les Clefs,45.851,6.327,752,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0238,Rochechinard,45.022,5.248,683,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0239,Elven,47.764,-2.591,88,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0240,Grandpré,49.34,4.84,129,08,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0241,Île-de-Sein,48.035,-4.854,2,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0242,Douelle,44.47,1.36,113,46,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0243,Percy,48.919,-1.176,116,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0244,Saint-André-de-Lancize,44.258,3.809,662,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0245,Arjuzanx,44.009,-0.874,73,40,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0246,Châteauvillain,48.038,4.915,236,52,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0247,Saint-Christophe-sur-Guiers,45.43,5.783,533,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0248,Ploufragan,48.464,-2.814,128,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0249,Longues-sur-Mer,49.338,-0.693,70,14,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0250,Trébry,48.321,-2.551,241,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0252,Prades-d'Aubrac,44.584,3.018,1250,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0253,Loublande,46.975,-0.838,146,79,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0255,Champagnole,46.745,5.914,540,39,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0256,Ploeuc-l'Hermitage,48.354,-2.785,190,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0257,Saint-Christol,44.03,5.493,824,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0258,Montsapey,45.524,6.339,1029,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0259,Dieulefit,44.523,5.063,374,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0260,Bourthes,50.602,1.93,120,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0263,Saint-Saud-Lacoussière - Lage,45.538,0.831,267,24,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0264,Bagnac-sur-Célé,44.678,2.161,270,46,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0265,Bagnoles-de-l'Orne-La-Prise-Pontin,48.557,-0.414,217,61,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0266,Juvigny-Val-d'Andaine-PNRNM,48.547,-0.566,133,61,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0267,Saint-Genest-d'Ambière,46.82,0.37,115,86,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0268,Arc-sous-Cicon - Village,47.051,6.38,785,25,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0273,Malintrat,45.815,3.19,321,63,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0274,Brigueuil - Village,45.951,0.863,291,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0275,Amiens - Saint-Roch,49.893,2.278,30,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0276,Pont-du-Château,45.801,3.25,350,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0278,Gréolières les Neiges,43.831,6.962,1387,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0279,Sainte-Mondane,44.85,1.333,78,24,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0280,Menton - Garavan,43.782,7.517,4,06,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0282,Voiron,45.364,5.592,368,38,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0283,Esery,46.143,6.242,450,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0284,Moliets-et-Maa,43.846,-1.393,20,40,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0285,Mélagues - Marcou,43.702,3.022,880,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0287,Bossey,46.156,6.169,490,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0288,Arêches-Le Planay,45.672,6.536,1231,73,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0289,Montpellier - bvd Berthelot,43.601,3.872,56,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0290,Chanac,44.466,3.343,680,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0292,Fléville-devant-Nancy,48.624,6.193,221,54,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0296,Breuil-en-Vexin - La Chartre,49.018,1.824,162,78,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0297,Schleithal,48.991,8.031,155,67,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0298,Grazac,45.181,4.172,809,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0299,Trébry - Bel Air,48.309,-2.559,315,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0300,Châteauneuf-de-Randon,44.654,3.672,1140,48,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0302,Aix-les-Bains,45.662,5.907,359,73,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0303,Taupont - Vallée du Ninian,47.969,-2.474,37,56,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0307,Odars,43.523,1.589,231,31,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0308,Quimper,47.984,-4.123,40,29,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0309,La Pesse - Combe d'Evuaz,46.265,5.843,1085,39,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0310,Le Monastier-sur-Gazeille,44.942,3.993,935,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0311,Auvers - Mont Mouchet,44.975,3.374,1495,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0312,Brouzet-lès-Alès - Mont Bouquet,44.132,4.285,623,30,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0313,Queyssac,44.914,0.547,113,24,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0315,Saint-André-la-Côte,45.63,4.6,839,69,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0316,Amigny-Rouy - Prairies de Condren,49.625,3.296,44,02,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0317,Coti-Chiavari,41.769,8.773,630,2A,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0318,Brantes,44.19,5.335,466,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0319,Blois Nord,47.601,1.321,108,41,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0320,Amiens-Val d'Avre,49.864,2.332,59,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0322,Aurel-Vercheny,44.694,5.263,296,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0323,Solaure-en-Diois,44.707,5.398,442,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0325,La Bastide,43.764,6.625,1015,83,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0326,Wildenstein - Bramont,47.991,6.964,714,68,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0328,Saint-Juéry,43.946,2.224,228,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0329,Saint-André-de-Sangonis,43.647,3.499,66,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0331,Sturzelbronn - Grafenweiher,49.025,7.599,229,57,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0332,"Pré-en-Pail, marais du Fourneau - PNRNM",48.446,-0.189,269,53,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0333,Speloncato,42.557,8.973,533,2B,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0334,L'île-d'Olonne,46.577,-1.747,22,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0335,Glux-en-Glenne,46.944,4.034,573,58,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0337,Valençay,47.151,1.569,136,36,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0339,Saint-Barthélemy-de-Vals,45.167,4.87,189,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0340,Passy - Le Fayet,45.909,6.708,592,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0341,Saint-Joseph - Les Lianes,-21.339,55.599,570,974,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0342,Lumbin,45.31,5.921,246,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0350,Hautecourt-Romanèche - RNN Grotte de Hautecourt,46.176,5.415,495,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0351,Montanges - RNR Galerie du Pont des Pierres,46.163,5.811,484,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0352,Fosse,42.79,2.44,503,66,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0353,Salvezines,42.778,2.316,634,11,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0354,Cormaranche-en-Bugey,45.954,5.606,820,01,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0355,Saint-Etienne-le-Molard,45.733,4.086,358,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0356,Champdieu,45.645,4.046,435,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0357,Saint-Bonnet-le-Courreau,45.633,3.895,1250,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0358,Sauvain,45.641,3.847,1360,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0359,Saint-Siméon-de-Bressieux,45.321,5.255,535,38,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0360,Murat-le-Quaire - Banne d'Ordanche,45.609,2.758,1332,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0361,L'Hôpital-sous-Rochefort,45.771,3.939,420,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0363,Marseillette - l'Isthme,43.225,2.556,52,11,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0364,Arboussols,42.662,2.501,550,66,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0365,Pont-du-Fossé,44.665,6.222,1113,05,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0366,Tina Nouméa,-22.239,166.5,20,988,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0367,Godewaersvelde,50.794,2.645,46,59,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0370,Mornand-en-Forez,45.683,4.133,355,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0371,Saint-Gaudens,43.106,0.739,306,31,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0372,Argenton-sur-Creuse,46.589,1.509,112,36,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0373,Murat-le-Quaire - Super-Murat,45.603,2.756,1145,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0375,Livron-sur-Drôme,44.773,4.847,140,26,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0376,Croisette,50.355,2.26,142,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0377,Neuvillalais - Théval,48.17,0.024,87,72,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0378,Pruniers-en-Sologne,47.336,1.674,89,41,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0380,Saint-Félix-de-Sorgues,43.861,2.968,610,12,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0381,Gréasque,43.429,5.539,334,13,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0382,La Ciotat - Hôtel de Ville,43.174,5.605,20,13,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0383,Amiens - Saint-Acheul,49.884,2.323,50,80,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0385,Richebourg,50.583,2.733,17,62,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0387,Saint-Floxel,49.491,-1.352,45,50,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0388,Essertines-en-Châtelneuf,45.619,3.995,807,42,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0389,Chazelles,45.637,0.386,109,16,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0390,Le Clapier-Larbussel,43.834,3.149,640,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0391,Valcivières - Rimbaud,45.588,3.813,965,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0392,Castanet-le-Haut - La Baraquette,43.686,2.94,850,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0393,Borne - Les Hautes Plaines,44.636,4.083,1230,07,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0394,Le Roux,44.739,4.161,1240,07,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0395,Cirey-sur-Vezouze,48.583,6.939,314,54,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0397,Gorniès,43.888,3.623,210,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0398,Cauneille,43.549,-1.074,13,40,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0399,Plourivo,48.73,-3.098,75,22,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0402,Nice - Ventabrun,43.702,7.224,160,06,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0403,Chamborigaud - Mas Jourdon,44.31,3.937,598,30,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0404,Blauvac,44.032,5.204,324,84,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0405,Saint-Laurent-les-Bains - Abbaye de Notre-Dame-des-Neiges,44.6,3.933,1100,07,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0406,Saint-Forgeux-Lespinasse,46.123,3.925,320,42,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0407,Lachapelle-Graillouse - Moulin de Courbet,44.79,4.003,1134,07,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0408,Digne-les-Bains - Les Férréols,44.081,6.219,596,04,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0409,L'Étang-Salé - Les Bains,-21.268,55.335,10,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0410,Saint-Joseph - Le Butor,-21.381,55.617,30,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0411,Saint-Philippe - Le Baril,-21.362,55.725,50,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0412,Saint-Denis - La Bretagne,-20.912,55.494,155,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0413,Saint-Denis - La Montagne,-20.878,55.428,280,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0414,Saint-Leu - Piton Saint-Leu,-21.216,55.314,310,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0415,Le Tampon - Plaine des Cafres ; Bois Court,-21.196,55.538,1370,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0416,Saint-Denis - La Montagne,-20.88,55.428,320,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0417,Le Tampon - Plaine des Cafres ; Piton Doret,-21.175,55.558,1590,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0418,Sainte-Marie - La Convenance,-20.896,55.572,45,974,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0419,Le Tampon - Plaine des Cafres ; Bourg Murat,-21.193,55.576,1610,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0420,"Les Avirons - La Chapelle, le Tévelave",-21.22,55.345,701,974,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0421,Saint-Genès-Champanelle,45.743,2.97,950,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0422,Landeronde,46.657,-1.57,44,85,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0423,Menton - La Casetta,43.788,7.519,120,06,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0424,Valady,44.466,2.42,322,12,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0425,Autry-Issards,46.534,3.124,270,03,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0426,Pouzolles,43.483,3.28,81,34,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0427,Pacy-sur-Eure,49.017,1.383,51,27,StatIC,True,False,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0428,Chadrac,45.064,3.896,700,43,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0429,Neuillé-le-Lierre,47.504,0.925,78,37,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0430,Saint-Pierre-le-Vieux,44.85,3.324,976,48,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0431,Vallet,45.3,-0.35,87,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0432,Penne,44.077,1.735,190,81,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0433,Igney,48.274,6.397,308,88,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0435,Pexiora,43.268,2.037,151,11,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0436,Bogève,46.192,6.427,970,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0437,Cahors,44.459,1.443,119,46,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0438,Saint-Philibert-Kernevest,47.567,-3.004,14,56,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0439,Meuzac,45.552,1.439,393,87,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0440,Massat,42.888,1.347,661,09,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0441,Plouguerneau - Île de Stagadon,48.625,-4.594,10,29,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0442,Brizon - Col de Solaison,46.032,6.421,1511,74,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0445,Vénérand,45.793,-0.557,72,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0446,Jolivet,48.61,6.509,229,54,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0448,Audes,46.479,2.584,205,03,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0449,Buziet,43.161,-0.469,366,64,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0451,Saint-Pons-la-Calm - La Gardie,44.081,4.552,280,30,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0452,Andelot-en-Montagne,46.838,5.929,608,39,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0453,Laqueuille - Les Plaines,45.675,2.736,910,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0455,Chartrettes,48.488,2.701,80,77,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0456,Échiré,46.387,-0.441,37,79,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0457,Chevenoz,46.337,6.648,830,74,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0458,Moret-Loing-et-Orvanne,48.361,2.809,56,77,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0459,Tauves - Les Chaumettes basses,45.58,2.657,960,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0460,Roquestéron,43.859,7.043,441,06,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0461,Montpellier - Université / Campus Triolet,43.633,3.861,50,34,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0463,Soudan - La Mornais,47.737,-1.277,78,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0464,Cherbourg - Port Chantereyne,49.643,-1.621,5,50,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0465,Izeure - Tarsul,47.177,5.116,196,21,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0466,Pourcharesses - Morangiès,44.471,3.926,650,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0467,Pourcharesses - Chantegrive,44.407,3.87,1220,48,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0468,Murat-le-Quaire - Col du Vieux Loup,45.606,2.787,1350,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0469,Cerbère - Puig Gallines,42.452,3.147,305,66,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0470,Vielle-Aure,42.832,0.326,794,65,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0471,Saint-Jean-de-Bournay,45.5,5.117,355,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0472,Loulay,46.043,-0.507,54,17,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0474,Fouras,45.987,-1.093,13,17,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0475,Saint-Julien-en-Born,44.085,-1.23,23,40,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0476,La Wantzenau,48.658,7.831,133,67,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0477,Saint-Silvain-sous-Toulx,46.262,2.179,515,23,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0479,Crête de la Moucherolle - Villard de Lans,45.009,5.558,1965,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0480,Labastide-Rouairoux,43.476,2.639,440,81,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0481,Diémoz,45.59,5.06,393,38,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0482,Saint-Emilien de Blain,47.425,-1.701,27,44,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0483,Bonneville-Aptot,49.26,0.748,141,27,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0484,Robion,43.854,5.114,135,84,StatIC,True,False,CC BY,,opendata/stations_xhr.php
+STATIC0485,Bailleval,49.346,2.457,63,60,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0486,Isigny-sur-Mer,49.316,-1.104,5,14,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0487,Aydat - Plaine de Randanne,45.688,2.948,949,63,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0488,Argelès-Gazost,43.002,-0.095,440,65,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0489,Willer-sur-Thur - Village,47.849,7.077,390,68,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0491,Dourgne (Saint-Stapin),43.484,2.14,530,81,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0492,Carrouges - Maison du Parc ,48.563,-0.148,297,61,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+STATIC0494,Boujailles,46.885,6.077,820,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0495,Évillers,46.99,6.228,706,25,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0496,Saint-Antonin,43.72,0.811,202,32,StatIC,True,True,CC BY,,opendata/stations_xhr.php
+STATIC0497,Malemort,45.17,1.578,121,19,StatIC,True,True,NON-COMMERCIAL ONLY: CC BY NC,,opendata/stations_xhr.php
+VENTOUX,Mont-Ventoux (sommet),44.175,5.279,1910,84,OMM/synop,True,True,Etalab Open License,,opendata/stations_xhr.php

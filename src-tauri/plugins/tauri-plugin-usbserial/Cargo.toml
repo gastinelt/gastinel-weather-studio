@@ -1,0 +1,23 @@
+[package]
+name = "tauri-plugin-usbserial"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77.2"
+description = "Liaison série USB-OTG sur Android (puce CH340, via usb-serial-for-android), pour la lecture directe du RC-5"
+# Exigé par `tauri_plugin::Builder` : c'est par cette clé que le CLI Tauri
+# retrouve le projet Gradle du greffon (`DEP_TAURI_PLUGIN_USBSERIAL_…`).
+links = "tauri-plugin-usbserial"
+
+[build-dependencies]
+# `features = ["build"]` explicitement : sans elle, `tauri_plugin::Builder`
+# n'existe pas. Le greffon compilait quand même tant qu'il n'était construit que
+# comme dépendance de l'application — `tauri-build` active la fonctionnalité et
+# l'unification la lui prêtait. Compilé seul (`cargo test --manifest-path …`),
+# il échouait. Une dépendance ne doit pas reposer sur ce que d'autres activent.
+tauri-plugin = { version = "2", features = ["build"] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"

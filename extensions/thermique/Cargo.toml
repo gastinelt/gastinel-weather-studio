@@ -1,0 +1,20 @@
+[package]
+name = "thermique"
+version = "1.0.0"
+edition = "2021"
+description = "Extension GWS : gradient thermique vertical, épisodes radiatifs, profil vertical"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+gws-extension-api = { path = "../gws-extension-api" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Lecture seule de la base de l'app (même version que l'app).
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

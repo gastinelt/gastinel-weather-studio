@@ -1,0 +1,10 @@
+# Chemins retires de la version publique (lus par scripts/publier_public.sh).
+# Un motif par ligne, relatif a la racine du depot. Ils restent dans le depot prive.
+
+# Infra (serveurs, comptes, tunnels)
+docs/serveur
+docs/serveur-*.md
+docs/cadrage-donnees-a-la-demande.md
+
+# Rapports internes
+docs/rapport-nuit-*.md

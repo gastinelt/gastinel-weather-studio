@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ce que l'application laisse sortir de l'appareil : rien.
+
+  `android:allowBackup="false"` suffit à couper la sauvegarde dans le nuage,
+  mais **pas** le transfert d'appareil à appareil : depuis Android 12 (API 31),
+  ces deux chemins sont réglés séparément, et un appareil neuf peut aspirer les
+  données de l'ancien même quand la sauvegarde est refusée. Ce fichier ferme le
+  second chemin.
+
+  Ce qui est en jeu : la base SQLite des projets (positions des points,
+  relevés) et les clés d'API chiffrées. Une tablette d'observation passe de
+  main en main et finit par être remplacée — la copie de ses données ne doit
+  pas être un effet de bord de la migration.
+
+  `<exclude domain="root" path="." />` plutôt qu'une liste de dossiers : une
+  exclusion qui énumère est une exclusion qui vieillit mal, puisque le prochain
+  répertoire ajouté à l'application y échapperait en silence.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+    </device-transfer>
+</data-extraction-rules>

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions de la fenêtre principale. Les commandes définies par l'application (list_projects, import_elitech…) ne sont pas soumises aux capabilities : seul le cœur de Tauri l'est. Le plugin `dialog` sert la boîte native d'enregistrement de l'export (page 2 du bloc Stations). Les plugins `fs` et `usbserial` sont montés mais **volontairement absents de cette liste** : ils ne sont utilisés que depuis Rust (écriture du fichier d'export, liaison USB-OTG du RC-5), et leur ouvrir le frontend n'apporterait rien qu'une surface d'API de plus.",
+  "windows": ["main"],
+  "permissions": ["core:default", "dialog:allow-save", "dialog:allow-open", "dialog:allow-message"]
+}

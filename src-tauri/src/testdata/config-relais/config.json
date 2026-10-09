@@ -1,0 +1,14 @@
+{
+  "format": 1,
+  "serial": 1,
+  "emis_le": "2026-09-29T10:00:00Z",
+  "serveur": "relais-exemple",
+  "extension": {
+    "nom": "exemple",
+    "version": "1.0.0",
+    "url": "https://example.org/gws/exemple-1.0.0.zip",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "quota": {"requetes_par_jour": 4000},
+  "champ_futur": "ignoré par la v1"
+}

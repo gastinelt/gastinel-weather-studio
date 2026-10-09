@@ -1,0 +1,4 @@
+# Scripts serveur : exécutés sous Linux, fins de ligne LF obligatoires.
+*.sh text eol=lf
+# Vecteur signé (octets exacts) : aucune conversion de fins de ligne.
+src-tauri/src/testdata/config-relais/* binary

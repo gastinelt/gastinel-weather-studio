@@ -1,0 +1,24 @@
+[package]
+name = "carte3d"
+version = "1.0.2"
+edition = "2021"
+description = "Extension GWS : carte 3D du relief avec les points du projet"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+gws-extension-api = { path = "../gws-extension-api" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Lecture seule de la base de l'app (même version que l'app).
+rusqlite = { version = "0.32", features = ["bundled"] }
+# Altimétrie IGN (data.geopf.fr).
+ureq = { version = "3", features = ["json"] }
+# Fond topo transmis à l'interface en data URL.
+base64 = "0.22"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

@@ -1,0 +1,5095 @@
+/*
+ * Direction artistique — Gastinel Weather Studio.
+ *
+ * Principes tenus dans tout ce fichier :
+ *   - Inter partout (vendorisée en local, cf. fonts/inter.css), titres compris.
+ *   - Fond blanc cassé, accent bleu #1e4d8b → gris clair #e8eaed, repris de
+ *     l'icône de l'application (la cuvette en dégradé).
+ *   - Chiffres tabulaires sur TOUTE donnée chiffrée : sans ça, deux colonnes de
+ *     températures ne s'alignent pas et la comparaison visuelle devient fausse.
+ *   - Les animations sont réservées aux changements d'état structurants
+ *     (ouverture d'un projet, d'une modale, bascule de page). Rien sur le survol
+ *     d'un bouton : à raison de plusieurs centaines par séance, une transition
+ *     de survol se paie en lenteur ressentie, pas en élégance.
+ *   - Aucun ornement : la donnée doit être lisible avant d'être jolie.
+ */
+
+:root {
+  --blue-900: #123a6b;
+  --blue-700: #1e4d8b;
+  --blue-500: #3a72bd;
+  --blue-050: #eef3fa;
+
+  --grey-900: #1a1d21;
+  --grey-700: #3f464f;
+  --grey-500: #6b7480;
+  --grey-300: #b9c0c9;
+  --grey-200: #e8eaed;
+  --grey-100: #f1f3f5;
+  --bg: #fafbfc;
+
+  --danger: #b3261e;
+  --danger-bg: #fdeceb;
+  --warn: #8a5a00;
+  --warn-bg: #fff6e5;
+  --ok: #1c6b45;
+  --ok-bg: #e9f5ef;
+
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(18, 58, 107, 0.06), 0 4px 12px rgba(18, 58, 107, 0.06);
+
+  /* Alias de compatibilité & conventions sémantiques */
+  --primary: var(--blue-500);
+  --text-muted: var(--grey-500);
+  --err: var(--danger);
+  --err-bg: var(--danger-bg);
+
+  /* Dégradé de marque : celui de l'icône (bleu foncé → gris clair). */
+  --gradient-marque: linear-gradient(160deg, var(--blue-700), var(--grey-200));
+
+  --topbar-h: 42px;
+  --gap-grille: 12px;
+
+  /* Zone couverte par la barre système Android (encoche/perforation caméra
+     comprise) en edge-to-edge ; vaut 0px partout ailleurs (desktop, iOS sans
+     encoche), donc sans effet hors Android. */
+  --safe-top: env(safe-area-inset-top, 0px);
+
+  /* Le pendant du précédent, en bas : la bande que la navigation gestuelle
+     d'Android se réserve. Un contrôle posé dessous n'est pas seulement masqué —
+     il est intercepté par le système, et l'appui renvoie à l'accueil. Vaut 0 px
+     partout ailleurs. */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Durées d'animation, centralisées pour rester cohérentes et courtes. */
+  --t-reveal: 320ms;
+  --t-modale: 180ms;
+  --t-page: 220ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* `.view` et `.panel` portent un `display` : sans ce !important, l'attribut
+   `hidden` cesserait de masquer quoi que ce soit. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--grey-900);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 15px;
+}
+h2 {
+  font-size: 20px;
+}
+h3 {
+  font-size: 15px;
+}
+
+p {
+  margin: 0;
+}
+
+.muted {
+  color: var(--grey-500);
+  font-size: 13px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* ---------------------------------------------------------------------------
+   Barre supérieure fine
+   --------------------------------------------------------------------------- */
+
+.topbar {
+  flex: none;
+  /* `box-sizing: border-box` (règle globale) : le padding-top ajouté par la
+     barre système s'ajoute à la hauteur totale sans écraser la hauteur utile
+     des boutons, qui reste `--topbar-h`. */
+  height: calc(var(--topbar-h) + var(--safe-top));
+  padding-top: var(--safe-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-left: 8px;
+  padding-right: 8px;
+  background: #fff;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.topbar-title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.topbar-sep {
+  color: var(--grey-300);
+}
+
+.topbar-project {
+  color: var(--grey-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--gradient-marque);
+  flex: none;
+}
+
+.icon-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--grey-700);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--grey-100);
+  color: var(--blue-700);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.icon-btn:disabled:hover {
+  background: none;
+  color: var(--grey-700);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------------------------------------------------------------------
+   Vues
+   --------------------------------------------------------------------------- */
+
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Liste des projets : une colonne pleine largeur. Le centrage et le rembourrage
+   sont descendus dans `.projects-scroll`, pour que le bandeau Elitech du bas
+   puisse, lui, toucher les deux bords de la fenêtre. */
+#view-projects {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Le contenu classique, centré et défilant — la mise en page d'avant. */
+.projects-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 28px;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.view-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card + .card {
+  margin-top: 18px;
+}
+
+.empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--grey-500);
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------------------------
+   Grille 2×2 de l'espace de travail
+   ---------------------------------------------------------------------------
+
+   Quatre zones fixes, jamais flottantes ni rétractables : chaque bloc reste au
+   même endroit d'une séance à l'autre. Les deux rangées ont volontairement des
+   proportions différentes — en haut la carte domine (~62 %), en bas c'est
+   l'agent qui a besoin de place pour du texte (~60 %).
+
+   `minmax(0, …)` partout : sans cette borne basse, une grille CSS refuse de
+   descendre sous la taille intrinsèque de son contenu, et un tableau un peu long
+   pousserait la rangée hors de l'écran au lieu de faire défiler son bloc. */
+
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--gap-grille);
+  padding: var(--gap-grille);
+}
+
+.ws-row {
+  display: grid;
+  gap: var(--gap-grille);
+  min-height: 0;
+}
+
+.ws-row-top {
+  grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+}
+
+.ws-row-bottom {
+  grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.panel-head h2 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.panel-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Le texte d'attente d'un bloc pas encore implémenté. Volontairement sobre :
+   il doit se lire comme une consigne, pas comme une erreur. */
+.placeholder {
+  color: var(--grey-500);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.placeholder-note {
+  font-size: 11px;
+  color: var(--grey-500);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   Bloc carte
+   --------------------------------------------------------------------------- */
+
+.panel-map {
+  padding: 0;
+}
+
+.panel-map-canvas {
+  flex: 1;
+  min-height: 0;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+.map-hint,
+.map-note,
+.map-alert {
+  flex: none;
+  margin: 0;
+  padding: 7px 14px;
+  font-size: 12px;
+  border-top: 1px solid var(--grey-200);
+}
+
+.map-hint {
+  color: var(--grey-500);
+}
+
+.map-note {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+
+/* Fond de carte injoignable : le symptôme naturel serait un rectangle gris muet,
+   indiscernable d'une zone sans donnée. Ce bandeau est la seule chose qui
+   distingue « pas de tuile ici » de « la clé a expiré ». */
+.map-alert {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-top-color: #f3cfcc;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* Tuile ni en cache ni joignable (zone blanche, secteur jamais visité en
+   ligne) : un aplat gris plutôt qu'une icône d'image cassée — l'utilisateur
+   doit comprendre qu'il est hors couverture, pas face à un bug d'affichage. */
+.tile-indisponible {
+  background: var(--grey-200);
+}
+
+/* Barre de progression du téléchargement d'une zone hors-ligne. */
+.map-download {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 7px 14px;
+  font-size: 12px;
+  color: var(--grey-700);
+  background: var(--blue-050);
+  border-top: 1px solid var(--grey-200);
+}
+
+.map-download progress {
+  flex: 1;
+  height: 6px;
+  accent-color: var(--blue-700);
+}
+
+/* Bouton de bascule de fond, en bas à droite de la carte. */
+.map-toggle {
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+
+.map-toggle-btn {
+  display: block;
+  padding: 6px 11px;
+  border: none;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--grey-900);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.map-toggle-btn:hover {
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+/* ---------------------------------------------------------------------------
+   Infobulles de la carte (Leaflet)
+   Rendu discret, sombre, compact, sans textes envahissants
+   --------------------------------------------------------------------------- */
+.leaflet-tooltip {
+  background: rgba(18, 22, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 5px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(18, 22, 30, 0.92);
+}
+
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: rgba(18, 22, 30, 0.92);
+}
+
+.leaflet-tooltip-left:before {
+  border-left-color: rgba(18, 22, 30, 0.92);
+}
+
+.leaflet-tooltip-right:before {
+  border-right-color: rgba(18, 22, 30, 0.92);
+}
+
+/* ---------------------------------------------------------------------------
+   Pagination du bloc Stations / Export
+   --------------------------------------------------------------------------- */
+
+.pager {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pager-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(14px);
+  transition: opacity var(--t-page) ease, transform var(--t-page) ease,
+    visibility var(--t-page);
+}
+
+.pager-page.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Retour arrière : la page entrante vient de la gauche, comme on l'attend. */
+.pager[data-dir="back"] .pager-page:not(.is-active) {
+  transform: translateX(-14px);
+}
+
+.pager-page .panel-body {
+  flex: 1;
+  /* Les flèches latérales flottent au-dessus : on leur réserve la gouttière. */
+  padding-left: 26px;
+  padding-right: 26px;
+}
+
+.pager-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--grey-200);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--grey-500);
+  cursor: pointer;
+}
+
+.pager-prev {
+  left: 0;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+}
+
+.pager-next {
+  right: 0;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+}
+
+.pager-arrow:hover {
+  color: var(--blue-700);
+  background: var(--blue-050);
+}
+
+.pager-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pager-arrow:disabled:hover {
+  color: var(--grey-500);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.pager-arrow svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pager-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--grey-300);
+  cursor: pointer;
+}
+
+.dot.is-active {
+  background: var(--blue-700);
+}
+
+/* ---------------------------------------------------------------------------
+   Bloc Stations — page 1
+   --------------------------------------------------------------------------- */
+
+.stations-actions {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Liste des stations — une ligne par station, deux niveaux de lecture : le nom
+   et ses chips (catégorie/taille), puis les chiffres en second plan. */
+
+.station-list {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* `flex-wrap` + une base de 150 px sur le bloc principal : sur une fenêtre
+   étroite, les deux boutons passent à la ligne au lieu d'écraser le nom de la
+   station en une lettre par ligne. */
+.station {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--grey-100);
+  cursor: pointer;
+}
+
+.station:last-child {
+  border-bottom: none;
+}
+
+.station:hover {
+  background: var(--grey-100);
+}
+
+/* Station retenue pour le croisement : liseré bleu à gauche, écho de l'anneau
+   bleu du marqueur sur la carte. Le même état doit se lire au même signe des
+   deux côtés, sinon la sélection devient un jeu de piste. */
+.station.is-picked {
+  background: var(--blue-050);
+  box-shadow: inset 3px 0 0 var(--blue-700);
+}
+
+.station-main {
+  flex: 1 1 150px;
+  min-width: 0;
+}
+
+.station-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.station-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.station-meta {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--grey-500);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.station-actions {
+  flex: none;
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.selection-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--blue-050);
+  border: 1px solid #d3e0f2;
+  color: var(--blue-900);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+   Bloc Stations — page 2 (export)
+   --------------------------------------------------------------------------- */
+
+.export-section {
+  margin-bottom: 12px;
+}
+
+.export-heading {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--grey-500);
+}
+
+.export-period {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue-900);
+}
+
+.export-hint {
+  margin: 2px 0 0;
+  font-size: 11px;
+}
+
+.export-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--grey-700);
+  cursor: pointer;
+}
+
+.export-pick-list {
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.export-pick-row {
+  cursor: default;
+}
+
+.export-pick-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.export-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.export-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.export-name {
+  font-weight: 500;
+}
+
+.export-desc {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ---------------------------------------------------------------------------
+   Bloc Croisement de données — split figé, jamais paginé
+   ---------------------------------------------------------------------------
+
+   Quatre pistes : la barre de période (hauteur libre), l'avertissement
+   (absent la plupart du temps), puis les deux zones qui se partagent ce qui
+   reste. `auto auto minmax(0,1fr) minmax(0,1fr)` et non `1fr 1fr` sur les deux
+   dernières seulement : sans borne basse à zéro, un tableau de huit lignes
+   pousserait le graphique hors du bloc au lieu de faire défiler sa propre zone.
+
+   Le graphique garde un plancher (`--cross-chart-min`) : en dessous, Chart.js
+   dessine encore mais la légende mange le tracé, et une courbe de 40 px de haut
+   ne se lit plus. Passé ce plancher, c'est la zone des statistiques qui défile. */
+
+.cross-split {
+  --cross-chart-min: 150px;
+  /* `flex: 1` et non la hauteur du contenu : `.panel-body` est un enfant flex de
+     `.panel` et vaut `flex: 0 1 auto` par défaut. Sans cette ligne, la grille se
+     dimensionne sur ce qu'elle contient et le graphique se retrouve écrasé à
+     quelques pixels dès que le tableau grandit — c'est le bloc carte qui portait
+     jusqu'ici le seul `flex: 1` de la feuille (`.panel-map-canvas`). */
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) minmax(var(--cross-chart-min), 1.15fr);
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* Pistes assignées explicitement, et non dans l'ordre du flux.
+   L'avertissement passe en `display: none` quand il n'a rien à dire : il cesse
+   alors d'être un élément de grille, tout remonte d'une piste, et le graphique
+   se retrouve dans la piste `minmax(0, 1fr)` prévue pour le tableau — écrasé à
+   zéro pendant que la piste du bas reste vide. Symptôme illisible, cause
+   invisible : on nomme donc chaque piste. */
+.cross-window-bar {
+  grid-row: 1;
+}
+.cross-warning {
+  grid-row: 2;
+}
+.cross-stats {
+  grid-row: 3;
+}
+.cross-chart {
+  grid-row: 4;
+}
+
+.cross-stats,
+.cross-chart {
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.cross-stats {
+  padding: 0 2px 2px;
+}
+
+.cross-chart {
+  padding: 8px 10px 4px;
+  overflow: hidden; /* le canvas se redimensionne, il ne défile jamais */
+  position: relative;
+}
+
+.cross-chart.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 16px;
+  border-style: dashed;
+  border-color: var(--grey-300);
+  background: var(--grey-100);
+}
+
+/* --- Barre de période --------------------------------------------------- */
+
+.cross-window-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.cross-window-label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-500);
+}
+
+/* `flex: 1 1 140px` avec `min-width: 0` : sans base souple, le `<select>` prend
+   sa largeur intrinsèque — celle de « 30 derniers jours de données », soit plus
+   que le bloc entier — et passe à la ligne en poussant son étiquette au-dessus.
+   La barre faisait alors trois lignes et 74 px, sur un bloc qui en compte 498. */
+.cross-window-select {
+  flex: 1 1 140px;
+  min-width: 0;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--grey-300);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--grey-700);
+}
+
+.cross-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--grey-500);
+}
+
+.cross-range input[type="date"] {
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 4px;
+  border: 1px solid var(--grey-300);
+  border-radius: 5px;
+}
+
+/* La fenêtre réellement retenue, en toutes lettres. Les périodes relatives
+   s'ancrent sur la dernière mesure disponible et non sur l'horloge du poste :
+   sans cette ligne, « 7 derniers jours » serait un libellé trompeur. */
+.cross-window-summary {
+  flex: 1 1 100%;
+  font-size: 11px;
+  color: var(--grey-500);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cross-warning {
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: var(--warn-bg);
+  border: 1px solid #f0e0bd;
+  color: var(--warn);
+}
+
+.cross-warning.is-error {
+  background: var(--danger-bg);
+  border-color: #f2c9c9;
+  color: var(--danger);
+}
+
+/* --- Tableau comparatif ------------------------------------------------- */
+
+/* 11 px et des colonnes serrées : ce bloc fait ~40 % de la largeur de la
+   fenêtre, et il doit rester lisible avec huit lignes sans défilement
+   horizontal. Les quatre colonnes de chiffres sont en `tabular-nums` (règle
+   commune plus haut) — c'est ce qui permet de comparer une colonne d'un coup
+   d'œil, l'intérêt même du bloc. */
+.data-table.cross-table {
+  font-size: 12px;
+}
+
+.data-table.cross-table th {
+  font-size: 10px;
+  padding: 6px;
+}
+
+/* Lignes serrées : chacune fait deux lignes de texte (nom, puis catégorie et
+   couverture), et le nombre de lignes visibles sans défilement se joue à
+   quelques pixels. Au-delà, la zone défile — préférable à écraser le graphique.
+
+   ⚠️ Sélecteurs qualifiés `.data-table.cross-table` : le bloc Croisement est
+   déclaré AVANT la section Tables dans cette feuille, et à spécificité égale
+   c'est la dernière règle qui gagne. Sans cette qualification, le `padding:
+   8px 10px` de `.data-table td` l'emporte et les lignes reprennent 12 px. */
+.data-table.cross-table td {
+  padding: 4px 6px;
+  line-height: 1.25;
+}
+
+.data-table.cross-table th:first-child,
+.data-table.cross-table td:first-child {
+  padding-left: 10px;
+}
+
+.cross-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.3;
+}
+
+/* La pastille reprend la couleur de la courbe — et celle de l'anneau du
+   marqueur sur la carte (cf. `GwsMap.setSelectionColors`). C'est le seul lien
+   visuel entre les trois représentations d'un même point. */
+.cross-swatch {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 3px;
+  border-radius: 2px;
+}
+
+.cross-sub {
+  display: block;
+  font-size: 10px;
+  color: var(--grey-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table.cross-table td.is-cold {
+  color: var(--blue-900);
+  font-weight: 500;
+}
+
+.data-table.cross-table tr.is-empty-row td {
+  color: var(--grey-500);
+}
+
+.cross-note {
+  font-size: 11px;
+  color: var(--grey-500);
+  padding: 6px 10px 2px;
+}
+
+/* Un calcul en vol grise le bloc sans le vider : remplacer le tableau par un
+   « chargement… » ferait clignoter la comparaison à chaque clic sur la carte. */
+.panel-cross.is-busy .cross-stats,
+.panel-cross.is-busy .cross-chart {
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------------------
+   Tables
+   --------------------------------------------------------------------------- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-500);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--grey-200);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--grey-100);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.data-table tbody tr.clickable:hover {
+  background: var(--blue-050);
+}
+
+/* Chiffres tabulaires : indispensable pour comparer des colonnes de températures. */
+.num,
+.data-table td.num,
+.mono,
+.stat-value,
+.kv dd,
+.map-menu-coords,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.num,
+.data-table th.num,
+.data-table td.num {
+  text-align: right;
+}
+
+/* Croix de fermeture des Paramètres, en haut à gauche. */
+.dialog-close-x {
+  /* Ancrée au cadre de la modale (qui ne défile pas) : toujours visible. */
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--grey-100, #eef1f4);
+  color: var(--grey-700, #444);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dialog-close-x:hover { background: var(--grey-200, #dde2e7); }
+#dlg-settings .dialog-form > h3 { padding-left: 34px; }
+.projets-gestion { width: 100%; border-collapse: collapse; }
+.projets-gestion td { padding: 6px 4px; border-bottom: 1px solid var(--grey-100, #eef1f4); }
+.projets-gestion tr:last-child td { border-bottom: none; }
+
+.shrink {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.strong {
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+   Chips
+   --------------------------------------------------------------------------- */
+
+.chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--grey-200);
+  background: var(--grey-100);
+  color: var(--grey-700);
+  white-space: nowrap;
+}
+
+.chip-cat {
+  background: var(--blue-050);
+  border-color: #d3e0f2;
+  color: var(--blue-900);
+}
+
+.chip-primary {
+  background: var(--ok-bg);
+  border-color: #c9e6d8;
+  color: var(--ok);
+}
+
+.chip-backup {
+  background: var(--warn-bg);
+  border-color: #f0e0bd;
+  color: var(--warn);
+}
+
+/* ---------------------------------------------------------------------------
+   Boutons
+   ---------------------------------------------------------------------------
+
+   Aucune transition sur `:hover` : c'est l'interaction la plus répétée de
+   l'application, et 120 ms d'attente multipliés par une séance de dépouillement
+   se ressentent comme de la lourdeur. Les animations sont réservées aux
+   changements d'état structurants. */
+
+.btn {
+  font: inherit;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 7px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--grey-300);
+  background: #fff;
+  color: var(--grey-900);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--grey-100);
+}
+
+.btn-primary {
+  background: var(--blue-700);
+  border-color: var(--blue-700);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--blue-900);
+  border-color: var(--blue-900);
+}
+
+.btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #8f1f1b;
+  border-color: #8f1f1b;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.link {
+  font: inherit;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--blue-700);
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+   Formulaires
+   --------------------------------------------------------------------------- */
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--grey-700);
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 9px;
+  border: 1px solid var(--grey-300);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--grey-900);
+}
+
+textarea {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: -1px;
+  border-color: var(--blue-500);
+}
+
+/* Focus clavier visible sur tout ce qui se clique — la grille se parcourt aussi
+   au clavier, et un focus invisible rend la navigation impossible. */
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.dot:focus-visible,
+.pager-arrow:focus-visible,
+.link:focus-visible,
+.map-toggle-btn:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  padding-bottom: 8px;
+}
+
+label.checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--grey-500);
+}
+
+fieldset {
+  margin: 4px 0 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+}
+
+legend {
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--grey-500);
+}
+
+/* Case et boutons radio : la seule fois que l'application demande un choix
+   binaire ou fermé plutôt qu'une saisie. Le texte du libellé est cliquable au
+   même titre que la case — c'est `<label>` qui le porte, pas une association
+   par `for` qu'on pourrait désynchroniser à la prochaine modification. */
+.checkbox-line,
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.checkbox-line input,
+.radio-line input {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--blue-700);
+  cursor: pointer;
+}
+
+.subgroup {
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+}
+
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+}
+
+.grid-2,
+.grid-3,
+.grid-4 {
+  display: grid;
+  gap: 12px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.form-error {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   Modales
+   ---------------------------------------------------------------------------
+
+   Ouverture et fermeture en fondu + léger agrandissement. `@starting-style` et
+   `transition-behavior: allow-discrete` sont ce qui permet d'animer un
+   `<dialog>` natif dans les deux sens : sans eux, `display: none` couperait la
+   transition de sortie net. Sur un moteur qui ne les connaît pas, la modale
+   s'affiche instantanément — dégradation sans casse. */
+
+dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 12px 40px rgba(18, 58, 107, 0.18);
+  max-width: 92vw;
+  color: var(--grey-900);
+
+  opacity: 0;
+  transform: scale(0.97) translateY(6px);
+  transition: opacity var(--t-modale) ease, transform var(--t-modale) ease,
+    overlay var(--t-modale) allow-discrete, display var(--t-modale) allow-discrete;
+}
+
+dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+}
+
+dialog::backdrop {
+  background: rgba(26, 29, 33, 0.35);
+  opacity: 0;
+  transition: opacity var(--t-modale) ease, overlay var(--t-modale) allow-discrete,
+    display var(--t-modale) allow-discrete;
+}
+
+dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* `max-width: 100%` n'est pas décoratif : le `dialog` qui contient ce formulaire
+   est plafonné à `92vw`, alors que la largeur ci-dessous est **fixe**. Sur un
+   téléphone (411 px de large, donc 378 px de modale), le formulaire gardait ses
+   440 px et débordait — le texte de la confirmation d'effacement se coupait en
+   plein milieu d'une phrase qui explique ce qui va être détruit. Cela valait
+   pour **toutes** les modales de l'application, pas seulement celle-là. */
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  width: 440px;
+  max-width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.dialog-form.wide {
+  width: 760px;
+  max-width: 100%;
+}
+
+/* Sur petit écran, la modale prend presque tout : lui laisser 22 px de marge
+   intérieure de chaque côté coûte 44 px sur 378, soit plus d'un dixième de la
+   ligne de texte. */
+@media (max-width: 640px) {
+  .dialog-form {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  /* Les deux boutons d'une confirmation ne tiennent pas côte à côte quand l'un
+     d'eux s'appelle « Effacer la mémoire du logger ». */
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .dialog-actions .btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Guide de prise en main (onboarding)
+   --------------------------------------------------------------------------- */
+.quickstart-modal {
+  width: 720px;
+  max-width: 95vw;
+  padding: 24px;
+  gap: 18px;
+}
+
+.quickstart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quickstart-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+.quickstart-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--grey-900);
+}
+
+.quickstart-header p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.quickstart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.quickstart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--grey-200);
+  background: var(--grey-050, #f8fafc);
+  transition: border-color 0.15s ease;
+}
+
+.quickstart-card:hover {
+  border-color: var(--blue-200, #bfdbfe);
+}
+
+.quickstart-icon {
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.quickstart-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--grey-900);
+}
+
+.quickstart-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--grey-700);
+}
+
+.quickstart-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .quickstart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Modale de mise à jour par paquet .gws
+   --------------------------------------------------------------------------- */
+.package-update-modal {
+  width: 660px;
+  max-width: 95vw;
+  padding: 24px;
+  gap: 16px;
+}
+
+.package-update-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.package-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+.package-update-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--grey-900);
+}
+
+.package-update-header p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.package-update-details {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--grey-050, #f8fafc);
+  border: 1px solid var(--grey-200);
+}
+
+.package-version-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.package-version-box.highlight {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--blue-050);
+  border: 1px solid var(--blue-200);
+}
+
+.version-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--grey-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.version-val {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--grey-800);
+}
+
+.version-val.highlight-val {
+  color: var(--blue-700);
+}
+
+.version-arrow {
+  font-size: 18px;
+  color: var(--grey-400);
+}
+
+.package-changelog-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.package-changelog-wrap h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--grey-900);
+}
+
+.package-changelog-body {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--grey-200);
+  background: #ffffff;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--grey-800);
+  white-space: pre-wrap;
+}
+
+.package-update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ---------------------------------------------------------------------------
+   Reveal à l'ouverture d'un projet
+   ---------------------------------------------------------------------------
+
+   Les quatre blocs apparaissent en fondu léger, décalés de 55 ms chacun : le
+   regard suit la mise en place de la grille au lieu de la subir. L'animation ne
+   joue qu'à l'ouverture (classe posée puis retirée par `main.js`), jamais sur un
+   simple rechargement de la liste des points. */
+
+.workspace.is-revealing .panel {
+  animation: reveal var(--t-reveal) cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(var(--reveal-order, 0) * 55ms);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Le mouvement est un confort, jamais une information : qui n'en veut pas doit
+   pouvoir s'en passer sans rien perdre. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Onglets (modale d'import)
+   --------------------------------------------------------------------------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.tab {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 6px 10px;
+  margin-bottom: -1px;
+  color: var(--grey-500);
+  cursor: pointer;
+}
+
+.tab.is-active {
+  color: var(--blue-700);
+  border-bottom-color: var(--blue-700);
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   Analyse / rapports
+   --------------------------------------------------------------------------- */
+
+.analysis,
+.report,
+.preview {
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  background: var(--grey-100);
+  padding: 12px 14px;
+  font-size: 12px;
+}
+
+.report.is-ok {
+  background: var(--ok-bg);
+  border-color: #c9e6d8;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 14px;
+}
+
+.kv dt {
+  color: var(--grey-500);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+.warn-list {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: var(--warn-bg);
+  border-radius: 6px;
+  color: var(--warn);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  list-style: none;
+}
+
+.warn-list li + li {
+  margin-top: 3px;
+}
+
+.preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.preview-scroll {
+  overflow-x: auto;
+}
+
+.preview th,
+.preview td {
+  border: 1px solid var(--grey-200);
+  padding: 3px 6px;
+  background: #fff;
+  text-align: left;
+}
+
+.preview th {
+  background: var(--blue-050);
+  color: var(--blue-900);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Détail d'une station (modale)
+   --------------------------------------------------------------------------- */
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.series-block {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--grey-100);
+}
+
+.series-block:last-child {
+  border-bottom: none;
+}
+
+.series-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: var(--grey-100);
+}
+
+.stat .stat-label {
+  display: block;
+  font-size: 11px;
+  color: var(--grey-500);
+}
+
+.stat .stat-value {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.stat.is-cold .stat-value {
+  color: var(--blue-700);
+}
+
+/* ---------------------------------------------------------------------------
+   Toast
+   --------------------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  max-width: 440px;
+  max-height: 50vh;
+  overflow-y: auto;
+  white-space: pre-line;
+  word-break: break-word;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--grey-900);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  z-index: 1200; /* au-dessus des contrôles Leaflet, qui montent à 1000 */
+  cursor: pointer;
+}
+
+.toast.is-error {
+  background: var(--danger);
+}
+
+/* ---------------------------------------------------------------------------
+   Notification de branchement d'un RC-5
+   ---------------------------------------------------------------------------
+
+   Distincte du toast, et pour une raison : elle porte une action (« importer »)
+   et ne doit donc pas s'effacer d'elle-même. Placée à gauche pour ne jamais
+   recouvrir un toast d'erreur, qui reste à droite. */
+
+.rc5-notice {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--blue-700);
+  background: #fff;
+  color: var(--grey-900);
+  font-size: 13px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  z-index: 1200; /* même plan que le toast */
+}
+
+.rc5-notice.is-warning {
+  border-color: var(--danger);
+}
+
+.rc5-notice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rc5-notice-body span {
+  color: var(--grey-700);
+  font-size: 12px;
+}
+
+.rc5-notice-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Rangée de boutons dans un panneau de dialogue (onglet USB direct). */
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+   Bandeaux d'avertissement sur une série
+   --------------------------------------------------------------------------- */
+
+.banner {
+  margin: 10px 0 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--grey-200);
+  background: var(--grey-100);
+  font-size: 13px;
+}
+
+/* Deux variantes d'accent, utilisées par la page RC-5 (verdict d'horloge,
+   avertissement d'effacement) et par les rapports d'import. `is-danger` est
+   réservé à ce qui est irréversible. */
+.banner.is-ok {
+  border-color: #c9e6d8;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.banner.is-danger {
+  border-color: #e8bdba;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.banner-warn {
+  border-color: #e6cfa0;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.banner p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.banner-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Menu contextuel de la carte
+   ---------------------------------------------------------------------------
+   En position absolue dans le document (pas dans la carte) : il doit passer
+   au-dessus des contrôles Leaflet, qui montent à z-index 1000. */
+
+.map-menu {
+  position: absolute;
+  z-index: 1100;
+  min-width: 190px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--grey-300);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.map-menu-title {
+  padding: 5px 10px 6px;
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-900);
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.map-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.map-menu-item:focus-visible {
+  outline: 2px solid var(--blue-700);
+  outline-offset: -2px;
+  background: var(--blue-050);
+}
+
+.map-menu-item:hover {
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+.map-menu-coords {
+  margin: 2px 0 0;
+  padding: 4px 10px 6px;
+  font-size: 11px;
+  color: var(--grey-500);
+  border-top: 1px solid var(--grey-200);
+}
+
+/* Aligner les contrôles Leaflet sur le reste de l'interface. */
+.leaflet-container {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.leaflet-control-layers,
+.leaflet-bar {
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--grey-300) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 10px;
+}
+
+/* ---------------------------------------------------------------------------
+   Infoclimat : statut de clé, barre de récupération, attribution
+   ---------------------------------------------------------------------------
+   L'attribution n'est pas décorative : la Moucherolle est diffusée en CC BY-NC,
+   la mentionner est la condition de la licence. Elle est donc discrète mais
+   toujours présente sous les données concernées, jamais masquable. */
+
+.key-status {
+  margin-top: 12px;
+}
+
+.key-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 13px;
+}
+
+.ic-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  background: var(--grey-100);
+}
+
+/* Sans identifiant de station, la barre se réduit à une phrase d'explication :
+   pas de cadre, pour ne pas donner l'air d'un bloc désactivé. */
+p.ic-bar {
+  display: block;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.attribution {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--grey-500);
+  letter-spacing: 0.01em;
+}
+
+/* ---------------------------------------------------------------------------
+   Récupération d'anciennes données Infoclimat (modale & bouton bas de fiche)
+   --------------------------------------------------------------------------- */
+
+.detail-bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--grey-200);
+}
+
+.ic-history-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--grey-100);
+  border: 1px solid var(--grey-200);
+  font-size: 13px;
+}
+
+.ic-history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.ic-history-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--grey-100);
+  border: 1px solid var(--grey-300);
+}
+
+.ic-history-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ic-history-progress-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--grey-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ic-history-progress-bar {
+  height: 100%;
+  background: var(--blue-500);
+  transition: width 0.25s ease;
+}
+
+/* Le message d'erreur d'authentification est structuré en paragraphes : les
+   aplatir le rendrait illisible, or c'est précisément celui qu'il faut lire. */
+.banner p.pre {
+  white-space: pre-line;
+}
+
+/* ---------------------------------------------------------------------------
+   Machine à écrire — commun à l'écran d'accueil et au bloc Agent IA
+   ---------------------------------------------------------------------------
+
+   Le curseur est un pseudo-élément du conteneur, pas un caractère ajouté au
+   texte : ainsi il ne se retrouve jamais copié avec la sélection, et le texte
+   reste sélectionnable pendant l'animation. */
+
+.tw {
+  white-space: pre-wrap;
+}
+
+/* Deux porteurs possibles pour le curseur. Sur du texte simple, le conteneur
+   suffit. Sur un rendu riche (`typeRich`), un `::after` de conteneur tomberait
+   *sous* le dernier paragraphe au lieu de suivre le mot en cours : le curseur
+   est alors porté par l'élément où la frappe se trouve, marqué `.tw-curseur`. */
+.tw.tw-caret::after,
+.tw.tw-caret .tw-curseur::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  opacity: 0.7;
+  animation: tw-blink 1s steps(2, start) infinite;
+}
+
+.tw.tw-rich.tw-caret::after {
+  content: none;
+}
+
+/* Un élément dont aucun caractère n'est encore arrivé ne réserve pas sa place :
+   sinon les puces d'une liste apparaîtraient toutes, vides, dès la première
+   lettre du premier item. */
+.tw .tw-attente {
+  display: none;
+}
+
+@keyframes tw-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Vues centrées (première ouverture, écran d'accueil)
+   --------------------------------------------------------------------------- */
+
+.view-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--topbar-h) - var(--safe-top));
+  padding: 24px;
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-card h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+/* Étape 1 de la première ouverture : la clé Groq.
+
+   Plus large et plus grosse que la carte du prénom — c'est un écran qu'on lit
+   en faisant autre chose (aller sur un site, se connecter, copier une clé), pas
+   un champ qu'on remplit d'un trait. Tout le reste — cadre, ombre, rayon —
+   reste celui de l'étape suivante, pour que l'enchaînement des deux ne donne
+   pas l'impression de changer d'application. */
+
+.onboarding-card-wide {
+  max-width: 560px;
+  gap: 16px;
+}
+
+.onboarding-card-wide h2 {
+  font-size: 22px;
+}
+
+.onboarding-card-wide > .muted {
+  font-size: 15px;
+}
+
+.onboarding-steps {
+  margin: 0;
+  padding-left: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.onboarding-steps::marker,
+.onboarding-steps > li::marker {
+  color: var(--blue-700);
+  font-weight: 600;
+}
+
+/* Un lien qui n'est pas un `<a>` : c'est un `<button>` qui délègue l'ouverture
+   au navigateur du système. Il doit malgré tout se lire comme un lien. */
+.link-external {
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.link-external::after {
+  content: " ↗";
+  text-decoration: none;
+}
+
+/* Un seul bouton, aligné à droite comme les autres actions de la boîte, mais
+   sans la marge d'un vrai pied de dialogue : il appartient au champ au-dessus. */
+.dialog-actions-inline {
+  justify-content: flex-start;
+  padding-top: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Écran d'accueil d'un projet
+   ---------------------------------------------------------------------------
+
+   Aucun cadre, aucune carte : le texte est seul au centre de l'écran, et les
+   trois boutons n'apparaissent qu'une fois la phrase écrite (un clic sur le
+   texte l'achève). C'est le seul écran de l'application où l'on fait
+   attendre — sept secondes, pas plus, et toujours interruptibles (clic sur
+   un des boutons). */
+
+.home-card {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.home-script {
+  margin: 0;
+  min-height: 3.2em;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--grey-900);
+  letter-spacing: -0.01em;
+  cursor: default;
+}
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: reveal var(--t-reveal) cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* Le bouton porte son propre remplissage : un calque en fond, sous le libellé.
+   `overflow: hidden` le contient dans les coins arrondis. */
+.home-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--grey-900);
+  background: #fff;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.home-btn:hover {
+  border-color: var(--blue-500);
+}
+
+.home-btn-label {
+  position: relative;
+  z-index: 1;
+}
+
+/* Largeur 0 → 100 % sur la durée passée par `main.js` (`--fill-duration`), pour
+   que la barre finisse exactement quand la minuterie se déclenche. */
+.home-btn-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--blue-050);
+  z-index: 0;
+}
+
+/* Le trait de front n'apparaît que pendant le remplissage : posé sur le calque
+   au repos (largeur 0), il laissait un filet bleu à gauche des autres boutons. */
+.home-btn.is-filling .home-btn-fill {
+  width: 100%;
+  border-right: 1px solid var(--blue-500);
+  transition: width var(--fill-duration, 7000ms) linear;
+}
+
+/* Exception assumée à la réduction de mouvement : cette barre n'est pas un
+   ornement, c'est le seul indice visible qu'une action va se déclencher toute
+   seule. La supprimer laisserait l'utilisateur devant un écran qui bascule sans
+   prévenir — moins de mouvement, mais moins d'information aussi. */
+@media (prefers-reduced-motion: reduce) {
+  .home-btn.is-filling .home-btn-fill {
+    transition-duration: var(--fill-duration, 7000ms) !important;
+  }
+}
+
+/* Focus clavier visible : le bouton désigné par le script reçoit le focus à
+   l'apparition des boutons, en même temps que son remplissage démarre. */
+.home-btn:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Bloc Agent IA
+   --------------------------------------------------------------------------- */
+
+.agent-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.agent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.agent-action {
+  font-size: 12px;
+}
+
+/* La zone de réponse prend toute la hauteur restante et défile seule : une
+   réponse longue ne doit pas pousser le champ de question hors du bloc. */
+.agent-output {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.agent-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--grey-900);
+}
+
+/* Mise en forme du Markdown rendu (voir `markdown.js`). Volontairement sobre :
+   le bloc est étroit et la réponse tient en quelques lignes, il ne s'agit pas
+   de composer un article mais de rendre lisibles une liste et un mot en gras. */
+.agent-text p {
+  margin: 0 0 0.6em;
+}
+
+.agent-text p:last-child {
+  margin-bottom: 0;
+}
+
+.agent-text ul,
+.agent-text ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.25em;
+}
+
+.agent-text ul:last-child,
+.agent-text ol:last-child {
+  margin-bottom: 0;
+}
+
+.agent-text li {
+  margin: 0 0 0.15em;
+}
+
+.agent-text li::marker {
+  color: var(--grey-500);
+}
+
+.agent-text strong {
+  font-weight: 600;
+}
+
+.agent-text code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.92em;
+  background: var(--grey-100);
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+/* Un « titre » Markdown est ramené à un paragraphe accentué : le bloc n'a pas
+   de hiérarchie de titres, et un `<h3>` y ferait une rupture d'échelle. */
+.agent-text .md-title {
+  font-weight: 600;
+  margin-bottom: 0.3em;
+}
+
+.agent-meta {
+  margin: 0;
+  font-size: 11px;
+  color: var(--grey-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-ask {
+  display: flex;
+  gap: 6px;
+}
+
+.agent-ask input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Un appel en cours se voit sur le bloc entier, pas sur un bouton isolé :
+   l'analyse peut aussi être partie toute seule après un changement de
+   sélection, sans qu'aucun bouton n'ait été cliqué. */
+.panel-agent.is-busy .agent-output {
+  opacity: 0.6;
+}
+
+/* ---------------------------------------------------------------------------
+   Page du logger RC-5 (desktop)
+
+   Une vue pleine page, pas un bloc de la grille : on y arrive avec le boîtier
+   dans la main et une seule chose à faire à la fois. Le graphique prend toute la
+   place utile — c'est ce qu'on vient voir — et les trois actions tiennent dans
+   une colonne à droite, dans l'ordre où on s'en sert : vérifier l'heure,
+   enregistrer, puis effacer. L'effacement est en dernier et porté par la seule
+   bordure rouge de l'application.
+   --------------------------------------------------------------------------- */
+
+/* La page occupe toute la hauteur : les onglets de droite doivent border le
+   contenu sur toute sa hauteur, pas s'arrêter là où le panneau s'arrête. */
+.elitech-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.elitech-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Le contenu défile ; la colonne d'onglets, non — on doit pouvoir changer de
+   logger sans avoir à remonter la page de celui qu'on regarde. */
+.elitech-panels {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.elitech-panel {
+  padding: 28px;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.rc5-grid {
+  display: grid;
+  /* Le graphique occupe le reste ; la colonne d'actions garde une largeur fixe
+     pour que ses champs ne s'étirent pas jusqu'à devenir illisibles. */
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--gap-grille);
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .rc5-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.rc5-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.rc5-block + .rc5-block {
+  margin-top: var(--gap-grille);
+}
+
+.rc5-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-grille);
+}
+
+.rc5-side .rc5-block + .rc5-block {
+  margin-top: 0;
+}
+
+.rc5-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.rc5-block-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rc5-block-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--grey-700);
+}
+
+/* Le graphique : haut, parce que c'est le sujet de la page. Hauteur fixe et non
+   proportionnelle — Chart.js mesure son conteneur, et un conteneur en % dans une
+   grille sans hauteur définie s'effondre à zéro. */
+.rc5-chart {
+  position: relative;
+  height: 420px;
+  padding: 10px 14px 14px;
+}
+
+.rc5-chart.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.rc5-block-danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--grey-200));
+}
+
+.rc5-block-danger .rc5-block-head {
+  color: var(--danger);
+  border-bottom-color: color-mix(in srgb, var(--danger) 25%, var(--grey-200));
+}
+
+
+/* Les deux boutons d'export côte à côte tant qu'il y a la place, l'un sous
+   l'autre sinon — `wrap` suffit, et évite une requête média de plus. */
+.rc5-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rc5-export-actions .btn {
+  flex: 1 1 140px;
+}
+
+/* Le tableau des informations de l'appareil : pleine largeur, sous la grille.
+   Deux colonnes de libellés sur grand écran — une douzaine de lignes en une
+   seule colonne obligerait à faire défiler pour un contenu de référence qu'on
+   consulte d'un coup d'oeil. */
+.rc5-block-infos {
+  margin-top: var(--gap-grille);
+}
+
+.rc5-block-infos .kv-infos {
+  grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+  gap: 6px 14px;
+}
+
+@media (max-width: 900px) {
+  .rc5-block-infos .kv-infos {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Petit écran (mobile)
+   ---------------------------------------------------------------------------
+   La page RC-5 est la même sur téléphone que sur poste fixe : mêmes commandes,
+   même backend, même graphique. Seule sa mise en page change, et elle change
+   sur trois points, chacun pour une raison précise.
+*/
+@media (max-width: 640px) {
+  /* 1. L'en-tête de page passe en colonne : sur 360 px de large, un titre et
+        deux boutons sur la même ligne réduisent le titre à deux mots coupés. */
+  .rc5-page .view-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .rc5-page .view-head .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rc5-page .view-head .actions .btn {
+    flex: 1 1 140px;
+  }
+
+  /* 2. Le graphique perd de la hauteur, mais pas trop : c'est le sujet de la
+        page, et un aplatissement en dessous de ~260 px écrase précisément les
+        minimums nocturnes qu'on vient y chercher. */
+  .rc5-chart {
+    height: 260px;
+    padding: 8px 6px 10px;
+  }
+
+  /* 3. Les cibles tactiles. 44 px est le minimum recommandé : en dessous, un
+        bouton se rate au doigt — et l'un d'eux efface la mémoire du logger. */
+  .rc5-page .btn,
+  .rc5-block-body select,
+  .rc5-block-body input {
+    min-height: 44px;
+  }
+
+  .rc5-block-body {
+    padding: 12px;
+  }
+
+  /* L'en-tête d'un bloc porte un titre et parfois une note (« Tout ce que le
+     protocole transmet »). Côte à côte sur 360 px, les deux se coupent en
+     quatre lignes entrelacées : on les empile. */
+  .rc5-block-head {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  /* Les libellés du tableau d'informations peuvent être longs (« Correction
+     interne de l'appareil ») : en `max-content`, ils écraseraient la valeur. */
+  .rc5-block-infos .kv-infos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 0;
+  }
+
+  /* Un espace avant chaque libellé, sauf le premier : sinon le tableau
+     commence par un blanc que rien ne justifie sous le trait d'en-tête. */
+  .rc5-block-infos .kv-infos dt + dd + dt {
+    margin-top: 8px;
+  }
+}
+
+.home-btn:disabled {
+  cursor: not-allowed;
+  background: var(--grey-100);
+  color: var(--grey-500);
+}
+
+.home-btn:disabled:hover {
+  border-color: var(--grey-200);
+}
+
+/* ---------------------------------------------------------------------------
+   Gastinel Weather Elitech
+
+   Trois pièces : le bouton d'accès (bas de la liste des projets), la colonne
+   d'onglets, et l'écran de détection.
+
+   Une contrainte tenue dans tout ce bloc : **les onglets sont en noir et
+   blanc**. Le seul bleu de la page est celui de la loupe. Ce n'est pas une
+   coquetterie — une colonne d'onglets colorée entrerait en concurrence avec les
+   courbes qu'elle borde, et l'oeil irait au décor plutôt qu'aux données.
+   --------------------------------------------------------------------------- */
+
+/* Le bandeau d'accès : tout en bas de la fenêtre, et non à la suite de la liste
+   des projets — il n'appartient à aucun projet, il ne doit donc pas se lire
+   comme la dernière ligne de leur tableau.
+
+   Aucun encadrement : deux traits horizontaux, d'un bord à l'autre de la
+   fenêtre, et rien entre eux. C'est ce qui le distingue des cartes du dessus
+   sans lui donner plus de poids qu'elles.
+
+   Il n'est jamais désactivé — la page a de quoi répondre même sans logger
+   branché, alors qu'un bouton gris n'expliquerait rien. */
+.elitech-entry {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  margin: 0;
+  /* 10 px : le bandeau fait 53,4 px de haut, soit 70 % des 76,5 px de la carte
+     qu'il remplaçait. C'est le rembourrage vertical qui absorbe la différence —
+     les interlignes restent à 1,5, sans quoi les jambages seraient rognés. */
+  padding: 10px 28px;
+  font: inherit;
+  text-align: left;
+  background: #fff;
+  color: var(--grey-900);
+  border: none;
+  border-top: 1px solid var(--grey-300);
+  border-bottom: 1px solid var(--grey-300);
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.elitech-entry:hover {
+  background: var(--grey-100);
+  border-top-color: var(--grey-900);
+  border-bottom-color: var(--grey-900);
+}
+
+/* Trois quarts des tailles d'origine (15 px et 12 px). */
+.elitech-entry-title {
+  font-size: 11.25px;
+  font-weight: 600;
+}
+
+.elitech-entry-note {
+  font-size: 9px;
+  color: var(--grey-500);
+}
+
+/* ---- la colonne d'onglets, à droite ---- */
+
+.elitech-tabs {
+  flex: none;
+  width: 216px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 0;
+  overflow-y: auto;
+  background: #fff;
+  border-left: 1px solid var(--grey-900);
+}
+
+/* Le trait entre deux onglets est un élément à part, et non une bordure : une
+   bordure disparaîtrait sous l'onglet actif (qui est noir), et la colonne
+   perdrait sa règle de lecture au moment précis où l'on s'en sert. */
+.elitech-tab-sep {
+  flex: none;
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--grey-300);
+}
+
+.elitech-tab-sep.is-strong {
+  height: 2px;
+  margin: 10px 2px;
+  background: var(--grey-900);
+}
+
+.elitech-tab {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  background: #fff;
+  color: var(--grey-900);
+  border: 1px solid var(--grey-900);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Noir plein pour l'onglet courant. Aucune autre couleur n'intervient : c'est
+   la seule distinction, et elle se voit de loin. */
+.elitech-tab.is-active {
+  background: var(--grey-900);
+  color: #fff;
+}
+
+.elitech-tab.is-off {
+  border-style: dashed;
+  color: var(--grey-500);
+}
+
+.elitech-tab.is-off.is-active {
+  color: var(--grey-200);
+}
+
+.elitech-tab-name {
+  font-weight: 600;
+  /* Un nom libre peut être long ; l'onglet ne s'élargit pas pour autant. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elitech-tab-meta {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+/* L'onglet de détection : la place d'un « nouvel onglet », mais c'est un onglet
+   entier — il a son propre écran, et il reste sélectionnable en permanence. */
+.elitech-tab-detect {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.elitech-tab-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.elitech-tab-badge {
+  margin-left: auto;
+  min-width: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 17px;
+  border-radius: 9px;
+  background: var(--grey-900);
+  color: #fff;
+}
+
+.elitech-tab.is-active .elitech-tab-badge {
+  background: #fff;
+  color: var(--grey-900);
+}
+
+/* ---- l'écran de détection ---- */
+
+.elitech-detect {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.detect-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 12px;
+}
+
+/* Le champ de recherche : un carré, parce que la règle des ondes se compte
+   « du centre à un côté » — la moitié du côté, donc, et il faut qu'elle soit la
+   même dans les deux directions. */
+.radar {
+  position: relative;
+  width: min(420px, 70vw);
+  aspect-ratio: 1;
+  flex: none;
+}
+
+/*
+ * Une onde part du centre et s'efface en grandissant.
+ *
+ * Les deux points de la spécification sont posés en toutes lettres dans les
+ * étapes : à `scale(0.75)` — soit les trois quarts de la distance qui sépare le
+ * centre d'un côté — l'opacité vaut 0,1, c'est-à-dire 90 % de transparence ;
+ * au bord (`scale(1)`) elle vaut 0, soit 100 %. Le minutage est linéaire pour
+ * que le rayon et le temps avancent du même pas, sans quoi ces deux repères ne
+ * tomberaient pas là où on les lit.
+ */
+@keyframes elitech-onde {
+  0% {
+    transform: translate(-50%, -50%) scale(0.06);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(0.75);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+.radar-onde {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid var(--blue-500);
+  border-radius: 50%;
+  opacity: 0;
+  animation: elitech-onde 3.6s linear infinite;
+}
+
+/* Quatre ondes décalées d'un quart de cycle : le départ d'une nouvelle coïncide
+   avec le passage de la précédente au quart du rayon. */
+.radar-onde:nth-child(2) {
+  animation-delay: 0.9s;
+}
+.radar-onde:nth-child(3) {
+  animation-delay: 1.8s;
+}
+.radar-onde:nth-child(4) {
+  animation-delay: 2.7s;
+}
+
+/* La loupe, au centre, et le seul élément bleu de la page. */
+.radar-loupe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26%;
+  height: 26%;
+  transform: translate(-50%, -50%);
+  fill: none;
+  stroke: var(--blue-700);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* Un écran qui bouge en permanence n'a rien à faire chez qui demande à ce que
+   ça s'arrête. La loupe, elle, reste : c'est l'information. */
+@media (prefers-reduced-motion: reduce) {
+  .radar-onde {
+    animation: none;
+    opacity: 0.1;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+}
+
+.detect-status {
+  max-width: 460px;
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--grey-500);
+}
+
+/* Les trouvailles se posent juste sous la loupe. */
+.detect-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+/* Chaque logger trouvé : un petit onglet flottant. Même noir et blanc que la
+   colonne — il en est le prolongement, et un clic le fait justement devenir un
+   onglet. */
+@keyframes elitech-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.detect-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: min(340px, 100%);
+  padding: 10px 13px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  background: #fff;
+  color: var(--grey-900);
+  border: 1px solid var(--grey-900);
+  /* Coins hauts plus marqués : la silhouette d'un onglet, pas d'une carte. */
+  border-radius: 8px 8px 5px 5px;
+  box-shadow: 0 6px 16px rgba(26, 29, 33, 0.12);
+  cursor: pointer;
+  animation: elitech-apparition 260ms ease-out both;
+}
+
+.detect-card:hover {
+  background: var(--grey-100);
+}
+
+.detect-card-name {
+  font-weight: 600;
+}
+
+.detect-card-meta {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--grey-500);
+}
+
+/* La description, en bas de la carte et calée à droite : elle ne décrit pas
+   l'appareil, elle décrit ce qu'un clic en fera. */
+.detect-card-hint {
+  align-self: flex-end;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--grey-500);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detect-card {
+    animation: none;
+  }
+}
+
+/* ---- le nom du logger, et son crayon ---- */
+
+.rc5-heading {
+  min-width: 0;
+}
+
+.rc5-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rc5-title-line h2 {
+  margin: 0;
+}
+
+/* Le crayon reste discret tant qu'on ne survole pas l'en-tête : renommer est un
+   geste rare, et un bouton permanent à côté du titre le ferait passer pour une
+   action courante. */
+.rc5-rename {
+  width: 26px;
+  height: 26px;
+  opacity: 0.45;
+}
+
+.view-head:hover .rc5-rename,
+.rc5-rename:focus-visible {
+  opacity: 1;
+}
+
+.rc5-rename svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* La croix de fermeture, à côté de « Relire le logger » : alignée sur sa
+   hauteur, et pleinement visible d'emblée — contrairement au crayon, fermer
+   un onglet n'est pas un geste rare qui mérite de se cacher au survol. */
+.rc5-close {
+  align-self: center;
+}
+
+.rc5-rename-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rc5-rename-form input {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 4px 8px;
+  min-width: 220px;
+  border: 1px solid var(--grey-300);
+  border-radius: 6px;
+}
+
+/* L'identité de l'appareil, sous le nom d'usage. Elle ne disparaît jamais :
+   c'est elle qui dit quel boîtier on regarde quand le titre porte un surnom. */
+.rc5-identite {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- position des onglets (réglage des paramètres) ----
+   Par défaut la colonne est à droite (règles ci-dessus, aucune classe requise) :
+   c'est la disposition d'origine, celle que rien ne change. Les deux autres
+   sont un choix explicite dans les paramètres, appliqué par `elitech.js` sous
+   forme de classe sur `.elitech-body`. */
+.elitech-body.tabs-gauche {
+  flex-direction: row-reverse;
+}
+
+.elitech-body.tabs-gauche .elitech-tabs {
+  border-left: none;
+  border-right: 1px solid var(--grey-900);
+}
+
+.elitech-body.tabs-haut {
+  flex-direction: column-reverse;
+}
+
+.elitech-body.tabs-haut .elitech-tabs {
+  width: 100%;
+  flex-direction: row;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-left: none;
+  border-bottom: 1px solid var(--grey-900);
+}
+
+.elitech-body.tabs-haut .elitech-tab {
+  width: auto;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.elitech-body.tabs-haut .elitech-tab-sep {
+  width: 1px;
+  height: auto;
+  margin: 4px 6px;
+}
+
+.elitech-body.tabs-haut .elitech-tab-sep.is-strong {
+  width: 2px;
+  height: auto;
+  margin: 2px 10px;
+}
+
+/* ---- petit écran ----
+   La colonne d'onglets passe en bandeau horizontal, quel que soit le réglage
+   choisi ci-dessus : 216 px de large sur un téléphone, c'est plus de la moitié
+   de l'écran pour choisir un appareil qu'on a rarement en double sur le
+   terrain. Cette règle est déclarée après les classes de position, à
+   spécificité égale : sur petit écran, c'est elle qui l'emporte. */
+@media (max-width: 760px) {
+  .elitech-body {
+    flex-direction: column-reverse;
+  }
+
+  .elitech-tabs {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-left: none;
+    border-bottom: 1px solid var(--grey-900);
+  }
+
+  .elitech-tab {
+    width: auto;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .elitech-tab-sep {
+    width: 1px;
+    height: auto;
+    margin: 4px 6px;
+  }
+
+  .elitech-tab-sep.is-strong {
+    width: 2px;
+    height: auto;
+    margin: 2px 10px;
+  }
+
+  .elitech-panel {
+    padding: 16px 12px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Saisie manuelle (onglet de l'écran d'import)
+
+   Une ligne par jour, avec sa propre valeur : c'est la règle métier rendue
+   visible. Une valeur unique appliquée à toute une plage de dates n'a pas de
+   représentation dans cette interface, et c'est voulu.
+   --------------------------------------------------------------------------- */
+
+.entry-days {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+}
+
+.entry-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+}
+
+.entry-day + .entry-day {
+  border-top: 1px solid var(--grey-100);
+}
+
+.entry-day-label {
+  font-size: 13px;
+  color: var(--grey-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-day input {
+  width: 120px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-day.is-missing input {
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.entry-empty {
+  padding: 18px;
+  text-align: center;
+  color: var(--grey-500);
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------------------------------
+   Téléphone — l'accueil coupé en deux, et l'écran d'un logger
+
+   Ces règles ne s'appliquent que sous `body.gws-mobile`, posé au démarrage par
+   `mobile.js` d'après le `userAgent`. Volontairement pas une `@media` de
+   largeur : une fenêtre de poste fixe rétrécie n'est pas un téléphone, et faire
+   basculer l'accès au RC-5 d'une forme à l'autre sur un redimensionnement
+   surprendrait plus que ça n'aiderait.
+
+   Le partage est 50 / 50 : la liste des projets en haut, la détection du RC-5
+   en bas. Deux hauteurs fixes, et chacune défile chez elle — c'est ce qui
+   garantit que les widgets d'un logger ne débordent jamais sur la liste, ni
+   hors de l'écran.
+   --------------------------------------------------------------------------- */
+
+body.gws-mobile #view-projects {
+  /* La colonne existe déjà (cf. `#view-projects` plus haut) ; ce qui change
+     ici, c'est que ses deux enfants ont une hauteur imposée au lieu de se
+     partager la place selon leur contenu. */
+  overflow: hidden;
+}
+
+body.gws-mobile .projects-scroll {
+  /* `flex: none` et pas `flex: 1` : la moitié haute vaut la moitié, qu'il y ait
+     un projet ou trente. `min-height: 0` laisse le défilement interne se faire
+     dans cette hauteur plutôt que de la faire grandir. */
+  flex: none;
+  height: 50%;
+  min-height: 0;
+  padding: 16px 14px;
+  /* Le tableau des projets est plus large qu'un téléphone (quatre colonnes,
+     dont une date longue) : sans cette ligne, la colonne « Ouvrir » est coupée
+     par le bord et rien ne permet d'aller la chercher. */
+  overflow-x: auto;
+}
+
+/* Le bandeau pleine largeur du poste fixe n'a plus de raison d'être : sur
+   téléphone, la détection n'est pas derrière un bouton, elle est là. */
+body.gws-mobile .elitech-entry {
+  display: none;
+}
+
+.home-rc5 {
+  flex: none;
+  height: 50%;
+  min-height: 0;
+  display: flex;
+  border-top: 1px solid var(--grey-900);
+  background: #fff;
+}
+
+body.gws-mobile .home-rc5 .detect-stage {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 12px 0;
+  gap: 0;
+}
+
+/* La loupe, à l'échelle d'une demi-hauteur de téléphone plutôt que d'un
+   panneau de poste fixe. `min()` sur les deux dimensions : c'est la plus
+   contraignante qui doit gagner, et sur un écran large et court c'est la
+   hauteur. La règle des ondes, elle, ne change pas d'un pixel — elle se compte
+   en fractions du carré, cf. `@keyframes elitech-onde`. */
+body.gws-mobile .home-rc5 .radar {
+  width: min(180px, 46vw, 20vh);
+}
+
+body.gws-mobile .home-rc5 .detect-status {
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+
+/* La zone des widgets : du bas de la loupe au bas de l'écran, et pas plus.
+   `flex: 1` + `min-height: 0` la borne à ce qui reste dans la moitié basse ;
+   `overflow-y: auto` fait défiler la liste quand il y a plus de loggers que de
+   place. Sans `min-height: 0`, un conteneur flex refuse de descendre sous la
+   hauteur de son contenu et la liste sortirait de l'écran par le bas. */
+body.gws-mobile .home-rc5-found {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 10px;
+  /* Le rembourrage bas dégage la barre de gestes d'Android : le dernier widget
+     doit pouvoir être touché, pas seulement vu. */
+  padding: 2px 2px calc(12px + var(--safe-bottom));
+}
+
+/* Les ombres portées des widgets se recoupent dans une liste serrée ; l'espace
+   du poste fixe (8 px) suffisait à une poignée de cartes, pas à une liste
+   défilante. */
+body.gws-mobile .home-rc5-found .detect-card {
+  width: 100%;
+  padding: 8px 11px;
+  font-size: 12.5px;
+}
+
+/* ---- l'écran plein d'un logger ---- */
+
+.rc5-mobile {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rc5-mobile-bar {
+  flex: none;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+/* Le défilement est ici, et pas sur le panneau : c'est l'hôte qui connaît la
+   hauteur disponible, exactement comme `.elitech-panels` sur poste fixe. */
+.rc5-mobile-host {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Le panneau est celui du poste fixe, cloné du même `#tpl-rc5-panel` : il porte
+   `.elitech-panel`, dont le rembourrage de 28 px est taillé pour un onglet dans
+   une page à colonnes. Le dernier bloc doit rester au-dessus de la barre de
+   gestes d'Android. */
+.rc5-mobile-host .elitech-panel {
+  padding: 12px 12px calc(16px + var(--safe-bottom));
+}
+
+/* ---------------------------------------------------------------------------
+   Import assisté par IA (Groq LLM + Vision)
+   --------------------------------------------------------------------------- */
+
+.ai-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  border: 2px dashed var(--blue-500, #3a72bd);
+  background: var(--blue-050, #eef3fa);
+  border-radius: var(--radius, 8px);
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.ai-dropzone.is-dragover {
+  background: #e1ecfa;
+  border-color: var(--blue-700, #1e4d8b);
+  transform: scale(1.01);
+}
+
+.ai-dropzone-icon {
+  font-size: 28px;
+}
+
+.ai-dropzone-text {
+  font-size: 13.5px;
+  color: var(--grey-700);
+}
+
+.ai-dropzone-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ai-queue {
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.ai-queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ai-queue-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.ai-queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--grey-100);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.ai-queue-item-name {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-spinner-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  background: var(--blue-050);
+  border-radius: var(--radius);
+  color: var(--blue-900);
+  font-weight: 500;
+}
+
+.ai-review {
+  margin-top: 14px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid var(--grey-300);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.ai-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ai-explanation {
+  padding: 8px 12px;
+  background: #f0f7ff;
+  border-left: 3px solid var(--blue-500);
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  color: var(--grey-900);
+  margin-bottom: 12px;
+}
+
+.ai-side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .ai-side-by-side {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-side-image, .ai-side-data {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-img-preview-wrap {
+  width: 100%;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-img-preview-wrap img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+}
+
+.ai-table-wrap {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--grey-200);
+  border-radius: 4px;
+}
+
+.ai-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.ai-table-wrap th {
+  position: sticky;
+  top: 0;
+  background: var(--grey-100);
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--grey-300);
+}
+
+.ai-table-wrap td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.ai-table-wrap td[contenteditable="true"]:focus {
+  outline: 2px solid var(--blue-500);
+  background: #fff;
+}
+
+
+/* ---------------------------------------------------------------------------
+   Partage par code et avertissement de mise à jour
+   --------------------------------------------------------------------------- */
+
+.view-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.radio-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 6px;
+}
+
+.update-bar {
+  flex: none;
+  padding: 8px 14px;
+  background: var(--blue-050);
+  border-bottom: 1px solid var(--grey-200);
+  font-size: 13px;
+}
+
+.update-bar-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.update-bar-text {
+  color: var(--blue-900);
+  font-weight: 600;
+}
+
+.update-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.update-bar-notes {
+  margin: 8px 0 2px;
+  white-space: pre-line;
+  color: var(--grey-700);
+  max-height: 30vh;
+  overflow: auto;
+}
+
+.share-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 34vh;
+  overflow: auto;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+}
+
+.share-points li {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--grey-100);
+}
+
+.share-points li:last-child {
+  border-bottom: none;
+}
+
+.share-points label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.share-points .share-point-meta {
+  margin-left: auto;
+  color: var(--grey-500);
+  font-size: 12px;
+}
+
+.share-points-actions {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+
+.share-code {
+  margin: 10px 0;
+  text-align: center;
+  font: 700 34px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  letter-spacing: 0.12em;
+  color: var(--blue-900);
+  user-select: all;
+}
+
+.share-code-actions {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 12px;
+}
+
+.issued-shares {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+.issued-shares li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--grey-100);
+  font-size: 13px;
+}
+
+.issued-shares .issued-code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-weight: 700;
+}
+
+.issued-shares .issued-meta {
+  color: var(--grey-500);
+  flex: 1;
+}
+
+.issued-shares .is-inactive {
+  opacity: 0.55;
+}
+
+/* ===========================================================================
+   Terrain — gants, plein soleil, petits écrans
+   ===========================================================================
+
+   Tout ce qui suit sert un seul usage : l'application tenue à bout de bras sur
+   une tablette durcie, dehors, par temps froid. Les trois contraintes de ce
+   contexte n'ont rien à voir avec celles du poste fixe :
+
+     * le doigt est ganté — il vise à ±10 px, pas à ±2 ;
+     * l'écran est lavé de lumière — un gris clair sur blanc disparaît ;
+     * la barre de gestes d'Android mange le bas de la dalle.
+
+   Deux conditions distinctes, et non une seule, parce qu'elles ne disent pas la
+   même chose :
+
+     * `pointer: coarse` — « on vise avec un doigt ». Vraie sur une tablette de
+       terrain de 12 pouces, fausse sur un portable de 13 pouces. C'est elle qui
+       commande la taille des cibles ;
+     * `max-width: 768px` — « la place manque ». C'est elle qui commande la mise
+       en page.
+
+   Les faire porter par la même requête aurait donné des cibles de bureau sur la
+   tablette (large mais tactile), ce qui est précisément le cas à traiter.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   La carte : mode ajout et appui long (cf. `map.js`)
+   --------------------------------------------------------------------------- */
+
+/* Le bouton d'armement. 44 px de côté dès le poste fixe : c'est une cible que
+   l'on vise en marchant, et la réduire sur grand écran n'économiserait rien. */
+.map-ajout {
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+
+.map-ajout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-900);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.map-ajout-btn:hover {
+  background: var(--blue-050);
+  color: var(--blue-700);
+}
+
+/* L'état armé doit être lisible d'un coup d'œil en plein soleil : c'est un mode
+   qui modifie ce que fait le prochain appui, et s'y tromper crée un point dont
+   on ne voulait pas. D'où l'aplat plein plutôt qu'un simple liseré. */
+.map-ajout-btn.is-actif {
+  background: var(--blue-700);
+  color: #fff;
+}
+
+.map-ajout-btn.is-actif:hover {
+  background: var(--blue-900);
+  color: #fff;
+}
+
+/* Le mode se voit aussi sur la carte elle-même, et pas seulement sur le bouton
+   qui l'a armé : c'est la carte qu'on regarde au moment de poser le point, et
+   le bouton est hors du champ de vision utile. */
+.leaflet-container.is-mode-ajout {
+  cursor: crosshair;
+  box-shadow: inset 0 0 0 3px var(--blue-700);
+}
+
+.map-mode-banner {
+  flex: none;
+  margin: 0;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue-700);
+  border-top: 1px solid var(--blue-900);
+}
+
+/* L'anneau de l'appui long : il se remplit sous le doigt pendant les 500 ms de
+   `DELAI_APPUI_LONG`, et disparaît avec lui.
+
+   Centré sur son point d'ancrage par `translate(-50%, -50%)` — `map.js` pose
+   les coordonnées brutes du toucher, sans avoir à connaître la taille du
+   cercle. `pointer-events: none` est indispensable : cet anneau est posé au
+   milieu du conteneur de la carte, et sans cela il intercepterait la fin du
+   geste qu'il est censé illustrer.
+
+   L'animation est portée par un `conic-gradient` plutôt que par un cercle SVG :
+   pas de second nœud à créer, et la propriété animée (`--avancement`) reste une
+   seule valeur. */
+@property --avancement {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.map-appui-anneau {
+  position: absolute;
+  z-index: 900;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: conic-gradient(
+    var(--blue-700) var(--avancement),
+    rgba(255, 255, 255, 0.55) var(--avancement)
+  );
+  /* Le disque plein deviendrait une tache opaque sur la carte ; le masque n'en
+     garde que la couronne, et laisse voir ce que l'on vise. */
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%);
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+  animation: map-appui var(--duree-appui, 500ms) linear forwards;
+}
+
+@keyframes map-appui {
+  from {
+    --avancement: 0deg;
+  }
+  to {
+    --avancement: 360deg;
+  }
+}
+
+/* Sur un moteur sans `@property`, l'angle n'est pas animable et l'anneau
+   resterait figé à zéro — donc invisible, donc sans aucun retour. Ce repli lui
+   rend au moins une pulsation, qui suffit à dire « l'appui est compté ». */
+@supports not (background: conic-gradient(red 0deg, blue 0deg)) {
+  .map-appui-anneau {
+    background: rgba(30, 77, 139, 0.35);
+    border: 3px solid var(--blue-700);
+    animation: map-appui-repli var(--duree-appui, 500ms) ease-out forwards;
+  }
+
+  @keyframes map-appui-repli {
+    from {
+      opacity: 0.25;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+}
+
+/* L'anneau *est* le retour visuel de l'appui long : le supprimer en mouvement
+   réduit rendrait le geste muet, ce que cette préférence ne demande pas. On
+   retire l'animation de remplissage, pas la marque. */
+@media (prefers-reduced-motion: reduce) {
+  .map-appui-anneau {
+    animation: none;
+    background: rgba(30, 77, 139, 0.3);
+    border: 3px solid var(--blue-700);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Cibles tactiles — 44 px, partout où l'on vise
+   ---------------------------------------------------------------------------
+
+   44 px CSS ≈ 48 dp sur une dalle Android ordinaire : la recommandation de
+   Material comme celle d'Apple. On la tient sur tout ce qui se touche, y
+   compris les contrôles que Leaflet dessine lui-même (26 px d'origine, soit
+   moitié moins que nécessaire avec un gant).
+
+   `min-height` et non `height` : un bouton dont le libellé passe à la ligne
+   doit grandir, pas rogner son texte. */
+@media (pointer: coarse) {
+  .btn,
+  .link,
+  .tab,
+  .map-menu-item,
+  button.dot {
+    min-height: 44px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    /* 13 px reste lisible à bout de bras, mais sur un bouton que l'on vise en
+       marchant, la surface du libellé compte autant que sa taille. */
+    font-size: 14px;
+  }
+
+  /* `.btn-sm` existait pour densifier les barres d'action du poste fixe. Cette
+     densité est exactement ce qu'il ne faut pas ici : la règle le ramène au
+     format commun plutôt que de le laisser à 24 px de haut. */
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    /* Un lien textuel n'a pas de surface propre : sans ce rembourrage, sa cible
+       fait la hauteur de sa ligne, soit une quinzaine de pixels. */
+    padding: 4px 2px;
+    font-size: 14px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    min-height: 44px;
+    /* Sous 16 px, Safari comme certaines WebViews zooment automatiquement à la
+       prise de focus, et la mise en page saute au moment le moins opportun :
+       celui où l'on commence à saisir. */
+    font-size: 16px;
+  }
+
+  /* Les cases et boutons radio font 13 px par défaut : c'est le contrôle le
+     plus petit de l'application, et celui des listes de partage où l'on coche
+     point par point. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* La cible d'une case, c'est son étiquette : l'agrandir ici évite d'avoir à
+     viser le carré lui-même. */
+  .share-points label,
+  .radio-row label,
+  .radio-col label {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  /* Les pastilles de pagination : 7 px de diamètre à l'œil, 44 px à la main.
+     Le point est redessiné en pseudo-élément et la surface passe au bouton —
+     agrandir le bouton lui-même aurait donné une pastille de 44 px, illisible
+     comme indicateur de page. */
+  button.dot,
+  /* `.dot.is-active` (deux classes) l'emporte sur `button.dot` (un élément et
+     une classe) : sans le reprendre ici, la pastille active gardait son aplat
+     bleu sur la surface agrandie et se dessinait en carré de 44 px. */
+  button.dot.is-active {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    position: relative;
+    background: none;
+    border-radius: 0;
+  }
+
+  button.dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--grey-300);
+  }
+
+  button.dot.is-active::before {
+    background: var(--blue-700);
+  }
+
+  /* Contrôles dessinés par Leaflet (zoom, bascule de fond). Les sélecteurs sont
+     ceux de la bibliothèque ; `!important` est ici nécessaire, sa feuille
+     vendorisée fixant ces tailles en dur. */
+  .leaflet-touch .leaflet-bar a,
+  .leaflet-bar a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    font-size: 20px !important;
+  }
+
+  .map-toggle-btn {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  /* Un menu contextuel visé au doigt : plus large, et des lignes assez hautes
+     pour ne pas déclencher « Modifier » en voulant « Sélectionner ». */
+  .map-menu {
+    min-width: 230px;
+  }
+
+  .map-menu-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Lisibilité en plein soleil
+   ---------------------------------------------------------------------------
+
+   Dehors, le contraste utile n'est pas celui que mesure un moniteur de bureau :
+   la lumière ambiante relève le noir du panneau, et c'est le bas du contraste
+   qui s'efface en premier. Le gris de commentaire (`--grey-500`, #6b7480) tient
+   le AA sur blanc (4,7:1) en salle, et disparaît au soleil.
+
+   On ne le corrige pas dans `:root` : sur un écran de bureau bien calibré, cet
+   écart de gris est une hiérarchie voulue, et l'aplatir rendrait chaque légende
+   aussi présente que la donnée qu'elle commente. La correction est donc portée
+   par les deux conditions du terrain, où cette hiérarchie coûte plus qu'elle ne
+   rapporte. */
+@media (pointer: coarse), (max-width: 768px) {
+  :root {
+    /* ~7,4:1 sur blanc : confortable au soleil, et toujours distinct de
+       `--grey-900` — la hiérarchie est resserrée, pas supprimée. */
+    --grey-500: #4d555f;
+    /* Le gris de bordure servait aussi de séparateur de tableau ; à #b9c0c9 les
+       lignes d'un tableau de relevés se confondent dehors. */
+    --grey-300: #a3abb5;
+  }
+
+  /* Les tailles de 11 et 12 px de l'interface dense du poste fixe : relevées au
+     plancher de 13 px, sous lequel un chiffre n'est plus lu mais deviné. */
+  .map-hint,
+  .map-note,
+  .map-alert,
+  .map-download,
+  .map-menu-coords,
+  .share-points .share-point-meta,
+  .share-points-actions,
+  .update-bar,
+  .issued-shares li,
+  .ai-table-wrap table {
+    font-size: 13px;
+  }
+
+  /* Un tableau de relevés se lit ligne à ligne, souvent en suivant du doigt :
+     des lignes trop serrées font sauter d'une ligne à l'autre. */
+  .ai-table-wrap td,
+  .ai-table-wrap th {
+    padding: 9px 10px;
+  }
+
+  /* `opacity` sur un bouton désactivé est la pire dégradation possible au
+     soleil : elle éteint le texte au lieu de le grisailler franchement. */
+  .btn:disabled {
+    opacity: 1;
+    color: var(--grey-500);
+    background: var(--grey-100);
+    border-color: var(--grey-300);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Petits écrans — la grille 2×2 devient une colonne
+   ---------------------------------------------------------------------------
+
+   La grille du poste fixe tient quatre blocs en deux rangées, chacun défilant
+   chez lui. Sous 768 px, ce découpage donne quatre fenêtres de 150 px de haut :
+   chacune défile, aucune ne montre rien. On passe donc à une colonne unique où
+   c'est *la page* qui défile, et où chaque bloc a la hauteur de travailler.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .workspace {
+    /* Une colonne qui défile, et non une grille : `grid-template-rows` imposait
+       deux rangées à se partager la hauteur, ce qui est exactement ce dont on
+       ne veut plus. */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* Le défilement par inertie d'Android s'arrête net sans cette ligne dans
+       une WebView. */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--gap-grille) + var(--safe-bottom));
+  }
+
+  .ws-row,
+  .ws-row-top,
+  .ws-row-bottom {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+  }
+
+  /* Sans hauteur imposée, un bloc flex prend celle de son contenu : la carte,
+     dont le contenu n'a pas de hauteur propre, se réduirait à sa barre d'aide.
+     70 % de la hauteur visible laisse voir le bloc suivant, ce qui est le seul
+     indice qu'il y a quelque chose sous le pli. */
+  .panel {
+    flex: none;
+    min-height: 70vh;
+  }
+
+  /* La carte est le bloc sur lequel on travaille le plus longtemps dehors : on
+     lui laisse la hauteur pleine, barre système déduite. */
+  .panel-map {
+    min-height: calc(100vh - var(--topbar-h) - var(--safe-top) - 24px);
+  }
+
+  /* Les grilles de formulaire : une colonne. `.grid-4` sur 360 px donnait des
+     champs de 78 px, où ni l'étiquette ni la valeur ne tiennent. */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Les tableaux croisés sont larges par nature — on ne les replie pas en
+     colonne (une comparaison repliée n'est plus une comparaison), on les fait
+     défiler latéralement, dans leur bloc et non dans la page. */
+  .ai-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .view-head-actions,
+  .update-bar-actions {
+    /* `margin-left: auto` poussait ces actions hors du bord sur écran étroit. */
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Modales en feuille basse
+   ---------------------------------------------------------------------------
+
+   Une modale centrée sur un téléphone tenu à une main met ses boutons au milieu
+   de l'écran, hors d'atteinte du pouce, et laisse une bande de fond en haut et
+   en bas qui ne sert à rien. Ancrée en bas, elle place la validation là où le
+   pouce se trouve déjà, et la croix de fermeture avec.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  dialog {
+    width: 100vw;
+    max-width: 100vw;
+    /* `auto` en haut, `0` en bas : la feuille est plaquée au bas de la fenêtre
+       quelle que soit sa hauteur, au lieu d'être centrée. */
+    margin: auto 0 0;
+    border-radius: 16px 16px 0 0;
+    /* Elle monte du bas plutôt que d'apparaître au centre — le mouvement dit
+       d'où elle vient et comment la renvoyer. */
+    transform: translateY(14px);
+  }
+
+  dialog[open] {
+    transform: none;
+  }
+
+  @starting-style {
+    dialog[open] {
+      transform: translateY(14px);
+    }
+  }
+
+  .dialog-form,
+  .dialog-form.wide {
+    width: 100%;
+    max-width: 100%;
+    /* 82vh et non 88 : la poignée de la feuille doit rester visible, c'est ce
+       qui la distingue d'une page plein écran dont on ne saurait pas sortir. */
+    max-height: 82vh;
+    padding: 18px 16px calc(14px + var(--safe-bottom));
+  }
+
+  /* La barre d'action reste sous le pouce même quand le formulaire défile : sur
+     un formulaire de point un peu long, « Enregistrer » se trouvait sous le pli
+     et n'était atteignable qu'après avoir fait défiler tout le reste. */
+  .dialog-actions {
+    position: sticky;
+    bottom: calc(-1 * var(--safe-bottom));
+    z-index: 2;
+    justify-content: stretch;
+    margin: 4px -16px calc(-14px - var(--safe-bottom));
+    padding: 12px 16px calc(12px + var(--safe-bottom));
+    background: #fff;
+    border-top: 1px solid var(--grey-200);
+  }
+
+  .dialog-actions .btn {
+    flex: 1 1 0;
+    min-height: 48px;
+  }
+
+  /* L'action principale à droite, sous le pouce d'un droitier, et la plus large
+     des deux : c'est celle que l'on vise, l'annulation étant le repli. */
+  .dialog-actions .btn-primary,
+  .dialog-actions .btn-danger {
+    flex: 1.4 1 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Barre de gestes d'Android
+   ---------------------------------------------------------------------------
+
+   `--safe-bottom` est le pendant de `--safe-top` (cf. `:root`) : la hauteur que
+   le système réserve en bas en navigation gestuelle. Sans elle, le dernier
+   bouton d'une vue n'est pas caché — il est *touchable par le système avant de
+   l'être par l'application*, ce qui est pire : l'appui renvoie à l'accueil
+   d'Android. Vaut 0 px partout ailleurs, donc sans effet sur le poste fixe.
+
+   Les vues qui la prenaient déjà en compte le faisaient avec un
+   `env(safe-area-inset-bottom)` en clair (cf. `.home-rc5-found`,
+   `.rc5-mobile-host`) ; elles passent par la variable pour n'avoir qu'un seul
+   endroit à corriger.
+   --------------------------------------------------------------------------- */
+
+.view-head-actions,
+.workspace,
+.projects-scroll {
+  scroll-padding-bottom: var(--safe-bottom);
+}
+
+
+/* ---------------------------------------------------------------------------
+   Extensions
+   --------------------------------------------------------------------------- */
+
+.panel-map {
+  position: relative;
+}
+
+.map-extensions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 800; /* au-dessus des volets Leaflet (400) et de ses contrôles (1000 exclus) */
+  display: flex;
+  gap: 6px;
+}
+
+.map-extensions:empty {
+  display: none;
+}
+
+.map-ext-btn {
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+
+.extensions-list {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.extension-item {
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+}
+
+.extension-item .hint {
+  margin: 0.25rem 0 0;
+}
+
+.extension-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.extension-state {
+  margin-left: auto;
+  font-size: 0.75rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--grey-100);
+  color: var(--grey-700);
+}
+
+.extension-state.is-active { background: var(--ok-bg); color: var(--ok); }
+.extension-state.is-erreur,
+.extension-state.is-incompatible { background: var(--danger-bg); color: var(--danger); }
+.extension-state.is-chargement { background: var(--warn-bg); color: var(--warn); }
+
+.dlg-extension {
+  width: min(1200px, 94vw);
+  height: min(820px, 90vh);
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dlg-extension[open] {
+  display: flex;
+}
+
+.dlg-extension-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.dlg-extension-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.extension-frame {
+  flex: 1;
+  min-height: 0;
+}
+
+.extension-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Altitude + bouton IGN sur une ligne (fiche point). */
+.altitude-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.altitude-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.altitude-row .btn {
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Modale Paramètres : recherche en temps réel et groupes repliables
+   (settings_search.js). Purement visuel : aucun champ n'est renommé.
+   --------------------------------------------------------------------------- */
+
+.settings-search {
+  position: sticky;
+  top: -22px; /* annule le padding haut de .dialog-form pendant le défilement */
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  margin: -6px 0 0;
+  padding: 6px 0;
+  background: #fff;
+}
+
+.settings-search input[type="search"] {
+  font: inherit;
+  font-size: 13px;
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  border: 1px solid var(--grey-300);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--grey-900);
+}
+
+.settings-search input[type="search"]::-webkit-search-cancel-button {
+  display: none; /* remplacé par notre croix, visible et cliquable au doigt */
+}
+
+.settings-search-clear {
+  position: absolute;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--grey-500);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-search-clear:hover {
+  background: var(--grey-100);
+  color: var(--grey-700);
+}
+
+.settings-search-empty {
+  margin: 0;
+  text-align: center;
+}
+
+.settings-group {
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.settings-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-700);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  border-radius: var(--radius);
+}
+
+.settings-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-group > summary::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--grey-500);
+  border-bottom: 2px solid var(--grey-500);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.settings-group[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.settings-group > summary:hover {
+  background: var(--grey-100);
+}
+
+.settings-group[open] > summary {
+  border-bottom: 1px solid var(--grey-200);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.settings-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.settings-group-body > .search-hidden {
+  display: none !important;
+}
+
+::highlight(settings-search) {
+  background-color: #ffe58a;
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .settings-search {
+    top: -18px;
+  }
+
+  .settings-search input[type="search"] {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .settings-search-clear {
+    width: 40px;
+    height: 40px;
+  }
+
+  .settings-group > summary {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .settings-group-body {
+    padding: 10px 8px;
+  }
+}
+
+/* ---- Synchro Cloud : fenêtre de progression et réglage par projet ---- */
+.cloud-progress {
+  position: fixed;
+  inset: auto 16px 16px auto;
+  margin: 0;
+  width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius);
+  background: #fff;
+  color: inherit;
+  box-shadow: 0 8px 24px rgba(18, 58, 107, 0.18);
+  font-size: 0.85rem;
+  animation: cloud-progress-in 180ms ease-out;
+}
+.cloud-progress-head { display: flex; align-items: center; gap: 8px; }
+/* Projet Cloud au démarrage : en bas à gauche (la synchro manuelle est à droite), barre verte. */
+.cloud-progress.cloud-demarrage { inset: auto auto 16px 16px; }
+.cloud-demarrage .cloud-progress-bar { background: #12a38a; }
+/* Pastille « Exemple » (projet de démonstration). */
+.badge-exemple {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border: 1px solid var(--blue-500);
+  border-radius: 999px;
+  color: var(--blue-500);
+  font-size: 0.75rem;
+  font-weight: 500;
+  vertical-align: middle;
+}
+/* Même barre, en ligne dans la fenêtre d'import. */
+.import-progress:not([hidden]) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 10px 0;
+  font-size: 0.85rem;
+}
+.import-progress .cloud-progress-track { grid-column: 1 / -1; }
+.cloud-progress-count { margin-left: auto; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.cloud-progress-icon {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--grey-200); border-top-color: var(--primary);
+  animation: cloud-progress-spin 0.8s linear infinite;
+}
+.cloud-progress-label {
+  margin: 4px 0 8px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cloud-progress-track { height: 4px; border-radius: 2px; background: var(--grey-200); overflow: hidden; }
+.cloud-progress-bar { height: 100%; width: 0; background: var(--primary); transition: width 200ms ease-out; }
+.cloud-progress-bar.indetermine { width: 35%; animation: cloud-progress-flux 1.1s ease-in-out infinite; }
+@keyframes cloud-progress-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes cloud-progress-spin { to { transform: rotate(360deg); } }
+@keyframes cloud-progress-flux { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+@media (prefers-reduced-motion: reduce) {
+  .cloud-progress, .cloud-progress-icon, .cloud-progress-bar.indetermine { animation: none; }
+}
+.cloud-projects-title { display: block; margin-top: 0.75rem; }
+.cloud-projects { display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+.cloud-project-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* ---- Carte : pastilles de regroupement (au-delà de 500 points) ---- */
+.map-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(30, 77, 139, 0.85);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.extensions-catalogue-title { display: block; margin-top: 0.75rem; }
+
+/* Laisse la place à la croix quand la recherche reste collée en haut. */
+#dlg-settings .settings-search { margin-left: 34px; }
+
+/* ---------- Données d'une série : voir, corriger, supprimer (0.5.0) ---------- */
+.series-data-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.btn-danger-ghost { color: var(--danger); border-color: currentColor; background: transparent; }
+.btn-danger-ghost:hover:not(:disabled) { background: rgba(198, 40, 40, 0.08); }
+.series-data { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.series-gaps summary { cursor: pointer; font-size: 13px; }
+.series-gaps ul { margin: 6px 0 0; padding-left: 18px; font-size: 12px; max-height: 140px; overflow: auto; }
+.series-range { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.series-range input { font: inherit; padding: 3px 6px; }
+.series-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--grey-200, #dfe3e8); border-radius: 8px; }
+.series-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.series-table th { position: sticky; top: 0; background: #fff; text-align: left; font-weight: 600; }
+.series-table th, .series-table td { padding: 4px 8px; border-bottom: 1px solid var(--grey-100, #eef0f3); white-space: nowrap; }
+.series-table .cell-edit { width: 72px; font: inherit; padding: 2px 4px; }
+.series-pager { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.series-pager .muted { margin-right: auto; }
+
+/* ---------- Panneau « Imports » du projet (0.5.0) ---------- */
+#dlg-imports .dialog-form { max-width: min(1200px, 96vw); }
+.imports-filtres { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
+.imports-filtres input { flex: 1; font: inherit; padding: 5px 8px; }
+.imports-wrap { max-height: 60vh; overflow: auto; border: 1px solid var(--grey-200); border-radius: 8px; }
+.imports-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.imports-table th { position: sticky; top: 0; background: #fff; text-align: left; font-weight: 600; z-index: 1; }
+.imports-table th, .imports-table td { padding: 5px 8px; border-bottom: 1px solid var(--grey-100); white-space: nowrap; }
+.imports-table td.muted { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.imports-table td.num { text-align: right; }
+.imports-actions { display: flex; gap: 4px; }
+.chip-ok { background: var(--ok-bg); color: var(--ok); }
+.chip-warn { background: var(--warn-bg); color: var(--warn); }
+
+/* ---------- Bandeau du quota partagé (0.5.0) ---------- */
+.settings-pied { align-items: center; }
+.quota-bandeau { flex: 1; min-width: 0; margin-right: 12px; display: flex; flex-direction: column; gap: 3px; }
+.quota-barre { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--grey-100); }
+.quota-seg { height: 100%; min-width: 2px; }
+.quota-seg + .quota-seg { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.7); }
+.quota-legende { font-size: 11px; color: var(--text-muted); }
+.appareil-couleurs { display: flex; gap: 8px; margin: 6px 0; }
+.appareil-couleur { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.appareil-couleur[aria-checked="true"] { border-color: var(--text, #202124); box-shadow: 0 0 0 2px #fff inset; }
+
+/* ---------- Fenêtre « Importer des données » : 3 onglets (0.5.0) ---------- */
+.tab-groupe { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; font: inherit; font-size: 14px; color: var(--text-muted); cursor: pointer; }
+.tab-groupe.is-active { color: inherit; border-bottom-color: var(--primary); font-weight: 600; }
+.import-sous-choix { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 10px 0; font-size: 13px; }
+.import-format { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.radio-inline { display: inline-flex; align-items: center; gap: 6px; }
+.import-avance { margin: 8px 0; border: 1px solid var(--grey-200); border-radius: 8px; padding: 6px 10px; }
+.import-avance summary { cursor: pointer; font-size: 13px; color: var(--text-muted); }
+.station-liste { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow: auto; margin: 8px 0; }
+
+/* ---------- Icônes SVG au trait (remplacent les emojis, 0.5.0) ---------- */
+.icone { width: 1.15em; height: 1.15em; vertical-align: -0.2em; flex: none; }
+.icone-texte { margin-right: 2px; }
+.quickstart-icon .icone { width: 32px; height: 32px; color: var(--primary); }
+.version-arrow .icone { width: 24px; height: 24px; }
+.ai-dropzone-icon { display: flex; gap: 10px; justify-content: center; }
+.ai-dropzone-icon .icone { width: 32px; height: 32px; color: var(--primary); }
+.ai-item-icon .icone { width: 18px; height: 18px; }
+
+/* ---------------------------------------------------------------------------
+   Croisement en plein écran (cross_plein.js)
+   Barre de 44 px, panneau de sélection à gauche, puis une colonne qui défile :
+   zone 1 (graphique) de la hauteur de la fenêtre moins la barre, zone 2
+   (tableau) 24 px plus bas, aussi longue que nécessaire.
+   --------------------------------------------------------------------------- */
+.panel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cross-plein {
+  --cp-barre: 44px;
+  --cp-panneau: 280px;
+  position: fixed;
+  inset: 0;
+  /* Au-dessus de la carte et de ses contrôles Leaflet (1000), sous les toasts. */
+  z-index: 1050;
+  display: grid;
+  grid-template-columns: var(--cp-panneau) 1fr;
+  grid-template-rows: var(--cp-barre) 1fr;
+  background: var(--bg);
+}
+
+.cross-plein[hidden] {
+  display: none;
+}
+
+body.cp-ouvert {
+  overflow: hidden;
+}
+
+.cp-barre {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  background: #fff;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.cp-barre h2 {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cp-resume {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--grey-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-panneau {
+  overflow-y: auto;
+  background: #fff;
+  border-right: 1px solid var(--grey-200);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-section h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-500);
+}
+
+.cp-champ {
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid var(--grey-300);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--grey-900);
+  min-width: 0;
+  /* Les champs de formulaire de l'app prennent toute la largeur par défaut. */
+  width: auto;
+}
+
+.cp-nombre {
+  width: 64px;
+}
+
+.cp-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cp-ligne .cp-champ:not(.cp-nombre) {
+  flex: 1;
+}
+
+.cp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.cp-actions .link {
+  font-size: 12px;
+}
+
+.cp-stations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  border: 1px solid var(--grey-200);
+  border-radius: 6px;
+}
+
+.cp-station {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cp-station:hover {
+  background: var(--grey-100);
+}
+
+.cp-station .cross-swatch {
+  margin-top: 0;
+  border: 1px solid var(--grey-200);
+}
+
+.cp-station-nom {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-station-alt {
+  font-size: 11px;
+  color: var(--grey-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-parametres {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--grey-100);
+  border-radius: 6px;
+}
+
+.cp-parametres[hidden] {
+  display: none;
+}
+
+.cp-contenu {
+  overflow-y: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.cp-zone-graphique {
+  flex: none;
+  height: calc(100vh - var(--cp-barre));
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 4px;
+  box-sizing: border-box;
+}
+
+.cp-graphique {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px;
+}
+
+.cp-graphique .placeholder {
+  padding: 20px;
+}
+
+.cp-zone-tableau {
+  margin-top: 24px;
+  padding: 0 16px 24px;
+}
+
+.cp-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+}
+
+.cp-filtres-titre {
+  color: var(--grey-500);
+}
+
+.cp-filtres-colonnes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.cp-filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.cp-titre-tableau {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+}
+
+.data-table.cross-table.cp-table {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+}
+
+.data-table.cross-table.cp-table td {
+  padding: 5px 10px;
+}
+
+.data-table.cross-table.cp-table td.is-hot {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.cp-table-defile {
+  overflow-x: auto;
+}
+
+.data-table.cross-table.cp-table td.cp-station-cellule {
+  vertical-align: top;
+  padding-top: 8px;
+  min-width: 150px;
+}
+
+.data-table.cross-table.cp-table td.cp-parametre {
+  white-space: nowrap;
+  color: var(--grey-700);
+}
+
+.data-table.cross-table.cp-table tr.cp-debut-station td {
+  border-top: 2px solid var(--grey-200);
+}
+
+.data-table.cross-table.cp-table .cp-col-periode {
+  border-left: 1px solid var(--grey-200);
+  font-weight: 600;
+}
+
+.cross-plein.is-busy .cp-graphique,
+.cross-plein.is-busy #cp-tableaux {
+  opacity: 0.55;
+}
+
+@media (max-width: 760px) {
+  .cross-plein {
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--cp-barre) auto 1fr;
+  }
+  .cp-resume {
+    display: none;
+  }
+  .cp-panneau {
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid var(--grey-200);
+  }
+  .cp-zone-graphique {
+    height: 60vh;
+  }
+}

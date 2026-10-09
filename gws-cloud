@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""
+gws-cloud -- outil d'administration locale du Projet Cloud GWS.
+Usage :
+  gws-cloud invite <compte> [--days <jours>]
+  gws-cloud list
+  gws-cloud delete <compte>
+"""
+
+import sys
+import os
+import json
+import urllib.request
+import urllib.error
+import argparse
+from datetime import datetime
+
+TOKEN_FILE = os.environ.get("GWS_ADMIN_TOKEN_FILE", "/etc/gws-share/admin-token")
+PORT = int(os.environ.get("GWS_PORT", "8087"))
+URL_BASE = f"http://127.0.0.1:{PORT}"
+
+def get_token():
+    if not os.path.exists(TOKEN_FILE):
+        print(f"Erreur: Fichier de jeton introuvable : {TOKEN_FILE}", file=sys.stderr)
+        print("Lancez cette commande avec sudo si necessaire.", file=sys.stderr)
+        sys.exit(1)
+    try:
+        with open(TOKEN_FILE, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except PermissionError:
+        print(f"Erreur: Permission refusee pour lire {TOKEN_FILE}. Utilisez sudo.", file=sys.stderr)
+        sys.exit(1)
+
+def api_call(method, path, data=None):
+    token = get_token()
+    url = f"{URL_BASE}{path}"
+    headers = {
+        "X-Admin-Token": token,
+        "Content-Type": "application/json"
+    }
+    body = json.dumps(data).encode("utf-8") if data is not None else None
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            if resp.status == 204:
+                return {}
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8", errors="replace")
+        try:
+            err_json = json.loads(err_msg)
+            err_msg = err_json.get("error", err_msg)
+        except Exception:
+            pass
+        print(f"Erreur API ({e.code}) : {err_msg}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Erreur connexion : {e}", file=sys.stderr)
+        sys.exit(1)
+
+def cmd_invite(args):
+    account = args.account.lower()
+    days = args.days
+    res = api_call("POST", "/admin/v1/invites", {"account": account, "days": days})
+    exp = datetime.fromtimestamp(res["expires_at"]).strftime("%d/%m/%Y %H:%M")
+    print(f"=== Invitation Cloud creee ===")
+    print(f"Compte     : {res['account']}")
+    print(f"Code       : {res['invite']}")
+    print(f"Expire le  : {exp} ({days} jours)")
+    print(f"\nFournissez ce code et l'identifiant pour la premiere inscription dans l'application.")
+
+def cmd_list(args):
+    res = api_call("GET", "/admin/v1/accounts")
+    accounts = res.get("accounts", [])
+    invites = res.get("invites", [])
+
+    print(f"=== Comptes Cloud ({len(accounts)}) ===")
+    if not accounts:
+        print("  (aucun compte)")
+    else:
+        for a in accounts:
+            created = datetime.fromtimestamp(a['created_at']).strftime("%d/%m/%Y")
+            size_kb = round(a['used_bytes'] / 1024, 1)
+            print(f"  - {a['account']} : {a['records']} enregistrements, {size_kb} Ko, {a['sessions']} session(s) active(s) [cree le {created}]")
+
+    print(f"\n=== Invitations en attente ({len(invites)}) ===")
+    pending = [i for i in invites if not i.get('used')]
+    if not pending:
+        print("  (aucune invitation en attente)")
+    else:
+        for inv in pending:
+            exp = datetime.fromtimestamp(inv['expires_at']).strftime("%d/%m/%Y %H:%M")
+            print(f"  - {inv['account']} : expire le {exp}")
+
+def cmd_delete(args):
+    account = args.account.lower()
+    confirm = input(f"Etes-vous sur de vouloir supprimer definitivement le compte '{account}' et toutes ses donnees ? (o/N) : ")
+    if confirm.strip().lower() not in ("o", "oui", "y", "yes"):
+        print("Annule.")
+        return
+    api_call("DELETE", f"/admin/v1/accounts/{account}")
+    print(f"Compte '{account}' et ses donnees supprimes avec succes.")
+
+def main():
+    parser = argparse.ArgumentParser(description="Administration locale du Projet Cloud GWS")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_inv = sub.add_parser("invite", help="Creer un code d'invitation pour un compte")
+    p_inv.add_argument("account", help="Identifiant du compte (3 a 32 lettres minuscules)")
+    p_inv.add_argument("--days", type=int, default=30, help="Duree de validite en jours (defaut: 30)")
+    p_inv.set_defaults(func=cmd_invite)
+
+    p_list = sub.add_parser("list", help="Lister les comptes et invitations")
+    p_list.set_defaults(func=cmd_list)
+
+    p_del = sub.add_parser("delete", help="Supprimer un compte et ses donnees")
+    p_del.add_argument("account", help="Identifiant du compte a supprimer")
+    p_del.set_defaults(func=cmd_delete)
+
+    args = parser.parse_args()
+    args.func(args)
+
+if __name__ == "__main__":
+    main()

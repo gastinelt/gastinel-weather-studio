@@ -1,0 +1,64 @@
+# Rust / Tauri
+/src-tauri/target/
+/src-tauri/gen/
+**/*.rs.bk
+
+# Sorties de build du greffon Android local (`tauri-plugin-usbserial`).
+# Le code source, lui, est suivi : c'est tout l'intérêt de l'avoir sorti de
+# `gen/android/`, qui est régénéré et ignoré en entier.
+/src-tauri/plugins/*/android/build/
+/src-tauri/plugins/*/android/.tauri/
+/src-tauri/plugins/*/target/
+# Le greffon est une bibliothèque, pas un binaire : son `Cargo.lock` ne fige
+# rien d'utile (c'est celui de l'application qui compte) et n'apparaît que si on
+# lance ses tests seuls.
+/src-tauri/plugins/*/Cargo.lock
+
+# Bases locales éventuellement copiées à côté du projet pour inspection
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Clés d'API — le dossier ENTIER, jamais seulement ses `.env`.
+# Il contient aussi des réponses d'API brutes (Moucherolle.json, ~10 Mo), et une
+# clé collée par erreur dans un fichier sans extension `.env` passerait à travers
+# d'une règle plus fine.
+Clee.API/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Magasins de clés et identifiants de signature Android.
+# `src-tauri/gen/` est déjà ignoré en entier, mais ces règles valent aussi pour
+# une copie posée ailleurs par mégarde : une clé de signature publiée ne se
+# révoque pas, elle se remplace — et remplacer la clé oblige à désinstaller
+# l'application de chaque téléphone avant de la réinstaller.
+*.jks
+*.keystore
+keystore.properties
+
+# Ancien dossier de build alternatif
+/src-tauri/target-v0.2/
+
+# Paquets de mise a jour locaux
+*.gws
+*.old
+
+# Python
+__pycache__/
+
+# Clés privées de signature (mises à jour .gws, extensions) : jamais dans le dépôt.
+*.pem
+*.key
+__pycache__/
+
+# Precautions supplementaires : cles, secrets, bases et paquets de mise a jour
+*.pem
+*.key
+.env
+*.env
+*.sqlite
+.gws/
+update-*.gws

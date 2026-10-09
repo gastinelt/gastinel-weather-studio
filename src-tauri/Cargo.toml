@@ -1,0 +1,176 @@
+[package]
+name = "gastinel-weather-studio"
+version = "0.5.5"
+description = "Gastinel Weather Studio — chasse aux TAF (Trous À Froid) du Vercors"
+license = "GPL-3.0-or-later"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+# Le binaire n'est qu'une coquille : toute la logique vit dans la lib, ce qui
+# permet de lancer `cargo test` sans démarrer Tauri.
+name = "gws_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive", "rc"] }
+serde_json = "1"
+
+# Boîte de dialogue native d'enregistrement, pour l'export (page 2 du bloc
+# Stations) : l'utilisateur choisit où écrire le fichier, sans chemin imposé.
+tauri-plugin-dialog = "2"
+
+# Écriture du fichier d'export.
+#
+# Il ne s'agit pas d'ajouter des capacités au frontend — aucune commande `fs`
+# n'est autorisée dans `capabilities/` — mais de pouvoir **écrire là où le
+# sélecteur de fichiers dit d'écrire**. Sur Android, celui-ci rend une URI
+# `content://` du Storage Access Framework, que `std::fs::write` ne sait pas
+# ouvrir : `Fs::open` la résout en descripteur de fichier via le
+# `ContentResolver`. Sur desktop, il retombe sur `std::fs::OpenOptions`.
+# La crate est déjà dans l'arbre (dépendance de `tauri-plugin-dialog`).
+tauri-plugin-fs = "2"
+
+# Horodatages : tout le modèle manipule des DateTime<Utc>.
+chrono = { version = "0.4.38", features = ["serde"] }
+
+# Identifiants stables des entités.
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# SQLite embarqué. `bundled` compile SQLite depuis les sources : aucune DLL à
+# installer sur les postes, et une version identique partout.
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+thiserror = "2"
+
+# Extensions natives (voir `extensions.rs`) : chargement des .dll au runtime et
+# interface C partagée avec les extensions.
+libloading = "0.8"
+gws-extension-api = { path = "../extensions/gws-extension-api" }
+# Vérification des archives d'extensions téléchargées (signature Ed25519).
+# Déjà compilé dans l'arbre de dépendances (russh).
+ed25519-dalek = "2"
+
+# Empreinte de contenu des séries importées (détection de ré-import, voir
+# `fingerprint.rs`). Déjà présent dans l'arbre de dépendances de Tauri : la
+# déclarer ici n'ajoute aucune compilation.
+sha2 = "0.10"
+
+# Projet Cloud : dérivation de clé et chiffrement de bout en bout (AEAD).
+# Déjà compilés dans l'arbre de dépendances.
+argon2 = "0.5"
+aes-gcm = "0.10"
+base64 = "0.22"
+rand = "0.8"
+flate2 = "1.0"
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+
+# Relai SSH pour les appels Infoclimat par serveur personnel (prompt 25).
+# russh est pur Rust (sans DLL C/OpenSSL externe), compatible tokio (déjà présent)
+# et supporte nativement Ed25519, RSA et ChaCha20-Poly1305.
+russh = "0.54"
+async-trait = "0.1"
+tokio = { version = "1", features = ["time"] }
+
+# Lecture des exports ElitechLog. Le fichier porte l'extension `.xls` mais c'est
+# un **xlsx** (zip OOXML, signature `PK 03 04`, produit par NPOI) : seule la
+# branche `Xlsx` de calamine est utilisée, jamais la détection par extension.
+# La fonctionnalité `dates` n'est pas nécessaire pour lire le fichier réel (tout
+# y est du texte), mais elle est activée pour qu'un futur export qui utiliserait
+# de vraies dates Excel reste lisible au lieu de produire des numéros de série.
+# Elle s'appuie sur `chrono`, déjà présent.
+# IMPORTANT : garder cette dépendance dans la table [dependencies] générale,
+# avant les tables [target.*.dependencies] ci-dessous — en TOML, une entrée
+# placée après un en-tête de table lui appartient jusqu'au prochain en-tête.
+# Elle avait fini piégée dans `cfg(not(windows))`, ce qui l'excluait
+# silencieusement du build desktop Windows (`unresolved import calamine`).
+calamine = { version = "0.26", default-features = false, features = ["dates"] }
+
+# Ouverture d'une URL dans le navigateur **du système**, pour le lien
+# « console.groq.com/keys » de l'écran d'accueil de première ouverture. Sans lui,
+# un `<a href>` navigue la webview elle-même : l'application disparaît derrière
+# la page Groq, sans barre d'adresse ni bouton retour.
+#
+# Monté pour son API Rust seule, comme `fs` et `usbserial` : aucune de ses
+# commandes n'est ouverte au frontend (cf. `capabilities/default.json`), qui
+# passe par `open_external_url` — laquelle n'accepte qu'une URL d'une liste
+# fermée. Un `allow-open-url` scopé ferait le même travail en déportant la règle
+# dans un fichier de configuration ; la garder en Rust la met sous test.
+tauri-plugin-opener = "2"
+
+# Une seule instance sur desktop : un double-clic sur un paquet `.gws` alors que
+# l'application tourne déjà est transmis à la fenêtre ouverte (au lieu d'en
+# démarrer une seconde qui ne fait rien).
+[target.'cfg(any(windows, target_os = "linux", target_os = "macos"))'.dependencies]
+tauri-plugin-single-instance = "2"
+
+# Client HTTP pour l'API Infoclimat et Groq.
+# `native-tls` s'appuie sur SChannel sous Windows (aucun OpenSSL requis).
+# Sur les cibles non-Windows (dont Android), `rustls` en pur Rust évite d'exiger OpenSSL.
+[target.'cfg(windows)'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = ["blocking", "native-tls"] }
+# Gardien de mise à jour `.gws` (package.rs) : poignée sur le processus de la
+# nouvelle version, pour savoir s'il vit encore et terminer celui-là seul, sans
+# risque de réutilisation de PID. Déjà dans l'arbre de dépendances (0.61).
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Threading"] }
+
+[target.'cfg(not(windows))'.dependencies]
+reqwest = { version = "0.13", default-features = false, features = ["blocking", "rustls"] }
+
+# Lecture directe du RC-5 par son port série (voir `elitech_serial.rs`). Le
+# logger se présente comme un adaptateur USB-série CH340 ; `serialport` est la
+# seule crate mature qui donne à la fois l'énumération des ports **avec leur
+# VID:PID** (indispensable pour reconnaître le CH340) et l'ouverture du port.
+# `default-features = false` retire `libudev` : elle n'existe que sur Linux, et
+# l'énumération y retombe alors sur `/sys`, ce qui suffit.
+# Retirée de la cible Android, et pas par prudence : `serialport` 4 n'a **aucune
+# branche** pour Android dans sa cascade de `cfg` d'énumération (Android n'est
+# pas `target_os = "linux"`), et y retombe sur « Not implemented for this OS ».
+# Le RC-5 y passe par l'API USB Host de la plateforme — voir le greffon
+# `tauri-plugin-usbserial` plus bas, et le README § 4quater.
+[target.'cfg(not(target_os = "android"))'.dependencies]
+serialport = { version = "4", default-features = false }
+
+# --- TLS sur Android : racines de certificats embarquées -------------------
+# Sur Android, `reqwest` 0.13 s'appuie sur `rustls-platform-verifier`, qui exige
+# un pont JNI vers le `TrustManager` de la plateforme, monté côté Java. Sans lui
+# toute requête HTTPS échoue à la poignée de main — c'est ce qui rendait
+# Infoclimat, Groq et les tuiles IGN inaccessibles sur mobile.
+#
+# Le choix retenu est d'embarquer le magasin de racines de Mozilla dans le
+# binaire plutôt que de monter ce pont. Compromis assumé : les racines suivent
+# les mises à jour de l'application, plus celles du système. Acceptable pour une
+# application familiale fermée qui n'appelle que trois domaines fixes. Voir
+# `http_client.rs` et le README, § « Appels HTTP sur Android ».
+#
+# `rustls` est déjà dans l'arbre via `reqwest` : le déclarer ici n'ajoute aucune
+# compilation, il rend seulement son API atteignable. `aws-lc-rs` est demandé
+# explicitement pour que `rustls::crypto::aws_lc_rs` soit toujours nommable —
+# c'est le fournisseur qu'active la fonctionnalité `rustls` de `reqwest`, et s'en
+# remettre à l'unification des fonctionnalités serait fragile.
+[target.'cfg(target_os = "android")'.dependencies]
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12", "aws-lc-rs"] }
+webpki-roots = "1"
+
+# --- Liaison série USB-OTG sur Android -------------------------------------
+# Greffon local : il porte la bibliothèque Android (Kotlin) qui parle à
+# `UsbManager` et pilote la puce CH340 du RC-5. Il ne peut pas vivre dans
+# `gen/android/`, qui est régénéré par `tauri android init` et ignoré par git.
+# Déclaré pour **toutes** les cibles, pas seulement Android : la façade Rust
+# compile partout et se contente de répondre « indisponible » ailleurs, ce qui
+# évite un `cfg` de plus dans `elitech_serial.rs`.
+[dependencies.tauri-plugin-usbserial]
+path = "plugins/tauri-plugin-usbserial"
+
+
+[profile.release]
+# L'app est distribuée en interne : on privilégie une binaire compacte.
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

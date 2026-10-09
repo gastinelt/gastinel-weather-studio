@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Le fusionneur de manifestes de Gradle reporte cette déclaration dans
+         celui de l'application. C'est la raison d'être de ce greffon : le
+         manifeste de `gen/android/` est régénéré et ignoré par git, on ne
+         pouvait donc pas l'y écrire durablement.
+
+         `required="false"` est délibéré : une tablette ou un téléphone sans
+         mode hôte USB doit pouvoir installer l'application quand même — tout le
+         reste (carte, import de fichiers, consultation) y fonctionne. Mettre
+         `true` la ferait disparaître du magasin pour ces appareils, pour une
+         fonction accessoire. -->
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
+    <!-- Sauvegarde et transfert désactivés, pour la même raison que le
+         `uses-feature` ci-dessus vit ici : le manifeste de `gen/android/` est
+         régénéré et ignoré par git, donc tout ce qu'on y écrit disparaît au
+         premier `tauri android init`. Le fusionneur de manifestes de Gradle
+         reporte ces attributs dans celui de l'application à chaque
+         construction : c'est le seul endroit où la garantie tient dans le
+         temps.
+
+         Sans elle, `adb backup` extrait la base SQLite des projets et les clés
+         d'API chiffrées d'un appareil non rooté, sans avoir à le déverrouiller.
+         Le détail de ce qui est exclu est dans
+         `res/xml/data_extraction_rules.xml`.
+
+         `tools:replace` rend la fusion déterministe : sans lui, un manifeste
+         d'application qui déclarerait un jour `allowBackup="true"` l'emporterait
+         en silence, la valeur du module de plus haute priorité gagnant. -->
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:replace="android:allowBackup,android:dataExtractionRules" />
+</manifest>

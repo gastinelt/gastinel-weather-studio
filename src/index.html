@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Gastinel Weather Studio</title>
+    <link rel="stylesheet" href="fonts/inter.css" />
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <!-- ================= Barre supérieure fine ================= -->
+    <header class="topbar">
+      <button
+        type="button"
+        class="icon-btn"
+        id="btn-home"
+        title="Retour à la liste des projets"
+        aria-label="Accueil"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 11.2 12 4l9 7.2" />
+          <path d="M5.6 9.8V19a1 1 0 0 0 1 1h3.2v-5h4.4v5h3.2a1 1 0 0 0 1-1V9.8" />
+        </svg>
+      </button>
+
+      <div class="topbar-center">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="topbar-title">Gastinel Weather Studio</span>
+        <span class="topbar-sep" id="topbar-sep" hidden>·</span>
+        <span class="topbar-project" id="topbar-project"></span>
+      </div>
+
+      <button
+        type="button"
+        class="icon-btn"
+        id="btn-settings"
+        title="Paramètres (Ctrl+,)"
+        aria-label="Paramètres"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.1" />
+          <path
+            d="M19.4 14.5a1.6 1.6 0 0 0 .32 1.77l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.05-.06a1.6 1.6 0 0 0-1.78-.32 1.6 1.6 0 0 0-.97 1.47v.17a1.9 1.9 0 1 1-3.8 0v-.09a1.6 1.6 0 0 0-1.05-1.47 1.6 1.6 0 0 0-1.77.32l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.47-.98h-.17a1.9 1.9 0 1 1 0-3.8h.09a1.6 1.6 0 0 0 1.47-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06a1.6 1.6 0 0 0 1.77.32h.08a1.6 1.6 0 0 0 .97-1.47v-.17a1.9 1.9 0 1 1 3.8 0v.09a1.6 1.6 0 0 0 .97 1.47 1.6 1.6 0 0 0 1.78-.32l.05-.06a1.9 1.9 0 1 1 2.7 2.7l-.06.06a1.6 1.6 0 0 0-.32 1.77v.08a1.6 1.6 0 0 0 1.47.97h.17a1.9 1.9 0 1 1 0 3.8h-.09a1.6 1.6 0 0 0-1.47.97Z"
+          />
+        </svg>
+      </button>
+    </header>
+
+    <!-- ============ Avertissement de mise à jour ============
+         Affiché seulement si une version plus récente existe et que
+         l'utilisateur n'a pas coupé les vérifications (Paramètres → Mises à
+         jour). Le téléchargement s'ouvre dans le navigateur du système, sur le
+         seul domaine accepté par `update.rs`. -->
+    <div class="update-bar" id="update-bar" role="status" hidden>
+      <div class="update-bar-main">
+        <span class="update-bar-text" id="update-bar-text"></span>
+        <button type="button" class="link" id="btn-update-notes">Nouveautés</button>
+        <span class="update-bar-actions">
+          <button type="button" class="btn btn-sm btn-primary" id="btn-update-download">Télécharger</button>
+          <button type="button" class="btn btn-sm" id="btn-update-skip">Ignorer cette version</button>
+          <button type="button" class="link" id="btn-update-close">Plus tard</button>
+        </span>
+      </div>
+      <p class="update-bar-notes" id="update-bar-notes" hidden></p>
+    </div>
+
+    <main>
+      <!-- ============ Vue : première ouverture, étape 1 (clé Groq) ============
+           Premier écran vu par quelqu'un qui vient d'installer l'application.
+           Il précède celui du prénom : la clé est ce qui manque le plus souvent
+           et le moins devinable des deux.
+
+           Volontairement **non bloquant** — « Passer » mène à l'étape suivante,
+           et l'application reste entièrement utilisable sans clé : seul le bloc
+           « Agent IA » se déclare indisponible, comme il le fait déjà.
+
+           Le lien n'est pas un `<a href>` : il ouvrirait la page Groq *dans* la
+           webview, remplaçant l'application par une page sans barre d'adresse ni
+           bouton retour. Il passe par `open_external_url` (voir `commands.rs`).
+      -->
+      <section class="view view-centered" id="view-onboarding-key" hidden>
+        <form class="onboarding-card onboarding-card-wide" id="form-onboarding-key">
+          <h2>Bienvenue dans Gastinel Weather Studio</h2>
+          <p class="muted">
+            L'application fonctionne sans rien configurer. Une seule fonction demande une
+            clé : l'agent IA, qui commente vos relevés. La clé est gratuite et se crée en
+            deux minutes.
+          </p>
+
+          <ol class="onboarding-steps">
+            <li>
+              Ouvrez la page des clés d'API de Groq :
+              <button type="button" class="link link-external" id="onboarding-key-link">
+                console.groq.com/keys
+              </button>
+            </li>
+            <li>Connectez-vous, ou créez un compte si vous n'en avez pas.</li>
+            <li>Dans le menu, allez à la section <strong>API Keys</strong>.</li>
+            <li>Cliquez sur <strong>Create API Key</strong> pour générer une clé.</li>
+            <li>Copiez la clé — Groq ne l'affiche qu'une fois — et collez-la ci-dessous.</li>
+          </ol>
+
+          <label>
+            Clé API Groq
+            <input
+              type="text"
+              id="onboarding-key-input"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="gsk_..."
+            />
+          </label>
+          <p class="form-error" id="onboarding-key-error" hidden></p>
+
+          <div class="dialog-actions">
+            <button type="button" class="btn" id="btn-onboarding-key-skip">
+              Passer, configurer plus tard
+            </button>
+            <button type="submit" class="btn btn-primary">Enregistrer la clé</button>
+          </div>
+          <p class="hint">
+            Vous pourrez la renseigner ou la changer à tout moment dans
+            <strong>Paramètres → Agent IA (Groq)</strong>.
+          </p>
+        </form>
+      </section>
+
+      <!-- ================= Vue : première ouverture (prénom) =================
+           Affichée seulement tant qu'aucun nom n'est enregistré. Formulaire nu,
+           sans animation : c'est un prérequis à franchir, pas une mise en scène.
+      -->
+      <section class="view view-centered" id="view-onboarding" hidden>
+        <form class="onboarding-card" id="form-onboarding">
+          <h2>Avant de commencer</h2>
+          <p class="muted">
+            Votre prénom sert à vous adresser la parole sur l'écran d'accueil et dans les
+            analyses de l'agent. Il reste sur ce poste et n'est envoyé nulle part, sinon à
+            l'agent quand vous lui posez une question.
+          </p>
+          <label>
+            Prénom
+            <input
+              type="text"
+              id="onboarding-name"
+              required
+              maxlength="60"
+              autocomplete="given-name"
+              autofocus
+            />
+          </label>
+          <p class="form-error" id="onboarding-error" hidden></p>
+          <div class="dialog-actions">
+            <button type="submit" class="btn btn-primary">Continuer</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================= Vue : écran d'accueil d'un projet =================
+           Intercalée entre la liste des projets et la grille 2×2. Aucune saisie
+           libre ici : trois boutons, ou le déclenchement automatique à 7 s
+           (annulé par un clic, une touche ou le survol d'un bouton).
+      -->
+      <section class="view view-centered" id="view-home" hidden>
+        <div class="home-card">
+          <p class="home-script" id="home-script" aria-live="polite"></p>
+
+          <div class="home-actions" id="home-actions" hidden>
+            <button type="button" class="home-btn" data-action="import">
+              <span class="home-btn-fill" aria-hidden="true"></span>
+              <span class="home-btn-label">Importer des données</span>
+            </button>
+            <button type="button" class="home-btn" data-action="create">
+              <span class="home-btn-fill" aria-hidden="true"></span>
+              <span class="home-btn-label">Ajouter un point</span>
+            </button>
+            <button type="button" class="home-btn" data-action="explore">
+              <span class="home-btn-fill" aria-hidden="true"></span>
+              <span class="home-btn-label">Explorer le studio</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Vue : Gastinel Weather Elitech =================
+           La page des loggers branchés. Elle ne vit plus dans un projet : on y
+           arrive depuis la liste des projets, avec un ou plusieurs boîtiers dans
+           la main, avant même de savoir à quel projet leurs données iront. Le
+           choix du projet est donc devenu un champ du panneau, au lieu d'être un
+           préalable à l'écran.
+
+           Deux zones, et une seule règle de lecture : la colonne de droite dit
+           **quel** logger on regarde, le reste de la page dit **ce qu'il
+           contient**. Un onglet par appareil branché — c'est ce qui manquait :
+           l'écran précédent ne tenait qu'un logger à la fois et n'affichait donc
+           que le dernier annoncé.
+
+           Le dernier onglet de la colonne ne désigne aucun appareil : il en
+           cherche. C'est lui qui donne un état lisible quand rien n'est branché,
+           et qui accueille les loggers branchés pendant que la page est ouverte.
+
+           La sortie se fait par le bouton d'accueil de la barre supérieure, à sa
+           place habituelle : cette page n'a pas de bouton « retour » à elle.
+      -->
+      <section class="view elitech-page" id="view-elitech" hidden>
+        <div class="elitech-body">
+          <!-- Les panneaux des loggers sont ajoutés ici par `elitech.js`, à
+               partir de `#tpl-rc5-panel`. Un seul est visible à la fois. -->
+          <div class="elitech-panels" id="elitech-panels">
+            <!-- Onglet de détection. Statique : son contenu ne dépend d'aucun
+                 appareil, seule la liste des trouvailles est peuplée en JS. -->
+            <section
+              class="elitech-panel elitech-detect"
+              id="elitech-detect"
+              role="tabpanel"
+              hidden
+            >
+              <div class="detect-stage">
+                <!-- La loupe et ses ondes. Les cercles partent du centre, grossissent
+                     et s'effacent : à 75 % de la distance qui sépare le centre d'un
+                     côté, l'onde est transparente à 90 %, et elle finit à 100 % en
+                     atteignant le bord. Voir `styles.css`, @keyframes elitech-onde. -->
+                <div class="radar" aria-hidden="true">
+                  <span class="radar-onde"></span>
+                  <span class="radar-onde"></span>
+                  <span class="radar-onde"></span>
+                  <span class="radar-onde"></span>
+                  <svg class="radar-loupe" viewBox="0 0 24 24">
+                    <circle cx="10.5" cy="10.5" r="6.4" />
+                    <path d="m15.3 15.3 4.7 4.7" />
+                  </svg>
+                </div>
+
+                <p class="detect-status" id="elitech-detect-status" aria-live="polite"></p>
+
+                <!-- Les loggers trouvés et pas encore ouverts. Chaque carte est un
+                     petit onglet flottant : elle porte le nom de l'appareil et dit
+                     ce qu'un clic en fera. -->
+                <div class="detect-found" id="elitech-detect-found"></div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Colonne d'onglets, à droite, peuplée par `elitech.js`.
+               Noir et blanc strictement : dans cette page, le bleu est réservé à
+               la loupe de la détection. -->
+          <nav
+            class="elitech-tabs"
+            id="elitech-tabs"
+            role="tablist"
+            aria-orientation="vertical"
+            aria-label="Loggers branchés"
+          ></nav>
+        </div>
+      </section>
+
+      <!-- ============ Le panneau d'un logger, cloné une fois par appareil ============
+           Aucun `id` à l'intérieur : les panneaux coexistent dans le document, et
+           deux éléments de même `id` rendraient l'un des deux inatteignable —
+           c'est exactement le défaut qui limitait l'écran précédent à un seul
+           logger. Chaque panneau ne cherche ses éléments que dans son propre
+           clone, par `[data-r="…"]` (cf. `rc5.js`, fonction `q`).
+
+           Quatre choses, dans l'ordre où on s'en sert quand on rentre du terrain :
+           ce que le logger contient (le graphique), si son heure est juste,
+           l'enregistrement en base, et — bien à part, en bas — l'effacement de sa
+           mémoire.
+      -->
+      <template id="tpl-rc5-panel">
+        <section class="elitech-panel rc5-page" role="tabpanel">
+          <div class="view-head">
+            <div class="rc5-heading">
+              <div class="rc5-title-line">
+                <h2 data-r="title">Logger RC-5</h2>
+                <!-- Le crayon : le numéro de série identifie l'appareil mais ne
+                     se retient pas. Le nom donné ici est rangé sur ce poste, sous
+                     l'identité du boîtier — il le suit d'un port à l'autre. -->
+                <button
+                  type="button"
+                  class="icon-btn rc5-rename"
+                  data-r="rename"
+                  title="Renommer ce logger"
+                  aria-label="Renommer ce logger"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4.5 19.5h3.6l9.1-9.1-3.6-3.6-9.1 9.1v3.6Z" />
+                    <path d="m15.4 5.3 3.6 3.6" />
+                  </svg>
+                </button>
+                <form class="rc5-rename-form" data-r="rename-form" hidden>
+                  <input
+                    type="text"
+                    data-r="rename-input"
+                    maxlength="60"
+                    autocomplete="off"
+                    aria-label="Nom du logger"
+                  />
+                  <button type="submit" class="btn btn-sm btn-primary">Renommer</button>
+                  <button type="button" class="btn btn-sm" data-r="rename-cancel">
+                    Annuler
+                  </button>
+                </form>
+              </div>
+              <!-- L'identité de l'appareil, sous le nom d'usage : renommer ne
+                   doit jamais faire perdre de vue quel boîtier on regarde. -->
+              <p class="rc5-identite muted" data-r="identite"></p>
+              <p class="muted" data-r="sub">Aucun logger lu pour l'instant.</p>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn" data-r="reload">Relire le logger</button>
+              <!-- Ferme cet onglet seul. Le logger, lui, reste branché : s'il
+                   est toujours là, il reparaît comme trouvaille dans l'onglet
+                   de détection, un clic l'y rouvre. -->
+              <button
+                type="button"
+                class="icon-btn rc5-close"
+                data-r="close"
+                title="Fermer cet onglet"
+                aria-label="Fermer cet onglet"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <p class="banner is-danger" data-r="offline" hidden>
+            Ce logger a été débranché. Ce qui est affiché ci-dessous a bien été lu et
+            reste exportable ; les actions qui parlent à l'appareil sont suspendues
+            jusqu'à ce qu'il revienne.
+          </p>
+
+          <p class="form-error" data-r="error" hidden></p>
+
+          <div class="rc5-grid">
+            <!-- Le graphique : toutes les mesures en mémoire, d'un coup d'oeil.
+                 Même bibliothèque et même approche que le bloc Croisement de
+                 données (Chart.js vendorisé, axe temporel UTC) — il n'y a qu'un
+                 composant de graphique dans cette application. -->
+            <section class="card rc5-block rc5-block-chart">
+              <header class="rc5-block-head">
+                <h3>Données en mémoire</h3>
+                <span class="muted" data-r="chart-note"></span>
+              </header>
+              <div class="rc5-chart is-empty" data-r="chart"></div>
+            </section>
+
+            <div class="rc5-side">
+              <!-- 1. L'horloge. -->
+              <section class="card rc5-block">
+                <header class="rc5-block-head"><h3>Heure du logger</h3></header>
+                <div class="rc5-block-body">
+                  <label>
+                    Fuseau réglé sur le logger
+                    <select data-r="tz">
+                      <option value="0">UTC</option>
+                      <option value="3600">UTC+1 (heure d'hiver FR)</option>
+                      <option value="7200">UTC+2 (heure d'été FR)</option>
+                    </select>
+                    <span class="hint">
+                      Sans lui, une heure d'écart ne se distingue pas d'une horloge parfaite
+                      réglée sur l'heure locale.
+                    </span>
+                  </label>
+                  <button type="button" class="btn" data-r="check-clock">
+                    Vérifier l'heure du logger
+                  </button>
+                  <dl class="kv" data-r="clock-kv" hidden></dl>
+                  <p class="banner" data-r="clock-verdict" hidden></p>
+                </div>
+              </section>
+
+              <!-- 1bis. Arrêt de l'enregistrement. Distinct de la réinitialisation
+                   plus bas : celle-ci n'efface rien, c'est pour ça qu'elle n'a pas
+                   besoin de la modale de confirmation qui protège l'effacement. -->
+              <section class="card rc5-block">
+                <header class="rc5-block-head"><h3>Arrêter l'enregistrement</h3></header>
+                <div class="rc5-block-body">
+                  <p class="hint">
+                    Arrête l'enregistrement en cours sur le <strong>boîtier physique</strong>,
+                    sans effacer les mesures déjà prises. <strong>C'est sans retour</strong> :
+                    le manuel officiel du RC-5 précise qu'un logger arrêté ne peut pas être
+                    relancé par son bouton, mais seulement en le reprogrammant depuis
+                    ElitechLog. Il n'existe donc ni commande de reprise, ni bouton ▶.
+                  </p>
+                  <button type="button" class="btn" data-r="stop">
+                    Arrêter l'enregistrement
+                  </button>
+                  <p class="banner" data-r="stop-result" hidden></p>
+                </div>
+              </section>
+
+              <!-- 2. L'enregistrement en base : même pipeline que l'onglet USB de
+                   l'écran d'import (`import_rc5`), donc même détection de doublon
+                   par empreinte SHA-256. Le projet est choisi ici, et non hérité
+                   d'un écran précédent : cette page ne vit plus dans un projet. -->
+              <section class="card rc5-block">
+                <header class="rc5-block-head"><h3>Sauvegarder les données</h3></header>
+                <div class="rc5-block-body">
+                  <label>
+                    Projet
+                    <select data-r="project"></select>
+                  </label>
+                  <label>
+                    Point de rattachement
+                    <select data-r="point" required></select>
+                  </label>
+                  <label>
+                    Rôle de la série
+                    <select data-r="role">
+                      <option value="Primary">Principal</option>
+                      <option value="Backup">Secours</option>
+                    </select>
+                  </label>
+                  <label>
+                    Dérive de l'horloge (s, positif = logger en avance)
+                    <input type="number" data-r="drift" step="1" value="0" />
+                  </label>
+                  <label>
+                    Numéro de série complet (facultatif)
+                    <input type="text" data-r="serial" autocomplete="off" />
+                  </label>
+                  <p class="hint" data-r="offset-hint"></p>
+                  <p class="hint" data-r="save-hint" hidden></p>
+                  <button type="button" class="btn btn-primary" data-r="save">
+                    Sauvegarder les données
+                  </button>
+                </div>
+              </section>
+
+              <!-- 3. L'export. Placé après l'enregistrement et avant l'effacement :
+                   c'est l'ordre des gestes du retour de terrain. Il porte sur la
+                   lecture affichée, pas sur la base — on veut souvent le fichier
+                   avant même d'avoir décidé à quel point rattacher la série, et
+                   c'est le seul export atteignable sans projet ouvert. -->
+              <section class="card rc5-block">
+                <header class="rc5-block-head"><h3>Exporter la lecture</h3></header>
+                <div class="rc5-block-body">
+                  <p class="hint">
+                    Exporte ce qui est affiché ci-contre, avec l'heure <strong>brute</strong>
+                    du logger — sans fuseau ni correction de dérive. Un export fait après
+                    l'enregistrement en base, lui, porte de l'UTC corrigé.
+                  </p>
+                  <div class="rc5-export-actions">
+                    <button type="button" class="btn" data-r="export-csv" disabled>
+                      Exporter en CSV
+                    </button>
+                    <button type="button" class="btn" data-r="export-txt" disabled>
+                      Exporter en texte
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 4. L'effacement. Séparé visuellement du reste, en bas, et jamais
+                   atteignable sans passer par la modale de confirmation. Celle-ci
+                   est unique dans le document : effacer deux loggers à la fois
+                   n'a aucun sens, et deux modales empilées encore moins. -->
+              <section class="card rc5-block rc5-block-danger">
+                <header class="rc5-block-head"><h3>Réinitialiser le logger</h3></header>
+                <div class="rc5-block-body">
+                  <p class="hint">
+                    Efface la mémoire du <strong>boîtier physique</strong>. Les mesures déjà
+                    enregistrées dans l'application ne sont pas touchées — elles restent en
+                    base, consultables et exportables.
+                  </p>
+                  <button type="button" class="btn btn-danger" data-r="reset">
+                    Réinitialiser le logger…
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- ============ Tout ce que l'appareil dit d'autre de lui-même ============
+               En bas, volontairement : rien ici ne sert à décider quoi que ce soit,
+               mais tout y sert à comprendre un chiffre surprenant plus haut (une
+               température décalée quand une calibration interne est active, un
+               logger qui enregistre encore pendant qu'on le lit…).
+
+               Le tableau est rempli par `rc5.js` à partir de `Rc5Analysis`. Deux
+               champs souvent attendus n'y sont pas, et ce n'est pas un oubli : le
+               protocole série du RC-5 ne transmet **ni version de firmware, ni
+               niveau de batterie**. La ligne le dit plutôt que de laisser chercher.
+          -->
+          <section class="card rc5-block rc5-block-infos" data-r="infos" hidden>
+            <header class="rc5-block-head">
+              <h3>Informations de l'appareil</h3>
+              <span class="muted">Tout ce que le protocole transmet</span>
+            </header>
+            <div class="rc5-block-body">
+              <dl class="kv kv-infos" data-r="infos-kv"></dl>
+              <p class="hint" data-r="infos-absents"></p>
+            </div>
+          </section>
+
+          <div class="report" data-r="report" hidden></div>
+        </section>
+      </template>
+
+      <!-- ================= Vue : liste des projets ================= -->
+      <section class="view" id="view-projects">
+        <!-- Tout ce qui défile. Le bandeau Elitech, lui, est en dehors : il doit
+             rester collé au bas de la fenêtre et toucher ses deux bords, ce que
+             ce conteneur centré et limité à 1180 px lui interdirait. -->
+        <div class="projects-scroll">
+        <div class="view-head">
+          <div>
+            <h2>Projets</h2>
+            <p class="muted">Un projet est un espace de travail géographique libre.</p>
+          </div>
+          <div class="view-head-actions">
+            <button type="button" class="btn btn-primary" id="btn-new-project">
+              Nouveau projet
+            </button>
+          </div>
+        </div>
+
+        <div class="card" id="projects-card">
+          <table class="data-table" id="projects-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th class="num">Points</th>
+                <th>Dernière ouverture</th>
+                <th class="shrink"></th>
+              </tr>
+            </thead>
+            <tbody id="projects-body"></tbody>
+          </table>
+          <p class="empty" id="projects-empty" hidden>
+            Aucun projet pour l'instant. Créez-en un pour commencer.
+          </p>
+          <!-- Optionnel : rien ne se crée sans ce clic. Données synthétiques,
+               jamais synchronisées vers le Cloud (voir src-tauri/src/demo.rs). -->
+          <p class="empty" id="projects-demo" hidden>
+            <button type="button" class="btn" id="btn-demo-project">Explorer un projet d'exemple</button>
+            <span class="hint">Trois points et six semaines de mesures fictives, marqués « Exemple ». Supprimable à tout moment, jamais synchronisé vers le Cloud.</span>
+          </p>
+        </div>
+        </div>
+
+        <!-- Accès aux loggers branchés : un bandeau tout en bas de la fenêtre,
+             sans encadrement — deux traits horizontaux d'un bord à l'autre, et
+             rien d'autre. Il tient la largeur entière parce qu'il n'appartient
+             à aucun projet : on branche un boîtier au retour du terrain, souvent
+             avant de savoir à quel projet ses données iront.
+
+             Il n'est jamais désactivé — même sans logger branché, la page a
+             quelque chose à dire (son onglet de détection cherche, et le dit),
+             alors qu'un bouton gris ne dirait rien de ce qu'il faut faire. -->
+        <button type="button" class="elitech-entry" id="btn-elitech">
+          <span class="elitech-entry-title">Gastinel Weather Elitech</span>
+          <span class="elitech-entry-note" id="elitech-entry-note"></span>
+        </button>
+
+        <!-- ---- Mobile : la moitié basse de l'écran d'accueil ----
+             Sur téléphone, ce bandeau-bouton ne mène nulle part : il *est* la
+             détection. La liste des projets ci-dessus est contrainte à la
+             moitié haute, cette zone occupe la moitié basse, et le RC-5 n'a
+             plus d'autre point d'entrée dans l'application mobile (ni la
+             notification de branchement, ni l'onglet « USB direct » de l'import
+             — cf. `mobile.js`).
+
+             Le contenu reprend celui de l'onglet « Détection du RC-5 » du
+             poste fixe, aux mêmes classes : la loupe, ses quatre ondes, le
+             statut, puis les cartes des loggers trouvés. Les identifiants
+             diffèrent (`m-`) parce que les deux zones coexistent dans le
+             document ; l'apparence, elle, ne diffère que par l'échelle, réglée
+             en CSS. -->
+        <section class="home-rc5" id="home-rc5" hidden aria-label="Détection du RC-5">
+          <div class="detect-stage">
+            <div class="radar" aria-hidden="true">
+              <span class="radar-onde"></span>
+              <span class="radar-onde"></span>
+              <span class="radar-onde"></span>
+              <span class="radar-onde"></span>
+              <svg class="radar-loupe" viewBox="0 0 24 24">
+                <circle cx="10.5" cy="10.5" r="6.4" />
+                <path d="m15.3 15.3 4.7 4.7" />
+              </svg>
+            </div>
+
+            <p class="detect-status" id="home-rc5-status" aria-live="polite"></p>
+
+            <!-- La zone des widgets, délimitée : elle va du bas de la loupe au
+                 bas de l'écran et défile toute seule quand il y a plus de
+                 loggers que de place. Elle ne déborde ni sur la liste des
+                 projets, ni hors de l'écran. -->
+            <div class="detect-found home-rc5-found" id="home-rc5-found"></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ================= Vue : un logger RC-5, sur téléphone =================
+           Le pendant mobile d'un onglet du poste fixe — le même panneau, issu
+           du même `#tpl-rc5-panel` et du même `GwsRc5Panel` : export, effacement
+           sous confirmation stricte, heure, graphique, informations de
+           l'appareil. Ce qui change n'est pas le contenu, c'est l'accès : un
+           écran plein par logger au lieu d'une colonne d'onglets, atteint depuis
+           un widget de l'accueil et quitté par le bouton retour Android (ou par
+           la flèche ci-dessous, qui fait la même chose).
+      -->
+      <section class="view rc5-mobile" id="view-rc5-mobile" hidden>
+        <div class="rc5-mobile-bar">
+          <button type="button" class="btn" id="rc5-mobile-back">← Retour aux projets</button>
+        </div>
+        <div class="rc5-mobile-host" id="rc5-mobile-host"></div>
+      </section>
+
+      <!-- ================= Vue : projet ouvert (grille 2×2) ================= -->
+      <section class="view workspace" id="view-project" hidden>
+        <!-- ---- Rangée haute : carte + stations/export ---- -->
+        <div class="ws-row ws-row-top">
+          <!-- Bloc 1 : carte géographique -->
+          <section class="panel panel-map" id="block-map" style="--reveal-order: 0">
+            <div class="panel-map-canvas">
+              <div id="map" role="application" aria-label="Carte des points du projet"></div>
+            </div>
+            <p class="map-mode-banner" id="map-mode-banner" hidden>
+              Mode ajout : touchez la carte à l'endroit du point.
+            </p>
+            <p class="map-alert" id="map-alert" hidden></p>
+            <div class="map-extensions" id="map-extensions"></div>
+            <p class="map-note" id="map-note" hidden></p>
+            <div class="map-download" id="map-download" hidden>
+              <span id="map-download-label"></span>
+              <progress id="map-download-bar" max="1" value="0"></progress>
+            </div>
+          </section>
+
+          <!-- Bloc 2 : stations / gestion des données (2 pages) -->
+          <section class="panel panel-stations" id="block-stations" style="--reveal-order: 1">
+            <header class="panel-head">
+              <h2 id="stations-title">Points</h2>
+              <div class="pager-dots" id="stations-dots" role="tablist" aria-label="Pages du bloc stations">
+                <button type="button" class="dot is-active" data-page="0" role="tab" aria-label="Page 1 : points"></button>
+                <button type="button" class="dot" data-page="1" role="tab" aria-label="Page 2 : export"></button>
+              </div>
+            </header>
+
+            <div class="pager">
+              <button
+                type="button"
+                class="pager-arrow pager-prev"
+                id="stations-prev"
+                aria-label="Page précédente"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5 8 12l6.5 7" /></svg>
+              </button>
+              <button
+                type="button"
+                class="pager-arrow pager-next"
+                id="stations-next"
+                aria-label="Page suivante"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5 16 12l-6.5 7" /></svg>
+              </button>
+
+              <!-- Page 1 : gestion des stations -->
+              <div class="pager-page is-active" data-page="0" id="stations-page-0">
+                <div class="panel-body">
+                  <div class="stations-actions">
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-new-point">
+                      Ajouter un point
+                    </button>
+                    <button type="button" class="btn btn-sm" id="btn-import" title="Importer (Ctrl+I)">
+                      Importer des données
+                    </button>
+                    <button type="button" class="btn btn-sm" id="btn-imports" title="Tous les imports du projet">
+                      Imports
+                    </button>
+                  </div>
+
+                  <p class="selection-bar" id="selection-bar" hidden>
+                    <span id="selection-count"></span>
+                    <button type="button" class="link" id="btn-clear-selection">
+                      Tout désélectionner
+                    </button>
+                  </p>
+
+                  <!-- Liste plutôt que tableau : ce bloc fait ~38 % de la
+                       largeur, six colonnes n'y tiennent pas sans défilement
+                       horizontal. Catégorie et taille restent affichées. -->
+                  <ul class="station-list" id="points-body"></ul>
+                  <p class="empty" id="points-empty" hidden>
+                    Aucun point dans ce projet. Ajoutez-en un, puis importez un fichier
+                    de logger.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Page 2 : export -->
+              <div class="pager-page" data-page="1" id="stations-page-1">
+                <div class="panel-body">
+                  <div class="export-section">
+                    <h3 class="export-heading">Points à exporter</h3>
+                    <div id="export-selection"></div>
+                  </div>
+
+                  <div class="export-section">
+                    <h3 class="export-heading">Période</h3>
+                    <p class="export-period" id="export-period"></p>
+                    <p class="export-hint muted">
+                      Modifiable depuis le sélecteur du bloc « Croisement de données ».
+                    </p>
+                  </div>
+
+                  <div class="export-section">
+                    <h3 class="export-heading">Contenu du texte (.txt)</h3>
+                    <div class="export-radio-group">
+                      <label class="export-radio">
+                        <input type="radio" name="export-txt-mode" value="detail" id="export-txt-detail" checked />
+                        Détail complet (une ligne par mesure)
+                      </label>
+                      <label class="export-radio">
+                        <input type="radio" name="export-txt-mode" value="summary" id="export-txt-summary" />
+                        Résumé statistique seul
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="export-list">
+                    <button type="button" class="btn export-btn" data-export="csv">
+                      <span class="export-name">Exporter en CSV</span>
+                      <span class="export-desc muted">Tableur — une ligne par mesure</span>
+                    </button>
+                    <button type="button" class="btn export-btn" data-export="txt">
+                      <span class="export-name">Exporter en TXT</span>
+                      <span class="export-desc muted">Texte brut — détail ou résumé</span>
+                    </button>
+                    <button type="button" class="btn export-btn" data-export="html">
+                      <span class="export-name">Exporter en HTML</span>
+                      <span class="export-desc muted">Rapport lisible dans un navigateur</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ---- Rangée basse : croisement + agent IA ---- -->
+        <div class="ws-row ws-row-bottom">
+          <!-- Bloc 3 : croisement de données.
+               Split figé : statistiques en haut, courbes superposées en bas,
+               les deux visibles en même temps. Pas de pagination — comparer
+               suppose de voir les chiffres et la forme des courbes ensemble.
+               Le sélecteur de fenêtre commande les DEUX zones (cf. cross.js). -->
+          <section class="panel panel-cross" id="block-cross" style="--reveal-order: 2">
+            <header class="panel-head">
+              <h2>Croisement de données</h2>
+              <div class="panel-head-actions">
+                <span class="chip" id="cross-badge" hidden></span>
+                <button type="button" class="btn btn-sm" id="btn-cross-plein" title="Ouvrir le croisement en plein écran : graphique mois par mois et tableau comparatif">
+                  <svg class="icone icone-texte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>
+                  Croisement en plein écran
+                </button>
+              </div>
+            </header>
+            <div class="panel-body cross-split">
+              <div class="cross-window-bar" id="cross-window-bar" hidden>
+                <label class="cross-window-label" for="cross-window">Période</label>
+                <select id="cross-window" class="cross-window-select">
+                  <option value="last7_days">7 derniers jours de données</option>
+                  <option value="last30_days" selected>30 derniers jours de données</option>
+                  <option value="current_year">Année de la dernière mesure</option>
+                  <option value="all">Tout l'historique disponible</option>
+                  <option value="custom">Plage personnalisée…</option>
+                </select>
+                <span class="cross-range" id="cross-range" hidden>
+                  <input type="date" id="cross-from" aria-label="Début de la plage (UTC)" />
+                  <span aria-hidden="true">→</span>
+                  <input type="date" id="cross-to" aria-label="Fin de la plage (UTC)" />
+                </span>
+                <span class="cross-window-summary" id="cross-window-summary" hidden></span>
+              </div>
+
+              <p class="cross-warning" id="cross-warning" hidden></p>
+
+              <div class="cross-stats" id="cross-stats">
+                <p class="placeholder" id="cross-hint">
+                  Sélectionnez au moins deux points sur la carte pour comparer leurs
+                  statistiques. Un seul point s'affiche aussi, sans comparaison.
+                </p>
+              </div>
+              <div class="cross-chart is-empty" id="cross-chart">
+                <p class="placeholder">
+                  Le graphique superpose les courbes des points sélectionnés sur la même
+                  période.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Bloc 4 : agent IA (Groq) -->
+          <section class="panel panel-agent" id="block-agent" style="--reveal-order: 3">
+            <header class="panel-head">
+              <h2>Agent IA</h2>
+              <span class="chip" id="agent-badge" hidden></span>
+            </header>
+            <div class="panel-body agent-body">
+              <!-- Actions rapides : reconstruites à chaque changement de
+                   sélection, car les analyses pertinentes n'y sont pas les mêmes
+                   selon qu'un, deux ou zéro point est coché. -->
+              <div class="agent-actions" id="agent-actions"></div>
+
+              <div class="agent-output" id="agent-output">
+                <p class="placeholder" id="agent-placeholder">
+                  Sélectionnez des points sur la carte, ou posez une question.
+                </p>
+                <div class="agent-text" id="agent-text" hidden></div>
+                <p class="form-error" id="agent-error" hidden></p>
+              </div>
+
+              <p class="agent-meta" id="agent-meta" hidden></p>
+
+              <form class="agent-ask" id="form-agent-ask">
+                <input
+                  type="text"
+                  id="agent-question"
+                  placeholder="Poser une question sur les points sélectionnés…"
+                  maxlength="2000"
+                  autocomplete="off"
+                />
+                <button type="submit" class="btn btn-primary btn-sm" id="agent-send">
+                  Envoyer
+                </button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= Modale : nouveau projet ================= -->
+    <dialog id="dlg-project">
+      <form method="dialog" class="dialog-form" id="form-project">
+        <h3>Nouveau projet</h3>
+        <label>
+          Nom du projet
+          <input type="text" id="project-name" required maxlength="120" autocomplete="off" />
+        </label>
+        <p class="form-error" id="project-error" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close>Annuler</button>
+          <button type="submit" class="btn btn-primary">Créer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ================= Modale : paramètres ================= -->
+    <dialog id="dlg-extension" class="dlg-extension">
+      <header class="dlg-extension-head">
+        <h3 id="dlg-extension-title">Extension</h3>
+        <button type="button" class="btn btn-sm" id="btn-close-extension">Fermer</button>
+      </header>
+      <div class="extension-frame" id="extension-frame"></div>
+    </dialog>
+
+    <dialog id="dlg-settings">
+      <div class="dialog-form wide">
+        <button type="button" class="dialog-close-x" data-close aria-label="Fermer les paramètres" title="Fermer">&times;</button>
+        <h3>Paramètres</h3>
+
+        <div class="settings-search" role="search">
+          <input type="search" id="settings-search" placeholder="Rechercher un réglage…" aria-label="Rechercher dans les paramètres" autocomplete="off" spellcheck="false" />
+          <button type="button" class="settings-search-clear" id="settings-search-clear" aria-label="Effacer la recherche" hidden>&times;</button>
+        </div>
+        <p class="hint settings-search-empty" id="settings-search-empty" role="status" hidden>Aucun réglage ne correspond à cette recherche.</p>
+
+        <details class="settings-group" data-group="profil" data-keywords="profil, compte local, utilisateur">
+          <summary class="settings-group-title">Profil</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="prénom, nom, identité, accueil">
+          <legend>Vous</legend>
+          <label>
+            Prénom
+            <input type="text" id="setting-user-name" maxlength="60" autocomplete="given-name" />
+            <span class="hint">
+              Utilisé sur l'écran d'accueil et transmis à l'agent IA pour qu'il puisse
+              vous adresser la parole.
+            </span>
+          </label>
+        </fieldset>
+        <fieldset data-keywords="appareil, quota, couleur, nom de l'appareil, relai">
+          <legend>Cet appareil</legend>
+          <label>
+            Nom de l'appareil
+            <input type="text" id="setting-appareil-nom" maxlength="40" autocomplete="off" />
+          </label>
+          <div class="appareil-couleurs" id="setting-appareil-couleurs" role="radiogroup" aria-label="Couleur de l'appareil"></div>
+          <span class="hint">
+            Nom et couleur de cet appareil dans le bandeau du quota Infoclimat partagé
+            (en bas de cette fenêtre, quand le relai serveur est activé).
+          </span>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="services" data-keywords="services, connexions, api, clés, réseau">
+          <summary class="settings-group-title">Services connectés</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="ia, intelligence artificielle, llm, groq, clé api, key, token, modèle, assistant, chat">
+          <legend>Agent IA (Groq)</legend>
+          <div class="key-status" id="setting-groq-key"></div>
+
+          <!-- Même commande que l'écran de première ouverture (`set_groq_key`) :
+               un seul chemin d'écriture, donc jamais deux clés divergentes
+               entre les deux écrans. Le champ est laissé vide à l'ouverture —
+               le backend ne rend jamais la clé en clair, seulement son
+               empreinte, affichée juste au-dessus. -->
+          <label>
+            Renseigner ou remplacer la clé
+            <input
+              type="text"
+              id="setting-groq-key-input"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="gsk_..."
+            />
+            <span class="hint">
+              Une clé gratuite se crée sur
+              <button type="button" class="link link-external" id="setting-groq-key-link">
+                console.groq.com/keys
+              </button>. Laisser ce champ vide ne change rien à la clé déjà enregistrée.
+            </span>
+          </label>
+          <div class="dialog-actions dialog-actions-inline">
+            <button type="button" class="btn btn-sm" id="btn-setting-groq-key">
+              Enregistrer la clé
+            </button>
+          </div>
+
+          <p class="hint" id="setting-groq-model"></p>
+        </fieldset>
+
+        <fieldset data-keywords="infoclimat, api, clé api, key, token, rafraîchissement, intervalle, délai, minutes, stations, opendata, attribution">
+          <legend>API Infoclimat</legend>
+
+          <label>
+            Intervalle minimal entre deux rafraîchissements automatiques (minutes)
+            <input
+              type="number"
+              id="setting-refresh"
+              min="1"
+              max="10080"
+              step="1"
+              inputmode="numeric"
+            />
+            <span class="hint">
+              Délai en dessous duquel une même série n'est pas réinterrogée. Le bouton
+              « Récupérer les dernières données » propose de forcer l'appel si vous êtes
+              pressé. Infoclimat ne limite pas les requêtes mais demande un usage
+              raisonnable : leur plateforme est maintenue par des bénévoles.
+            </span>
+          </label>
+
+          <div class="key-status" id="setting-key"></div>
+
+          <label>
+            Renseigner ou remplacer la clé
+            <input
+              type="text"
+              id="setting-infoclimat-key-input"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="Coller la clé..."
+            />
+            <span class="hint">
+              Une clé gratuite se crée sur
+              <button type="button" class="link link-external" id="setting-infoclimat-key-link">
+                infoclimat.fr/opendata
+              </button>. Laisser ce champ vide ne change rien à la clé déjà enregistrée.
+            </span>
+          </label>
+          <div class="dialog-actions dialog-actions-inline">
+            <button type="button" class="btn btn-sm" id="btn-setting-infoclimat-key">
+              Enregistrer la clé
+            </button>
+          </div>
+
+          <p class="hint" id="setting-attribution"></p>
+        </fieldset>
+
+        <!-- Le piège n°1 de cette API : il mérite d'être écrit là où on le lira
+             avant d'avoir le problème, pas seulement dans le message d'erreur. -->
+        <div class="banner banner-warn" data-keywords="infoclimat, adresse ip, ip publique, erreur, clé refusée, box, relai ssh">
+          <strong>La clé est liée à votre adresse IP publique</strong>
+          <p>
+            Infoclimat associe chaque clé à l'adresse IP déclarée au moment de sa
+            génération. Si votre box redémarre et que l'opérateur vous attribue une
+            nouvelle IP, les appels échouent — alors que la clé est toujours valide.
+            Il faut alors regénérer une clé sur infoclimat.fr/opendata depuis ce poste,
+            ou activer le relai SSH ci-dessous vers votre serveur à adresse IP stable.
+          </p>
+        </div>
+
+        <fieldset data-keywords="ssh, relai, relais, proxy, serveur, debian, ip fixe, adresse ip, tunnel, clé privée, mot de passe, empreinte, curl" id="fs-ssh-relay">
+          <legend>Relai serveur (SSH)</legend>
+
+          <label class="checkbox-line">
+            <input type="checkbox" id="setting-ssh-enabled" />
+            <strong>Utiliser le relai SSH pour Infoclimat</strong>
+          </label>
+          <span class="hint">
+            Fait passer les requêtes Infoclimat par votre serveur Debian distant
+            (via <code>curl</code>) pour utiliser son IP fixe ou déclarée.
+            Désactivé par défaut (appels directs depuis ce poste sans relai). Les
+            appels Groq restent directs.
+          </span>
+
+          <div class="banner" style="margin-top: 10px; margin-bottom: 10px;">
+            <small>
+              <strong>Connexion explicite :</strong> une application desktop ne peut pas
+              « se raccrocher » automatiquement à un terminal SSH déjà ouvert en tâche de fond.
+              Enregistrez ici les paramètres de connexion une fois pour toutes.
+            </small>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px;">
+            <label>
+              Adresse du serveur (hôte ou IP)
+              <input
+                type="text"
+                id="setting-ssh-host"
+                placeholder="ex. 192.0.2.1 ou ssh.example.org"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+            <label>
+              Port SSH
+              <input
+                type="number"
+                id="setting-ssh-port"
+                value="22"
+                min="1"
+                max="65535"
+              />
+            </label>
+          </div>
+
+          <label>
+            Utilisateur SSH
+            <input
+              type="text"
+              id="setting-ssh-user"
+              placeholder="ex. debian"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </label>
+
+          <fieldset class="subgroup">
+            <legend>Méthode d'authentification</legend>
+            <div class="radio-row">
+              <label class="radio-line">
+                <input type="radio" name="ssh-auth-type" value="key" checked />
+                Clé privée (recommandé)
+              </label>
+              <label class="radio-line">
+                <input type="radio" name="ssh-auth-type" value="password" />
+                Mot de passe
+              </label>
+            </div>
+
+            <!-- Options Clé privée -->
+            <div id="ssh-auth-key-fields">
+              <label>
+                Chemin vers le fichier de clé privée
+                <div style="display: flex; gap: 6px;">
+                  <input
+                    type="text"
+                    id="setting-ssh-key-path"
+                    placeholder="ex. C:\Users\...\.ssh\id_ed25519"
+                    autocomplete="off"
+                    spellcheck="false"
+                    style="flex: 1;"
+                  />
+                  <button type="button" class="btn btn-sm" id="btn-browse-ssh-key">
+                    Parcourir…
+                  </button>
+                </div>
+              </label>
+              <label>
+                Phrase secrète de la clé (optionnelle)
+                <input
+                  type="password"
+                  id="setting-ssh-passphrase"
+                  placeholder="Laisser vide si la clé n'est pas chiffrée"
+                  autocomplete="off"
+                />
+              </label>
+            </div>
+
+            <!-- Options Mot de passe -->
+            <div id="ssh-auth-password-fields" hidden>
+              <label>
+                Mot de passe SSH
+                <input
+                  type="password"
+                  id="setting-ssh-password"
+                  placeholder="Mot de passe du compte SSH distant"
+                  autocomplete="off"
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="dialog-actions dialog-actions-inline" style="margin-top: 12px; gap: 8px;">
+            <button type="button" class="btn btn-sm" id="btn-test-ssh">
+              Tester la connexion
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" id="btn-save-ssh">
+              Enregistrer la configuration SSH
+            </button>
+          </div>
+
+          <div id="ssh-test-result" style="margin-top: 10px; display: none;"></div>
+
+          <!-- Empreinte de la clé d'hôte acceptée. Le client refuse tout serveur
+               dont l'empreinte diffère, avant d'envoyer le moindre identifiant. -->
+          <p class="hint" id="ssh-host-key-line" hidden>
+            Empreinte du serveur acceptée : <code id="ssh-host-key"></code>
+            <button type="button" class="link" id="btn-ssh-forget-key">Oublier</button>
+          </p>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="loggers" data-keywords="loggers, enregistreurs, elitech, rc5">
+          <summary class="settings-group-title">Loggers RC-5</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="elitech, rc5, rc-5, logger, enregistreur, usb, onglets, position, fermeture">
+          <legend>Loggers RC-5</legend>
+
+          <label class="checkbox-line">
+            <input type="checkbox" id="setting-elitech-close-on-exit" />
+            Fermer les onglets des loggers à la fermeture de l'application
+          </label>
+          <span class="hint">
+            Décoché, l'application se souvient des loggers restés ouverts et rouvre
+            leur onglet tout seul dès qu'ils reparaissent au prochain lancement — les
+            données affichées, elles, ne sont jamais mémorisées : le logger est relu.
+          </span>
+
+          <fieldset class="subgroup">
+            <legend>Position des onglets</legend>
+            <div class="radio-row">
+              <label class="radio-line">
+                <input type="radio" name="elitech-tab-position" value="droite" />
+                Droite
+              </label>
+              <label class="radio-line">
+                <input type="radio" name="elitech-tab-position" value="gauche" />
+                Gauche
+              </label>
+              <label class="radio-line">
+                <input type="radio" name="elitech-tab-position" value="haut" />
+                Haut
+              </label>
+            </div>
+          </fieldset>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="mises-a-jour" data-keywords="mise à jour, update, version, bêta, beta, canal">
+          <summary class="settings-group-title">Mises à jour</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="mise à jour, mises à jour, maj, update, updates, version, paquet, gws, installer, bêta, beta, préversion, canal, gastinel.me">
+          <legend>Mises à jour</legend>
+          <div class="radio-col">
+            <label class="radio-line">
+              <input type="radio" name="update-mode" value="notify" />
+              Vérifier au démarrage et me prévenir
+            </label>
+            <label class="radio-line">
+              <input type="radio" name="update-mode" value="off" />
+              Ne jamais vérifier automatiquement
+            </label>
+          </div>
+          <label class="radio-line">
+            <input type="checkbox" id="setting-update-beta" />
+            Recevoir les mises à jour bêta
+          </label>
+          <span class="hint">
+            Les versions bêta servent à essayer les nouveautés avant leur sortie
+            officielle : elles peuvent être moins stables. Décochez pour revenir aux
+            seules versions officielles (vous resterez sur la bêta installée jusqu'à
+            la prochaine version officielle).
+          </span>
+          <span class="hint">
+            La vérification interroge gastinel.me au lancement, sans rien envoyer
+            d'autre que le numéro de version de l'application. Désactivée, aucune
+            requête ne part tant que vous ne cliquez pas sur « Vérifier maintenant ».
+          </span>
+          <p class="hint" id="setting-update-info"></p>
+          <div class="dialog-actions dialog-actions-inline">
+            <button type="button" class="btn btn-sm" id="btn-check-update">Vérifier maintenant</button>
+            <button type="button" class="btn btn-sm" id="btn-open-gws-package">Installer un paquet .gws...</button>
+          </div>
+          <p class="hint" id="setting-update-result" hidden></p>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="partage-cloud" data-keywords="partage, cloud, synchronisation">
+          <summary class="settings-group-title">Partage & Cloud</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="partage, partager, code, envoyer, recevoir, importer, révoquer, points">
+          <legend>Partage par code</legend>
+          <p class="hint">
+            Transmettez des points (avec ou sans leurs séries) à un autre observateur via un code éphémère à 6 caractères, ou importez un code reçu.
+          </p>
+          <div class="dialog-actions dialog-actions-inline" style="margin-bottom: 0.8rem;">
+            <button type="button" class="btn btn-sm" id="btn-share-settings">
+              Partager des points
+            </button>
+            <button type="button" class="btn btn-sm" id="btn-receive-share-settings">
+              Recevoir un partage
+            </button>
+          </div>
+          <p class="hint" id="share-settings-hint" hidden>Ouvrez un projet pour pouvoir en partager les points.</p>
+
+          <h4 style="font-size: 0.85rem; margin-top: 1rem; margin-bottom: 0.4rem; color: var(--grey-500);">Partages créés depuis ce poste</h4>
+          <ul class="issued-shares" id="issued-shares"></ul>
+          <p class="hint" id="issued-shares-empty">Aucun partage créé depuis ce poste.</p>
+          <span class="hint">
+            Révoquer un partage le rend aussitôt illisible, même pour qui a déjà le
+            code. Les points déjà importés par le destinataire restent chez lui.
+          </span>
+        </fieldset>
+
+        <fieldset data-keywords="cloud, sync, synchro, synchronisation, sauvegarde, backup, serveur, compte, connexion, login, inscription, invitation, chiffrement" id="section-cloud">
+          <legend>Projet Cloud (Synchronisation)</legend>
+          <p class="hint">
+            Stockez et synchronisez vos projets de manière sécurisée et chiffrée de bout en bout sur votre serveur.
+            Le serveur ne voit que des octets chiffrés : vos données restent strictement privées.
+          </p>
+
+          <!-- Mode déconnecté -->
+          <div id="cloud-logged-out">
+            <div class="field-grid" style="margin-bottom: 0.8rem;">
+              <label>
+                Identifiant
+                <input type="text" id="cloud-account" placeholder="ex: theo (3 à 32 lettres minuscules)" pattern="[a-z]{3,32}" autocomplete="username" />
+                <span class="hint">Lettres minuscules uniquement (a-z).</span>
+              </label>
+              <label>
+                Mot de passe
+                <input type="password" id="cloud-password" placeholder="8 à 30 caractères" minlength="8" maxlength="30" autocomplete="current-password" />
+                <span class="hint">8 à 30 caractères. Ne l'oubliez pas : aucune réinitialisation possible.</span>
+              </label>
+            </div>
+
+            <div id="cloud-invite-box" style="margin-bottom: 0.8rem;">
+              <label>
+                Code d'invitation (première inscription uniquement)
+                <input type="text" id="cloud-invite" placeholder="ex: 9KXE-N5ZY-XFF5 (fourni par l'administrateur)" autocomplete="off" />
+                <span class="hint">Requis uniquement pour créer un nouveau compte sur le serveur.</span>
+              </label>
+            </div>
+
+            <div class="dialog-actions dialog-actions-inline">
+              <button type="button" class="btn btn-sm btn-primary" id="btn-cloud-login">
+                Se connecter
+              </button>
+              <button type="button" class="btn btn-sm" id="btn-cloud-register">
+                Première inscription
+              </button>
+            </div>
+            <p class="hint error" id="cloud-error" hidden></p>
+          </div>
+
+          <!-- Mode connecté -->
+          <div id="cloud-logged-in" hidden>
+            <p class="key-line">
+              <span class="chip chip-primary">Connecté</span>
+              <strong id="cloud-display-account" class="mono"></strong>
+              <span class="muted" id="cloud-storage-info"></span>
+            </p>
+            <p class="hint" id="cloud-sync-status">Dernière synchronisation : aucune.</p>
+
+            <div class="dialog-actions dialog-actions-inline" style="margin-top: 0.8rem; margin-bottom: 0.8rem;">
+              <button type="button" class="btn btn-sm btn-primary" id="btn-cloud-sync">
+                Synchroniser maintenant
+              </button>
+              <button type="button" class="btn btn-sm" id="btn-cloud-logout">
+                Se déconnecter
+              </button>
+            </div>
+
+            <label class="checkbox-label" style="margin-top: 0.5rem;">
+              <input type="checkbox" id="cloud-auto-sync" checked />
+              Synchroniser automatiquement à l'ouverture et fermeture d'un projet
+            </label>
+            <strong class="cloud-projects-title">Projets synchronisés</strong>
+            <div id="cloud-projects" class="cloud-projects"></div>
+            <span class="hint">
+              « Automatique » : un projet de plus de 10 millions de mesures n'est pas
+              envoyé dans le Cloud (le projet France, par exemple). Ce qui y a déjà été
+              envoyé y reste.
+            </span>
+          </div>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="extensions" data-keywords="extensions, plugins, modules">
+          <summary class="settings-group-title">Extensions</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="extension, plugin, module, carte 3d, 3d, altitude, ign, relief, natif" id="section-extensions">
+          <legend>Extensions</legend>
+          <ul class="extensions-list" id="extensions-list"></ul>
+          <p class="hint" id="extensions-empty">
+            Aucune extension installée : choisissez-en une dans le catalogue ci-dessous.
+          </p>
+          <strong class="extensions-catalogue-title">Catalogue gastinel.me</strong>
+          <ul class="extensions-list" id="extensions-catalogue"></ul>
+          <p class="hint" id="extensions-catalogue-status"></p>
+          <span class="hint">
+            <svg class="icone icone-texte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/> <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/> <path d="M12 16h.01"/></svg> Une extension est du code natif chargé dans l'application, sans
+            isolation : un bug peut fermer l'application. Une extension qui déclare
+            l'écriture dans la base déclenche d'abord une copie complète de la base
+            (les 3 dernières sont gardées dans <code>sauvegardes-extensions</code>).
+            Les extensions du catalogue sont signées : l'application refuse toute
+            archive dont la signature ne correspond pas.
+          </span>
+        </fieldset>
+        </div>
+        </details>
+
+        <details class="settings-group" data-group="stockage" data-keywords="stockage, aide, données, maintenance">
+          <summary class="settings-group-title">Stockage, aide & données</summary>
+          <div class="settings-group-body">
+        <fieldset data-keywords="cache, tuiles, hors-ligne, hors ligne, offline, carte, fond de carte, ign, scan25, top25, photo aérienne, disque, espace">
+          <legend>Cache de tuiles hors-ligne</legend>
+          <p class="hint" id="setting-tiles-cache"></p>
+          <button type="button" class="btn" id="btn-clear-tiles-cache">
+            Vider le cache de tuiles
+          </button>
+          <span class="hint">
+            Les tuiles déjà consultées en ligne (Photo aérienne et TOP25/SCAN25) restent
+            utilisables hors-ligne sur les mêmes zones. Videz le cache si vous changez de
+            secteur de prospection ou pour libérer de l'espace disque.
+          </span>
+        </fieldset>
+
+        <fieldset data-keywords="aide, help, guide, tutoriel, prise en main, démarrage, raccourcis">
+          <legend>Aide & Prise en main</legend>
+          <p class="hint">
+            Retrouvez les interactions clés de la carte et les fonctions essentielles de l'application.
+          </p>
+          <div class="dialog-actions dialog-actions-inline">
+            <button type="button" class="btn btn-sm" id="btn-show-quickstart">
+              Revoir le guide de démarrage
+            </button>
+          </div>
+        </fieldset>
+
+        <fieldset data-keywords="projets, gestion des projets, supprimer un projet, effacer projet">
+          <legend>Gestion des projets</legend>
+          <table class="projets-gestion"><tbody id="setting-projects-body"></tbody></table>
+          <span class="hint">
+            Supprimer un projet efface ses points, séries et mesures sur ce poste. S'il est
+            synchronisé, il disparaît aussi du Cloud à la prochaine synchronisation.
+          </span>
+        </fieldset>
+        <fieldset data-keywords="effacer, supprimer, réinitialiser, reset, remise à zéro, données, base, projets">
+          <legend>Données de l'application</legend>
+          <button type="button" class="btn btn-danger" id="btn-clear-data">
+            Effacer toutes les données
+          </button>
+          <span class="hint">
+            Cette action supprimera tous les projets, les points, les données importées et votre prénom. Elle ne peut pas être annulée.
+          </span>
+        </fieldset>
+        </div>
+        </details>
+
+        <p class="form-error" id="setting-error" hidden></p>
+        <div class="dialog-actions settings-pied">
+          <div class="quota-bandeau" id="quota-bandeau" hidden>
+            <div class="quota-barre" id="quota-barre" role="img"></div>
+            <div class="quota-legende" id="quota-legende"></div>
+          </div>
+          <button type="button" class="btn" data-close>Fermer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Modale : Guide de prise en main ================= -->
+    <dialog id="dlg-quickstart">
+      <div class="dialog-form wide quickstart-modal">
+        <div class="quickstart-header">
+          <div class="quickstart-badge">Prise en main</div>
+          <h3>Bienvenue sur Gastinel Weather Studio</h3>
+          <p class="muted">
+            Découvrez en un clin d'œil les interactions essentielles pour explorer vos données météo.
+          </p>
+        </div>
+
+        <div class="quickstart-grid">
+          <div class="quickstart-card">
+            <div class="quickstart-icon"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/></svg></div>
+            <h4>1. Vos projets de prospection</h4>
+            <p>
+              Regroupez vos points de mesure au sein de projets géographiques
+              dédiés (massifs, vallées, combes).
+            </p>
+          </div>
+
+          <div class="quickstart-card">
+            <div class="quickstart-icon"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/> <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg></div>
+            <h4>2. Placer des sites sur la carte</h4>
+            <p>
+              Faites un <strong>clic droit</strong> (ou un <strong>appui long</strong> sur écran tactile)
+              n'importe où sur la carte pour créer un nouveau point.
+            </p>
+          </div>
+
+          <div class="quickstart-card">
+            <div class="quickstart-icon"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/> <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/> <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/></svg></div>
+            <h4>3. Interagir avec les marqueurs</h4>
+            <p>
+              • <strong>Clic simple</strong> : sélectionner le point (croiser ses courbes, interroger l'IA).<br />
+              • <strong>Double-clic</strong> : ouvrir la fiche détaillée pour modifier les informations du site.
+            </p>
+          </div>
+
+          <div class="quickstart-card">
+            <div class="quickstart-icon"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18v-3"/> <path d="M8 18v-6"/> <path d="M12 18v-9"/> <path d="M16 18v-12"/> <path d="M20 18v-15"/></svg></div>
+            <h4>4. Usage terrain hors-ligne</h4>
+            <p>
+              Via le clic droit sur la carte, <strong>« Télécharger cette zone »</strong> met en cache les tuiles
+              IGN / Photo aérienne pour une utilisation sans réseau en montagne.
+            </p>
+          </div>
+        </div>
+
+        <div class="dialog-actions quickstart-actions">
+          <button type="button" class="btn btn-primary" id="btn-quickstart-close">
+            Compris, c'est parti !
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Modale : Mise à jour par paquet .gws ================= -->
+    <dialog id="dlg-apres-maj">
+      <form method="dialog" class="dialog-form" style="text-align:center">
+        <h3>Mise à jour installée</h3>
+        <p id="apres-maj-version" style="font-size:1.6em;font-weight:600;margin:.4em 0"></p>
+        <p class="muted">Gastinel Weather Studio est à jour.</p>
+        <div class="dialog-actions" style="justify-content:center"><button class="btn btn-primary" autofocus>OK</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-package-update">
+      <div class="dialog-form wide package-update-modal">
+        <div class="package-update-header">
+          <div class="package-badge" id="pkg-update-badge">Paquet .gws détecté</div>
+          <h3 id="pkg-update-title">Mise à jour prête à installer</h3>
+          <p class="muted" id="pkg-update-subtitle">Une nouvelle version de Gastinel Weather Studio est disponible.</p>
+        </div>
+
+        <div class="package-update-details">
+          <div class="package-version-box">
+            <span class="version-label">Version actuelle</span>
+            <span class="version-val" id="pkg-current-version">v0.4.0</span>
+          </div>
+          <div class="version-arrow"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/> <path d="M13 18l6 -6"/> <path d="M13 6l6 6"/></svg></div>
+          <div class="package-version-box highlight">
+            <span class="version-label">Version du paquet</span>
+            <span class="version-val highlight-val" id="pkg-new-version">v0.4.0</span>
+          </div>
+        </div>
+
+        <div class="package-changelog-wrap">
+          <h4>Nouveautés & Changements</h4>
+          <div class="package-changelog-body" id="pkg-update-changelog"></div>
+        </div>
+
+        <div class="banner banner-info" style="margin: 0; font-size: 0.85rem;">
+          <strong>Vos données sont protégées :</strong> Vos projets, points, séries de mesures, réglages et clés API sont intégralement conservés lors de la mise à jour.
+        </div>
+
+        <p class="form-error" id="pkg-update-error" hidden></p>
+
+        <div class="dialog-actions package-update-actions">
+          <button type="button" class="btn" id="btn-pkg-update-cancel">Annuler</button>
+          <button type="button" class="btn btn-primary" id="btn-pkg-update-apply">
+            Installer la mise à jour et redémarrer
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Modale : nouveau point ================= -->
+    <dialog id="dlg-point">
+      <form method="dialog" class="dialog-form wide" id="form-point">
+        <h3 id="point-dialog-title">Ajouter un point</h3>
+
+        <div class="grid-2">
+          <label>
+            Nom
+            <input type="text" id="point-name" required maxlength="120" autocomplete="off" />
+          </label>
+          <label>
+            Altitude (m)
+            <span class="altitude-row">
+              <input type="number" id="point-altitude" step="1" inputmode="numeric" />
+              <button type="button" class="btn btn-sm" id="btn-ign-altitude" disabled
+                title="Renseignez d'abord la latitude et la longitude">Récupérer via IGN</button>
+            </span>
+            <span class="hint" id="ign-altitude-status" aria-live="polite"></span>
+          </label>
+          <label>
+            Latitude
+            <input type="number" id="point-lat" step="any" required placeholder="44.9812" />
+          </label>
+          <label>
+            Longitude
+            <input type="number" id="point-lon" step="any" required placeholder="5.4213" />
+          </label>
+          <label>
+            Catégorie
+            <select id="point-category" required></select>
+          </label>
+          <label>
+            Taille
+            <select id="point-size"></select>
+            <span class="hint" id="size-hint"></span>
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>Facteurs de site (optionnels, format libre pour l'instant)</legend>
+          <div class="grid-2">
+            <label>Ciel / dégagement <input type="text" id="factor-sky" /></label>
+            <label>Vent / exposition <input type="text" id="factor-wind" /></label>
+            <label>Pente <input type="text" id="factor-slope" /></label>
+            <label>Enneigement <input type="text" id="factor-snow" /></label>
+            <label>Couvert forestier <input type="text" id="factor-forest" /></label>
+            <label class="checkbox">
+              <input type="checkbox" id="point-open" />
+              Terrain ouvert (écoulement d'air possible)
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Station Infoclimat rattachée (optionnel)</legend>
+          <label>
+            Identifiant de la station
+            <input
+              type="text"
+              id="point-station"
+              maxlength="40"
+              autocomplete="off"
+              placeholder="STATIC0479"
+              spellcheck="false"
+            />
+            <span class="hint">
+              Saisie libre : l'identifiant se lit dans l'URL de la station sur
+              infoclimat.fr (par exemple <code>STATIC0479</code> pour la Crête de la Grande
+              Moucherolle). Renseigné, il débloque le bouton « Récupérer les dernières
+              données » sur la fiche de cette station. La recherche par nom ou par
+              proximité n'existe pas encore.
+            </span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Station ROMMA rattachée (optionnel)</legend>
+          <label>
+            Identifiant ou nom de la station
+            <input
+              type="text"
+              id="point-romma"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Lans - Les Allières"
+              spellcheck="false"
+            />
+            <span class="hint">
+              Saisie libre. ROMMA ne propose pas d'annuaire interrogeable, et ses
+              exports ne nomment la station que dans le <em>nom du fichier</em>
+              (<code>archives_Lans - Les Allières_31-05-2017_19-08-2026.csv</code>) :
+              recopiez ce qui vous permettra de la reconnaître. Contrairement à
+              Infoclimat, ce champ ne débloque aucune récupération automatique —
+              il n'existe pas d'API ROMMA ici, seulement l'import de fichier.
+            </span>
+          </label>
+        </fieldset>
+
+        <label>
+          Notes
+          <textarea id="point-notes" rows="2"></textarea>
+        </label>
+
+        <p class="form-error" id="point-error" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close>Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ================= Modale : détail d'une station ================= -->
+    <dialog id="dlg-detail">
+      <div class="dialog-form wide">
+        <div class="detail-head">
+          <h3 id="detail-title"></h3>
+          <button type="button" class="link" data-close>Fermer</button>
+        </div>
+        <div id="detail-body"></div>
+      </div>
+    </dialog>
+
+    <!-- ================= Modale : récupération d'anciennes données Infoclimat ================= -->
+    <dialog id="dlg-infoclimat-history">
+      <form method="dialog" class="dialog-form" id="form-ic-history">
+        <div class="detail-head">
+          <h3 id="ic-history-title">Récupération d'anciennes données</h3>
+          <button type="button" class="link" id="btn-ic-history-close-x">Fermer</button>
+        </div>
+
+        <p class="muted" id="ic-history-station-info">
+          Sélectionnez la période à importer pour cette station. L'API Open Data d'Infoclimat est interrogée par tranches de 7 jours, avec un délai de sécurité de 1,01 s entre chaque requête pour respecter les règles de l'API.
+        </p>
+
+        <div class="form-row">
+          <label>
+            Date de début
+            <input type="date" id="ic-history-start" required />
+          </label>
+          <label>
+            Date de fin
+            <input type="date" id="ic-history-end" required />
+          </label>
+        </div>
+
+        <div class="ic-history-summary" id="ic-history-summary">
+          <div class="ic-history-row">
+            <span class="muted">Tranches (7j max / requête) :</span>
+            <strong id="ic-history-chunks-count">—</strong>
+          </div>
+          <div class="ic-history-row">
+            <span class="muted">Durée estimée :</span>
+            <strong id="ic-history-estimated-time">—</strong>
+          </div>
+          <div class="ic-history-row">
+            <span class="muted">Quota journalier Infoclimat :</span>
+            <span id="ic-history-quota-info">—</span>
+          </div>
+        </div>
+
+        <div class="ic-history-progress-box" id="ic-history-progress-box" hidden>
+          <div class="ic-history-progress-header">
+            <span id="ic-history-progress-label">Récupération en cours…</span>
+            <span id="ic-history-progress-pct">0%</span>
+          </div>
+          <div class="ic-history-progress-bar-wrap">
+            <div class="ic-history-progress-bar" id="ic-history-progress-bar" style="width: 0%"></div>
+          </div>
+          <p class="hint" id="ic-history-progress-detail"></p>
+        </div>
+
+        <p class="form-error" id="ic-history-error" hidden></p>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn" id="btn-ic-history-close">Fermer</button>
+          <button type="button" class="btn btn-primary" id="btn-ic-history-start">C'est parti !</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ================= Modale : import ================= -->
+    <dialog id="dlg-import">
+      <form method="dialog" class="dialog-form wide" id="form-import">
+        <h3>Importer des données</h3>
+
+        <div class="tabs" role="tablist" aria-label="Type de données">
+          <button type="button" class="tab-groupe is-active" data-groupe="fichier" role="tab">Fichier</button>
+          <button type="button" class="tab-groupe" data-groupe="station" role="tab">Station en ligne</button>
+          <button type="button" class="tab-groupe" data-groupe="releve" role="tab">Relevé sur place</button>
+        </div>
+
+        <div class="import-sous-choix" id="import-sous-fichier">
+          <span class="muted" id="import-format-detecte">Format reconnu automatiquement au dépôt du fichier.</span>
+          <label class="import-format">Format
+            <select id="import-format">
+              <option value="auto">Elitech</option>
+              <option value="infoclimat">Export Infoclimat</option>
+              <option value="romma">Archive ROMMA</option>
+              <option value="manual">Autre : désigner les colonnes</option>
+              <option value="ai">Autre : lecture par l'assistant IA</option>
+            </select>
+          </label>
+        </div>
+        <div class="import-sous-choix" id="import-sous-releve" hidden>
+          <label class="radio-inline"><input type="radio" name="import-releve" value="entry" checked /> Saisie à la main</label>
+          <label class="radio-inline"><input type="radio" name="import-releve" value="rc5" /> Logger RC-5 branché</label>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Lecteur" hidden>
+          <button type="button" class="tab" data-tab="station" role="tab">Station en ligne</button>
+          <button type="button" class="tab is-active" data-tab="ai" role="tab">
+            Assistant IA
+          </button>
+          <button type="button" class="tab" data-tab="auto" role="tab">
+            Automatique (Elitech)
+          </button>
+          <button type="button" class="tab" data-tab="rc5" role="tab">
+            USB direct (RC-5)
+          </button>
+          <button type="button" class="tab" data-tab="manual" role="tab">
+            Manuel (colonnes mappées)
+          </button>
+          <button type="button" class="tab" data-tab="entry" role="tab">
+            Saisie manuelle (sans fichier)
+          </button>
+          <button type="button" class="tab" data-tab="infoclimat" role="tab">
+            Infoclimat (JSON / CSV)
+          </button>
+          <button type="button" class="tab" data-tab="romma" role="tab">
+            ROMMA (archives CSV)
+          </button>
+        </div>
+
+        <label id="import-point-field">
+          Point
+          <select id="import-point" required></select>
+        </label>
+
+        <label class="file-field" id="import-file-field">
+          <span id="import-file-label">Fichier (.txt, .csv) — ou collez le contenu ci-dessous</span>
+          <input
+            type="file"
+            id="import-file"
+            accept=".txt,.csv,.tsv,.dat,.json,.xls,.xlsx,text/plain,application/json"
+          />
+        </label>
+        <label id="import-content-field">
+          <span class="sr-only">Contenu</span>
+          <textarea
+            id="import-content"
+            rows="6"
+            spellcheck="false"
+            placeholder="Collez ici le contenu du fichier si vous préférez…"
+          ></textarea>
+        </label>
+
+        <details class="import-avance" id="import-avance">
+          <summary>Réglages avancés (rôle, fuseau, horloge, numéro de série)</summary>
+          <label>
+            Rôle de la série
+            <select id="import-role">
+              <option value="Primary">Principal</option>
+              <option value="Backup">Secours</option>
+            </select>
+            <span class="hint">Jamais déduit : les séries ne sont jamais fusionnées.</span>
+          </label>
+        <fieldset id="import-clock">
+          <legend>Horloge du logger</legend>
+          <div class="grid-3">
+            <label>
+              Fuseau réglé sur le logger
+              <select id="import-tz">
+                <option value="0">UTC</option>
+                <option value="3600">UTC+1 (heure d'hiver FR)</option>
+                <option value="7200">UTC+2 (heure d'été FR)</option>
+              </select>
+            </label>
+            <label>
+              Dérive (s, positif = logger en avance)
+              <input type="number" id="import-drift" step="1" value="0" />
+            </label>
+            <label>
+              Numéro de série (si absent du fichier)
+              <input type="text" id="import-serial" autocomplete="off" />
+            </label>
+          </div>
+          <p class="hint" id="offset-hint"></p>
+        </fieldset>
+        </details>
+
+        <!-- Station en ligne : récupération par l'API (Infoclimat) -->
+        <div class="tab-panel" role="tabpanel" data-panel="station" hidden>
+          <p class="hint">
+            Récupère les mesures des stations Infoclimat rattachées à vos points
+            (par le relai serveur s'il est activé). Une requête par station.
+          </p>
+          <div class="import-sous-choix">
+            <label class="radio-inline"><input type="radio" name="station-quoi" value="dernieres" checked /> Dernières données</label>
+            <label class="radio-inline"><input type="radio" name="station-quoi" value="periode" /> Une période passée</label>
+          </div>
+          <div id="station-liste" class="station-liste"></div>
+          <p class="hint" id="station-cout"></p>
+        </div>
+
+        <!-- Onglet Assistant IA (Fichiers & Images) -->
+        <div class="tab-panel" role="tabpanel" data-panel="ai">
+          <div id="ai-key-warning" class="banner is-warn" hidden>
+            <strong>Clé Groq manquante</strong> — Pour utiliser l'assistant IA et l'analyse visuelle, configurez une clé API Groq gratuite dans les Paramètres.
+            <button type="button" class="btn btn-sm" id="btn-open-settings-groq" style="margin-top: 4px;">Ouvrir Paramètres</button>
+          </div>
+
+          <p class="hint">
+            Déposez un ou plusieurs fichiers (<strong>CSV, JSON, TXT, TSV</strong>), un dossier complet, ou des <strong>captures d'écran / images</strong> de tableaux de données.
+            L'agent IA analyse la structure ou extrait les données visuelles et vous propose un aperçu vérifiable avant tout enregistrement.
+          </p>
+
+          <div class="ai-dropzone" id="ai-dropzone">
+            <div class="ai-dropzone-icon"><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/></svg><svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8h.01"/> <path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/> <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/> <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></svg></div>
+            <div class="ai-dropzone-text">
+              <strong>Glissez-déposez vos fichiers ou images ici</strong><br />
+              ou utilisez les boutons ci-dessous (ou <em>Ctrl+V</em> pour coller une capture d'écran)
+            </div>
+            <div class="ai-dropzone-actions">
+              <label class="btn btn-sm file-btn">
+                <span>Parcourir des fichiers / images</span>
+                <input type="file" id="ai-input-files" multiple accept=".csv,.tsv,.json,.txt,.dat,.log,.png,.jpg,.jpeg,.webp,image/*,text/*,application/json" hidden />
+              </label>
+              <label class="btn btn-sm file-btn">
+                <span>Parcourir un dossier</span>
+                <input type="file" id="ai-input-dir" webkitdirectory directory multiple hidden />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label for="ai-instruction">
+              Consigne spécifique pour l'IA (facultatif)
+              <input type="text" id="ai-instruction" placeholder="Ex: La colonne T_air est la température sous abri, format JJ/MM/AAAA..." autocomplete="off" />
+            </label>
+          </div>
+
+          <div id="ai-files-queue" class="ai-queue" hidden>
+            <div class="ai-queue-header">
+              <h4 id="ai-queue-title">Fichiers à analyser (0)</h4>
+              <button type="button" class="btn btn-sm btn-primary" id="btn-ai-analyze-all">Lancer l'analyse IA</button>
+            </div>
+            <ul id="ai-queue-list" class="ai-queue-items"></ul>
+          </div>
+
+          <div id="ai-loading" class="ai-spinner-container" hidden>
+            <div class="spinner"></div>
+            <span id="ai-loading-text">Analyse en cours par l'agent IA...</span>
+          </div>
+
+          <!-- Résultat et validation humaine (non contournable) -->
+          <div id="ai-review-container" class="ai-review" hidden>
+            <div class="ai-review-header">
+              <h4 id="ai-review-title">Proposition de l'IA — Vérification avant import</h4>
+              <span class="badge" id="ai-review-badge">Fichier texte</span>
+            </div>
+
+            <div id="ai-review-explanation" class="ai-explanation"></div>
+
+            <!-- Pour les images : affichage côte à côte -->
+            <div id="ai-vision-side-by-side" class="ai-side-by-side" hidden>
+              <div class="ai-side-image">
+                <h5>Image source analysée</h5>
+                <div class="ai-img-preview-wrap">
+                  <img id="ai-vision-img-preview" alt="Capture d'écran source" />
+                </div>
+              </div>
+              <div class="ai-side-data">
+                <h5>Données extraites (éditables si besoin)</h5>
+                <div class="ai-table-wrap" id="ai-vision-table-wrap">
+                  <table class="data-table" id="ai-vision-table">
+                    <thead>
+                      <tr>
+                        <th>Ligne</th>
+                        <th>Horodatage</th>
+                        <th>Température (°C)</th>
+                        <th>Humidité (%)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ai-vision-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pour les fichiers texte : mapping éditable et aperçu tabulaire -->
+            <div id="ai-text-review" class="ai-text-review" hidden>
+              <div class="grid-4" id="ai-mapping-controls">
+                <label>Séparateur <input type="text" id="ai-map-delimiter" style="max-width:80px;" /></label>
+                <label>Lignes ignorées <input type="number" id="ai-map-skip" min="0" step="1" /></label>
+                <label>Colonne date/heure <select id="ai-map-dt"></select></label>
+                <label>Colonne température <select id="ai-map-temp"></select></label>
+                <label>Colonne humidité <select id="ai-map-hum"></select></label>
+              </div>
+              <button type="button" class="btn btn-sm" id="btn-ai-recalculate-preview" style="margin-top: 6px;">Recalculer l'aperçu</button>
+              <div class="ai-table-wrap" id="ai-text-table-wrap" style="margin-top: 10px;">
+                <table class="data-table" id="ai-text-table">
+                  <thead>
+                    <tr>
+                      <th>Ligne</th>
+                      <th>Horodatage</th>
+                      <th>Température (°C)</th>
+                      <th>Humidité (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ai-text-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="ai-review-warnings" class="banner is-warn" style="margin-top: 10px;" hidden></div>
+          </div>
+        </div>
+
+        <!-- Onglet automatique. -->
+        <div class="tab-panel" role="tabpanel" data-panel="auto" hidden>
+          <p class="hint" id="elitech-format-hint">
+            Déposez l'export d'ElitechLog. Le fichier <code>.xls</code> qu'il produit est
+            en réalité un classeur <strong>xlsx</strong> : il est reconnu tout seul, à sa
+            signature, et lu comme tel. Les formats <code>.esf</code> (chiffré) et
+            <code>.elt</code> (binaire propriétaire) ne sont pas lisibles — réexportez
+            en « Excel » si vous n'avez qu'eux.
+          </p>
+          <button type="button" class="btn" id="btn-analyze">Analyser le fichier</button>
+          <div id="analysis" class="analysis" hidden></div>
+        </div>
+
+        <!-- Onglet USB direct : lecture du RC-5 par son port série, sans passer
+             par ElitechLog ni par un fichier. Ni fichier ni contenu collé n'ont
+             de sens ici — `switchTab` masque les deux champs.
+             Voir `src-tauri/src/elitech_serial.rs` pour le protocole. -->
+        <div class="tab-panel" role="tabpanel" data-panel="rc5" hidden>
+          <p class="hint">
+            Branchez le RC-5 en USB : l'application le reconnaît toute seule et lit sa
+            mémoire directement, sans ElitechLog. Les mesures obtenues sont
+            <strong>identiques</strong> à celles d'un export
+            <code>.xls</code> — c'est vérifié mesure par mesure par un test permanent.
+            Si ElitechLog est ouvert, fermez-le : un seul logiciel à la fois peut parler
+            au logger.
+          </p>
+          <div class="row-actions">
+            <button type="button" class="btn" id="btn-rc5-search">Rechercher un logger</button>
+            <button type="button" class="btn btn-primary" id="btn-rc5-read">
+              Lire les données du logger
+            </button>
+          </div>
+          <p class="hint" id="rc5-status"></p>
+          <div id="rc5-analysis" class="analysis" hidden></div>
+        </div>
+
+        <!-- Onglet manuel -->
+        <div class="tab-panel" role="tabpanel" data-panel="manual" hidden>
+          <div class="grid-3">
+            <label>
+              Séparateur
+              <select id="map-delimiter">
+                <option value="">Détection automatique</option>
+                <option value="TAB">Tabulation</option>
+                <option value=";">Point-virgule</option>
+                <option value=",">Virgule</option>
+                <option value="|">Barre verticale</option>
+              </select>
+            </label>
+            <label>
+              Lignes à ignorer en tête
+              <input type="number" id="map-skip" min="0" step="1" value="0" />
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="map-header" />
+              La première ligne conservée est un en-tête
+            </label>
+          </div>
+          <button type="button" class="btn" id="btn-preview">Afficher l'aperçu</button>
+          <div id="preview" class="preview" hidden></div>
+          <div class="grid-4" id="mapping-fields" hidden>
+            <label>Colonne date / horodatage <select id="map-datetime"></select></label>
+            <label>Colonne heure (si séparée) <select id="map-time"></select></label>
+            <label>Colonne température <select id="map-temp"></select></label>
+            <label>Colonne humidité (option) <select id="map-hum"></select></label>
+          </div>
+        </div>
+
+        <!-- Onglet Saisie manuelle : aucun fichier, aucun appareil.
+             Cas d'usage : relevé manuscrit sur site, pas de logger disponible ce
+             jour-là. La valeur saisie décrit une PLAGE HORAIRE (« moyenne 6 h–9 h »),
+             pas un instant — voir `src-tauri/src/manual_entry.rs` pour ce qui en
+             est fait, et pourquoi la mesure est datée au milieu de la plage.
+
+             Une ligne de saisie par jour, jamais une valeur unique recopiée :
+             c'est la règle du prompt, et le backend la fait respecter. -->
+        <div class="tab-panel" role="tabpanel" data-panel="entry" hidden>
+          <p class="hint">
+            Pour un relevé fait à la main, sans logger. Chaque jour porte
+            <strong>sa</strong> valeur : rien n'est recopié d'un jour sur l'autre.
+            La série créée est marquée « saisie manuelle sur site » — les statistiques,
+            l'export et l'agent la distinguent d'une mesure d'appareil.
+          </p>
+          <div class="grid-4">
+            <label>Premier jour <input type="date" id="entry-from" /></label>
+            <label>Dernier jour <input type="date" id="entry-to" /></label>
+            <label>Début de plage <input type="time" id="entry-start" value="06:00" /></label>
+            <label>Fin de plage <input type="time" id="entry-end" value="09:00" /></label>
+          </div>
+          <div class="grid-2">
+            <label>
+              Type de valeur saisie
+              <select id="entry-kind">
+                <option value="Minimum">Minimum sur la plage</option>
+                <option value="Average">Moyenne sur la plage</option>
+                <option value="Maximum">Maximum sur la plage</option>
+              </select>
+            </label>
+            <label>
+              Fuseau de la saisie
+              <select id="entry-tz">
+                <option value="0">UTC</option>
+                <option value="3600">UTC+1 (heure d'hiver FR)</option>
+                <option value="7200">UTC+2 (heure d'été FR)</option>
+              </select>
+              <span class="hint">L'heure lue sur votre montre, pas une heure UTC.</span>
+            </label>
+          </div>
+          <p class="hint" id="entry-hint"></p>
+          <div class="entry-days" id="entry-days"></div>
+        </div>
+
+        <!-- Onglet Infoclimat : fichier JSON téléchargé à la main sur le site.
+             Le parseur est exactement celui de l'appel direct — un seul code de
+             lecture pour les deux modes. -->
+        <div class="tab-panel" role="tabpanel" data-panel="infoclimat" hidden>
+          <p class="hint">
+            Déposez ici un export téléchargé depuis
+            <strong>infoclimat.fr/opendata</strong>, au format <strong>JSON</strong> ou
+            <strong>CSV</strong> — le format est reconnu d'après le contenu du fichier, il
+            n'y a rien à choisir. Les deux portent les mêmes champs et passent par le même
+            lecteur. Aucun réglage d'horloge n'est demandé : le champ <code>dh_utc</code>
+            est de l'UTC vrai, il n'y a ni fuseau à corriger ni ambiguïté jour/mois à
+            trancher.
+          </p>
+
+          <div class="grid-2">
+            <label>
+              Station à extraire (si le fichier en contient plusieurs)
+              <input
+                type="text"
+                id="ic-station"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="STATIC0479 — laisser vide si une seule station"
+              />
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="ic-append" />
+              Compléter la série Infoclimat existante de cette station
+              <span class="hint">
+                Sinon, une nouvelle série est créée. Deux exports successifs de la même
+                station gagnent à aller dans la même série : les instants déjà connus
+                sont ignorés, aucun doublon n'est créé.
+              </span>
+            </label>
+          </div>
+
+          <button type="button" class="btn" id="btn-analyze-ic">Analyser le fichier</button>
+          <div id="ic-analysis" class="analysis" hidden></div>
+        </div>
+
+        <!-- Onglet ROMMA : archive détaillée d'une station du réseau.
+             Comme Infoclimat, la source est nativement UTC (colonne `timestamp`,
+             epoch Unix) : aucun réglage d'horloge n'est proposé. -->
+        <div class="tab-panel" role="tabpanel" data-panel="romma" hidden>
+          <p class="hint">
+            Déposez ici un fichier <code>archives_*.csv</code> téléchargé depuis
+            <strong>romma.fr</strong>. Aucun réglage d'horloge n'est demandé : la colonne
+            <code>timestamp</code> de ces archives est un horodatage Unix en UTC (les
+            colonnes <code>Date</code> et <code>heure</code>, elles, sont en heure locale
+            et ne sont pas utilisées).
+            <br />
+            Les fichiers <code>climato_*.csv</code> ne sont pas acceptés : ce sont des
+            moyennes journalières que l'application recalcule elle-même à partir des
+            mesures détaillées.
+            <br />
+            Ces archives sont volumineuses (neuf ans d'historique au pas de 10 minutes
+            font environ 40 Mo et 480 000 lignes) : comptez quelques secondes.
+          </p>
+
+          <label>
+            Station ROMMA (facultatif)
+            <input
+              type="text"
+              id="romma-station"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Lans - Les Allières — repris du point si laissé vide"
+            />
+          </label>
+
+          <button type="button" class="btn" id="btn-analyze-romma">Analyser le fichier</button>
+          <div id="romma-analysis" class="analysis" hidden></div>
+        </div>
+
+        <!-- Barre indéterminée pendant l'import (style de la synchro Cloud). -->
+        <div class="import-progress" id="import-progress" role="status" aria-live="polite" hidden>
+          <span class="cloud-progress-icon" aria-hidden="true"></span>
+          <span id="import-progress-label">Import en cours…</span>
+          <div class="cloud-progress-track"><div class="cloud-progress-bar indetermine"></div></div>
+        </div>
+        <p class="form-error" id="import-error" hidden></p>
+        <div id="import-report" class="report" hidden></div>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close>Fermer</button>
+          <button type="submit" class="btn btn-primary" id="btn-do-import">Importer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ================= Modale : effacer la mémoire du logger =================
+         Une action destructrice sur du matériel ne se déclenche pas d'un clic.
+         Trois gardes, et chacune répond à une erreur différente :
+           * le texte distingue explicitement le boîtier de la base — c'est la
+             confusion qui coûterait le plus cher ;
+           * le mot à recopier empêche le clic réflexe sur un bouton rouge ;
+           * le backend refuse la commande sans ce mot (cf. `reset_rc5`).
+    -->
+    <dialog id="dlg-rc5-reset">
+      <form method="dialog" class="dialog-form" id="form-rc5-reset">
+        <h3>Effacer la mémoire du logger ?</h3>
+        <p id="rc5-reset-what"></p>
+        <p class="banner is-danger">
+          Cette opération efface les mesures <strong>du boîtier physique</strong>, et
+          elle est irréversible : le logger ne les contiendra plus.
+          <br />
+          Les données <strong>déjà importées dans l'application restent intactes</strong> —
+          rien n'est supprimé de la base, des statistiques ni des exports.
+        </p>
+        <p class="hint" id="rc5-reset-unsaved" hidden></p>
+        <p class="banner is-warning" id="rc5-reset-running" hidden></p>
+        <label>
+          Pour confirmer, recopiez le mot <strong>EFFACER</strong>
+          <input type="text" id="rc5-reset-word" autocomplete="off" spellcheck="false" />
+        </label>
+        <p class="form-error" id="rc5-reset-error" hidden></p>
+        <menu>
+          <button type="button" class="btn" id="rc5-reset-cancel" autofocus>Annuler</button>
+          <button type="button" class="btn btn-danger" id="rc5-reset-confirm" disabled>
+            Effacer la mémoire du logger
+          </button>
+        </menu>
+      </form>
+    </dialog>
+
+    <!-- ================= Confirmation de suppression d'une station ================= -->
+    <dialog id="dlg-delete-point">
+      <div class="dialog-form">
+        <h3>Supprimer ce point ?</h3>
+        <p id="delete-point-message"></p>
+        <p class="hint">
+          Les séries et mesures associées seront également supprimées.
+          Ctrl+Z annule la suppression tant que l'application reste ouverte.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" class="btn" id="delete-point-cancel">Annuler</button>
+          <button type="button" class="btn btn-danger" id="delete-point-confirm">Supprimer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Ré-import détecté =================
+         Ce contenu existe déjà à l'identique sur ce point. Au moment où ce
+         dialogue s'ouvre, **rien n'a été écrit** : le backend a comparé
+         l'empreinte du lot avant d'insérer quoi que ce soit. C'est donc le seul
+         chemin vers la création d'une seconde série jumelle, et il demande un
+         clic explicite. L'action sûre (annuler) est celle qui est mise en avant.
+    -->
+    <dialog id="dlg-duplicate">
+      <div class="dialog-form">
+        <h3>Ce contenu a déjà été importé</h3>
+        <p id="dup-message"></p>
+        <dl class="kv" id="dup-details"></dl>
+        <p class="hint">
+          Rien n'a été enregistré. Forcer l'import n'a de sens que si ces données
+          proviennent réellement d'un autre logger ayant produit, par coïncidence,
+          exactement les mêmes valeurs aux mêmes instants.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" class="btn" id="dup-force">Importer quand même</button>
+          <button type="button" class="btn btn-primary" id="dup-cancel" autofocus>
+            Annuler l'import
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Fenêtre : imports du projet (0.5.0) ================= -->
+    <dialog id="dlg-imports">
+      <div class="dialog-form wide">
+        <div class="detail-head">
+          <h3>Imports du projet</h3>
+          <button type="button" class="link" data-close>Fermer</button>
+        </div>
+        <p class="hint">
+          Chaque ligne est un import : un fichier de logger, une saisie ou une
+          récupération par API. <strong>Anciennes données</strong> : première mesure
+          enregistrée. <strong>Dernières données</strong> : mesure la plus récente.
+          Le <strong>dernier appel</strong> est le moment où l'API a été interrogée,
+          même si elle n'a rien renvoyé de neuf.
+        </p>
+        <div class="imports-filtres">
+          <input type="search" id="imports-recherche" placeholder="Filtrer par point, source ou fichier" aria-label="Filtrer les imports">
+          <span class="muted" id="imports-compte"></span>
+        </div>
+        <div class="imports-wrap" id="imports-liste"></div>
+      </div>
+    </dialog>
+
+    <div class="map-menu" id="map-menu" hidden></div>
+
+    <!-- Notification de branchement d'un RC-5. Persistante, contrairement au
+         toast : elle porte une action et doit attendre que l'utilisateur la
+         voie. Alimentée par l'événement Tauri `rc5-detecte`. -->
+    <div class="rc5-notice" id="rc5-notice" hidden role="status" aria-live="polite">
+      <div class="rc5-notice-body">
+        <strong id="rc5-notice-title"></strong>
+        <span id="rc5-notice-detail"></span>
+      </div>
+      <div class="rc5-notice-actions">
+        <button type="button" class="btn btn-primary" id="rc5-notice-import"></button>
+        <button type="button" class="btn" id="rc5-notice-dismiss">Ignorer</button>
+      </div>
+    </div>
+
+    <!-- ================= Partager des points =================
+         Deux étapes dans la même modale : le choix (points, contenu, durée),
+         puis le code obtenu. Rien ne part avant « Créer le code ». -->
+    <dialog id="dlg-share">
+      <div class="dialog-form wide">
+        <h3>Partager des points</h3>
+        <div id="share-step-choose">
+          <p class="muted">
+            Les points choisis sont déposés sur le serveur de partage de gastinel.me.
+            Vous obtenez un code de six caractères : toute personne qui le connaît peut
+            importer ces points jusqu'à l'expiration du partage, ou jusqu'à ce que vous
+            le révoquiez.
+          </p>
+          <fieldset class="subgroup">
+            <legend>Points à partager</legend>
+            <p class="share-points-actions">
+              <button type="button" class="link" id="btn-share-all">Tout cocher</button>
+              ·
+              <button type="button" class="link" id="btn-share-none">Tout décocher</button>
+            </p>
+            <ul class="share-points" id="share-points"></ul>
+          </fieldset>
+          <fieldset class="subgroup">
+            <legend>Contenu</legend>
+            <div class="radio-col">
+              <label class="radio-line">
+                <input type="radio" name="share-content" value="points" checked />
+                Les points seuls (position, catégorie, facteurs de site, notes)
+              </label>
+              <label class="radio-line">
+                <input type="radio" name="share-content" value="series" />
+                Les points et leurs séries de mesures
+              </label>
+            </div>
+            <span class="hint">
+              Les séries partent avec leur horodatage brut et leur décalage d'horloge :
+              le destinataire pourra recalibrer comme vous. L'humidité, les stations
+              rattachées et les autres champs ne sont pas transmis.
+            </span>
+            <label id="share-period-line" hidden>
+              Période des mesures
+              <select id="share-period">
+                <option value="">Toutes les mesures</option>
+                <option value="365">Les 12 derniers mois</option>
+                <option value="90">Les 3 derniers mois</option>
+                <option value="30">Les 30 derniers jours</option>
+              </select>
+              <span class="hint">
+                Un partage porte au plus 450 000 mesures. Une archive ROMMA complète
+                dépasse seule cette limite : réduisez alors la période.
+              </span>
+            </label>
+          </fieldset>
+          <label>
+            Durée de validité
+            <select id="share-ttl">
+              <option value="7">7 jours</option>
+              <option value="30">30 jours</option>
+              <option value="90" selected>90 jours</option>
+            </select>
+          </label>
+          <p class="form-error" id="share-error" hidden></p>
+          <div class="dialog-actions">
+            <button type="button" class="btn" data-close>Annuler</button>
+            <button type="button" class="btn btn-primary" id="btn-share-create">Créer le code</button>
+          </div>
+        </div>
+        <div id="share-step-done" hidden>
+          <p class="muted">Transmettez ce code à la personne concernée :</p>
+          <p class="share-code" id="share-code"></p>
+          <p class="share-code-actions">
+            <button type="button" class="btn btn-sm" id="btn-share-copy">Copier le code</button>
+          </p>
+          <dl class="kv" id="share-done-details"></dl>
+          <p class="hint">Vous pourrez le révoquer à tout moment dans Paramètres → Partages créés depuis ce poste.</p>
+          <div class="dialog-actions">
+            <button type="button" class="btn btn-primary" data-close>Terminé</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ================= Recevoir un partage =================
+         L'aperçu passe toujours avant l'import : on voit d'où viennent les
+         points et combien il y en a avant qu'une seule ligne soit écrite. -->
+    <dialog id="dlg-receive">
+      <div class="dialog-form">
+        <h3>Recevoir un partage</h3>
+        <label>
+          Code reçu
+          <input
+            type="text"
+            id="receive-code"
+            maxlength="12"
+            autocomplete="off"
+            spellcheck="false"
+            autocapitalize="characters"
+            placeholder="ex. XZ4-K9P"
+          />
+          <span class="hint">
+            Majuscules ou minuscules, avec ou sans tiret. O et 0 sont confondus, de même
+            que I, L et 1 : un code dicté ne peut pas être mal recopié sur ces lettres.
+          </span>
+        </label>
+        <div class="dialog-actions dialog-actions-inline">
+          <button type="button" class="btn btn-sm" id="btn-receive-preview">Voir l'aperçu</button>
+        </div>
+        <div id="receive-preview" hidden>
+          <dl class="kv" id="receive-details"></dl>
+          <fieldset class="subgroup">
+            <legend>Où ranger ces points ?</legend>
+            <div class="radio-col">
+              <label class="radio-line">
+                <input type="radio" name="receive-target" value="new" checked />
+                Dans un nouveau projet (recommandé)
+              </label>
+              <label class="radio-line" id="receive-target-current-line">
+                <input type="radio" name="receive-target" value="current" />
+                <span id="receive-target-current"></span>
+              </label>
+            </div>
+            <span class="hint">
+              Un projet à part garde les points reçus séparés des vôtres. L'import
+              ajoute toujours : il ne remplace ni ne fusionne rien.
+            </span>
+          </fieldset>
+        </div>
+        <p class="form-error" id="receive-error" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-close>Annuler</button>
+          <button type="button" class="btn btn-primary" id="btn-receive-import" disabled>Importer</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <!-- Croisement en plein écran (cross_plein.js) : barre de 44 px, panneau
+         à gauche, graphique sur toute la hauteur restante puis, 24 px plus bas,
+         le tableau comparatif aussi long que nécessaire. -->
+    <div class="cross-plein" id="cross-plein" role="dialog" aria-modal="true" aria-labelledby="cp-titre" hidden>
+      <header class="cp-barre">
+        <h2 id="cp-titre">Croisement en plein écran</h2>
+        <span class="cp-resume" id="cp-resume"></span>
+        <button type="button" class="btn btn-sm" id="cp-fermer" title="Fermer (Échap)">Fermer</button>
+      </header>
+      <aside class="cp-panneau">
+        <section class="cp-section">
+          <h3>Stations</h3>
+          <input type="search" id="cp-filtre-stations" class="cp-champ" placeholder="Filtrer par nom" aria-label="Filtrer les stations par nom" />
+          <div class="cp-actions">
+            <button type="button" class="link" id="cp-reprendre-carte">Reprendre la sélection de la carte</button>
+            <button type="button" class="link" id="cp-tout-decocher">Tout décocher</button>
+          </div>
+          <p class="hint" id="cp-compte"></p>
+          <ul class="cp-stations" id="cp-stations"></ul>
+        </section>
+        <section class="cp-section">
+          <h3>Période (UTC)</h3>
+          <label class="cp-ligne">Du <input type="date" id="cp-du" class="cp-champ" /></label>
+          <label class="cp-ligne">Au <input type="date" id="cp-au" class="cp-champ" /></label>
+        </section>
+        <section class="cp-section">
+          <label class="cp-ligne">Profil <select id="cp-profil" class="cp-champ"></select></label>
+          <button type="button" class="btn btn-sm" id="cp-btn-parametres" aria-expanded="false" aria-controls="cp-parametres">Paramètres du croisement</button>
+          <div class="cp-parametres" id="cp-parametres" hidden>
+            <label class="cp-ligne" title="Un jour compte comme chaud si sa maximale atteint ce seuil">Jour chaud : maxi ≥ <input type="number" step="0.5" id="cp-seuil-chaud" class="cp-champ cp-nombre" /> °C</label>
+            <label class="cp-ligne" title="Un jour compte comme jour de gel si sa minimale descend à ce seuil">Jour de gel : mini ≤ <input type="number" step="0.5" id="cp-seuil-gel" class="cp-champ cp-nombre" /> °C</label>
+          </div>
+        </section>
+      </aside>
+      <div class="cp-contenu">
+        <section class="cp-zone-graphique" aria-label="Graphique">
+          <div class="cp-graphique" id="cp-graphique"></div>
+          <p class="cross-note">Chaque mois est moyenné sur toutes les années de la période. Trait plein : moyenne des maximales. Pointillés fins : moyenne du mois. Tirets : moyenne des minimales. Une couleur par station ; cliquez une courbe dans la légende pour la masquer.</p>
+        </section>
+        <section class="cp-zone-tableau" aria-label="Tableau comparatif">
+          <div class="cp-filtres">
+            <span class="cp-filtres-titre">Paramètres affichés :</span>
+            <span id="cp-filtres-colonnes" class="cp-filtres-colonnes"></span>
+          </div>
+          <div id="cp-tableaux"></div>
+        </section>
+      </div>
+    </div>
+
+    <script src="vendor/leaflet/leaflet.js"></script>
+    <!-- Chart.js vendorisé comme Leaflet : la CSP interdit tout script externe,
+         et l'application doit tourner sans réseau. L'adaptateur de dates est
+         écrit à la main pour éviter une seconde dépendance (date-fns / Luxon)
+         et pour tenir l'axe en UTC strict — il doit suivre chart.umd.js. -->
+    <script src="vendor/chartjs/chart.umd.js"></script>
+    <script src="vendor/chartjs/adapter-utc.js"></script>
+    <script src="dialogues.js"></script>
+    <script src="markdown.js"></script>
+    <script src="typewriter.js"></script>
+    <script src="home_scripts.js"></script>
+    <script src="map.js"></script>
+    <script src="cross.js"></script>
+    <script src="cross_plein.js"></script>
+    <script src="rc5.js"></script>
+    <script src="elitech.js"></script>
+    <script src="mobile.js"></script>
+    <script src="extensions.js"></script>
+    <script src="settings_search.js"></script>
+    <script src="main.js"></script>
+    <!-- Progression de la synchro Cloud. `popover` : au-dessus des fenêtres
+         modales (Paramètres…), qui occupent la couche supérieure. -->
+    <div id="cloud-progress" class="cloud-progress" popover="manual" role="status" aria-live="polite">
+      <div class="cloud-progress-head">
+        <span class="cloud-progress-icon" aria-hidden="true"></span>
+        <strong id="cloud-progress-phase">Synchronisation</strong>
+        <span id="cloud-progress-count" class="cloud-progress-count"></span>
+      </div>
+      <div id="cloud-progress-label" class="cloud-progress-label"></div>
+      <div class="cloud-progress-track"><div id="cloud-progress-bar" class="cloud-progress-bar indetermine"></div></div>
+    </div>
+    <!-- Projet Cloud au démarrage : côté opposé à la synchro manuelle, barre verte.
+         Reste affiché pendant qu'on travaille sur un projet, jusqu'à la fin des étapes. -->
+    <div id="cloud-demarrage" class="cloud-progress cloud-demarrage" popover="manual" role="status" aria-live="polite">
+      <div class="cloud-progress-head">
+        <span class="cloud-progress-icon" aria-hidden="true"></span>
+        <strong>Projet Cloud</strong>
+        <span id="cloud-demarrage-count" class="cloud-progress-count"></span>
+      </div>
+      <div id="cloud-demarrage-label" class="cloud-progress-label">Chargement des projets…</div>
+      <div class="cloud-progress-track"><div id="cloud-demarrage-bar" class="cloud-progress-bar indetermine"></div></div>
+    </div>
+  </body>
+</html>
