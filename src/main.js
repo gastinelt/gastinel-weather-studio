@@ -5592,6 +5592,9 @@ async function submitImport(event) {
     memoriserOngletImport(importState.tab);
     await loadPoints();
     toast(`${fmtNumber(report.imported_count)} mesures importées sur « ${report.point_name} ».`);
+    // Import propre : rien à lire dans le bilan, la fenêtre se ferme seule.
+    // Un avertissement la garde ouverte, sinon il serait perdu.
+    if (!rapportAAvertissement(report)) el("dlg-import").close();
   } catch (e) {
     // Dans la fenêtre, pas dans un toast : un message long doit rester lisible.
     showError(el("import-error"), String(e));
@@ -5600,6 +5603,13 @@ async function submitImport(event) {
     button.textContent = libelleBouton;
     button.disabled = false;
   }
+}
+
+/** Le bilan d'import montre-t-il quelque chose à lire (mêmes conditions que `renderReport`) ? */
+function rapportAAvertissement(r) {
+  return Boolean(
+    r.date_format_uncertain || r.forced_duplicate || r.anomalies?.length || r.warnings?.length
+  );
 }
 
 function renderReport(r) {
@@ -6461,9 +6471,17 @@ async function cloudSync() {
     toast(`Synchronisation terminée : ${res.uploaded} envoyé(s), ${res.downloaded} reçu(s).`);
     await loadCloudStatus();
     renderCloudStatus();
-    await loadProjects();
+    const projets = await loadProjects();
+    // Rafraîchir le projet ouvert sur place : le rouvrir repasserait par
+    // l'écran d'accueil et son compte à rebours.
     if (state.project) {
-      await openProject(state.project.id);
+      if (projets.some((p) => p.id === state.project.id)) {
+        await loadPoints();
+        if (state.detailPointId && el("dlg-detail").open) await renderDetail(state.detailPointId);
+      } else {
+        toast("Ce projet a été supprimé sur un autre poste.");
+        goHome();
+      }
     }
   } catch (e) {
     toast(`Erreur lors de la synchronisation : ${e}`, true);
