@@ -46,9 +46,9 @@ git add -A
 if git diff --cached --quiet; then
   echo "Rien de nouveau par rapport au depot public."; exit 0
 fi
-# Adresse anonyme GitHub : aucune adresse reelle dans le depot public.
+# Adresse publique de l auteur pour les publications.
 git -c user.name="Theo Gastinel" \
-    -c user.email="264859180+gastinelt@users.noreply.github.com" \
+    -c user.email="studio@gastinel.me" \
     commit -q -m "Gastinel Weather Studio $VERSION"
 git --no-pager show --stat --oneline HEAD | tail -5
 

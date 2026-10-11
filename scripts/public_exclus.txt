@@ -8,3 +8,6 @@ docs/cadrage-donnees-a-la-demande.md
 
 # Rapports internes
 docs/rapport-nuit-*.md
+
+# Journal de developpement detaille (notes personnelles)
+docs/journal-developpement.md
