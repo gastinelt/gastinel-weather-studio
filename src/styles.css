@@ -4761,6 +4761,15 @@ body.gws-mobile .home-rc5-found .detect-card {
 .quota-seg { height: 100%; min-width: 2px; }
 .quota-seg + .quota-seg { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.7); }
 .quota-legende { font-size: 11px; color: var(--text-muted); }
+/* Bandeau « limite Infoclimat atteinte », sous la barre du haut. */
+.bandeau-quota { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 11px 44px; background: #111; color: #fff; font-size: 14px; line-height: 1.4; text-align: center; position: relative; z-index: 6001; }
+.bandeau-quota[hidden] { display: none; }
+.bandeau-quota .point { width: 7px; height: 7px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+.bandeau-quota button { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: rgba(255, 255, 255, 0.7); font-size: 18px; cursor: pointer; padding: 4px 8px; line-height: 1; }
+.bandeau-quota button:hover { color: #fff; }
+@media (max-width: 600px) { .bandeau-quota { font-size: 13px; padding: 10px 40px; gap: 10px; } }
+.bulle-souris { position: fixed; z-index: 10000; pointer-events: none; background: #111; color: #fff; font-size: 12px; line-height: 1.3; padding: 5px 8px; border-radius: 4px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); }
+.settings-extensions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
 .appareil-couleurs { display: flex; gap: 8px; margin: 6px 0; }
 .appareil-couleur { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
 .appareil-couleur[aria-checked="true"] { border-color: var(--text, #202124); box-shadow: 0 0 0 2px #fff inset; }
@@ -5093,3 +5102,15 @@ body.cp-ouvert {
     height: 60vh;
   }
 }
+/* Import poursuivi en arrière-plan : en bas à gauche, cliquable pour rouvrir la fenêtre. */
+.cloud-progress.import-fond { inset: auto auto 16px 16px; cursor: pointer; }
+.import-fond .cloud-progress-bar { background: var(--blue-500, var(--primary)); }
+/* Point et rôle de la série, côte à côte dans la fenêtre d'import. */
+.import-cible:not([hidden]) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 640px) { .import-cible:not([hidden]) { grid-template-columns: 1fr; } }
+/* Intervalle du RC-5 en h / min / s, sur une ligne. */
+.rc5-hms { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.rc5-hms input { width: 4.2em; }
+/* Assistant de démarrage du RC-5 : étapes et bouton de vérification. */
+.rc5-demarrage { display: grid; gap: 8px; margin-top: 10px; }
+.rc5-demarrage .btn { justify-self: start; }

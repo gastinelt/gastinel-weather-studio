@@ -21,12 +21,16 @@
  *
  * ## Limites assumées
  *
- * Pas de listes imbriquées, pas de liens, pas de tableaux, pas de blocs de code
- * multilignes. Si l'agent se met à en produire, c'est le *system prompt* qu'il
- * faut resserrer (voir `CONSIGNES_FORMAT` dans `groq.rs`), pas ce fichier qu'il
- * faut gonfler. Un délimiteur non apparié reste affiché tel quel : mieux vaut un
- * astérisque isolé visible qu'un morceau de phrase avalé par une règle trop
- * gourmande.
+ * Un seul niveau de sous-puces, pas de liens, pas de tableaux, pas de blocs de
+ * code multilignes. Si l'agent produit davantage, c'est le *system prompt*
+ * qu'il faut resserrer (voir `CONSIGNES_FORMAT` dans `groq.rs`), pas ce
+ * fichier qu'il faut gonfler. Un délimiteur non apparié reste affiché tel
+ * quel : mieux vaut un astérisque isolé visible qu'un morceau de phrase avalé
+ * par une règle trop gourmande.
+ *
+ * Les sous-puces sont venues de l'usage (0.6.0) : sous chaque puce, le modèle
+ * ajoutait une ligne « *Écarter : … » — un astérisque collé au mot, jamais
+ * refermé. Elle s'affichait telle quelle et coupait la liste en morceaux.
  */
 
 const GwsMarkdown = (() => {
@@ -134,6 +138,8 @@ const GwsMarkdown = (() => {
   const TITRE = /^#{1,6}\s+(.+?)\s*#*$/;
   const PUCE = /^[-*+•]\s+(.+)$/;
   const NUMERO = /^\d+[.)]\s+(.+)$/;
+  /** « *Écarter : … » : un astérisque collé au mot, qui n'ouvre aucun italique. */
+  const PUCE_COLLEE = /^[*•](?=[^\s*])(.+)$/;
 
   /**
    * Analyse le texte en blocs. Fonction **pure** : aucun DOM touché, ce qui la
@@ -141,7 +147,7 @@ const GwsMarkdown = (() => {
    *
    * @param {string} texte
    * @returns {Array<{kind: "p"|"h", lines?: Array, tokens?: Array} |
-   *                 {kind: "ul"|"ol", items: Array}>}
+   *                 {kind: "ul"|"ol", items: Array<{tokens: Array, sub: Array}>}>}
    */
   function toBlocks(texte) {
     const lignes = String(texte == null ? "" : texte)
@@ -151,15 +157,42 @@ const GwsMarkdown = (() => {
     const blocs = [];
     let paragraphe = null;
     let liste = null;
+    /** Liste fermée par une ligne vide, que la ligne suivante peut prolonger. */
+    let listePrecedente = null;
 
     for (const brute of lignes) {
       const ligne = brute.trim();
+      const retrait = brute.length - brute.trimStart().length;
 
       // Une ligne vide ferme ce qui est ouvert : c'est la seule ponctuation de
       // bloc que le format connaisse.
       if (!ligne || SEPARATEUR.test(ligne)) {
+        if (liste) listePrecedente = liste;
         paragraphe = null;
         liste = null;
+        continue;
+      }
+
+      // Sous-puce : puce en retrait, ou astérisque collé au mot sans fermeture.
+      // Elle se range sous la dernière puce, même séparée par une ligne vide.
+      const enCours = liste || listePrecedente;
+      // Collé mais refermé (« *Écarter* : … »), c'est un italique, pas une puce.
+      const collee = PUCE_COLLEE.test(ligne) && tokens(ligne)[0].kind === "text" ? PUCE_COLLEE.exec(ligne) : null;
+      const sousPuce = (retrait >= 2 && PUCE.exec(ligne)) || collee;
+      if (sousPuce && enCours && enCours.items.length) {
+        enCours.items[enCours.items.length - 1].sub.push(tokens(sousPuce[1].trim()));
+        liste = enCours;
+        listePrecedente = null;
+        paragraphe = null;
+        continue;
+      }
+      // Ligne en retrait sous une puce : la suite de cette puce.
+      if (retrait >= 2 && liste && liste.items.length && !PUCE.test(ligne) && !NUMERO.test(ligne)) {
+        const item = liste.items[liste.items.length - 1];
+        (item.sub.length ? item.sub[item.sub.length - 1] : item.tokens).push(
+          { kind: "text", text: " " },
+          ...tokens(ligne)
+        );
         continue;
       }
 
@@ -171,22 +204,27 @@ const GwsMarkdown = (() => {
         continue;
       }
 
-      const puce = PUCE.exec(ligne);
+      const puce = PUCE.exec(ligne) || (collee ? collee : null);
       const numero = puce ? null : NUMERO.exec(ligne);
       if (puce || numero) {
         const type = puce ? "ul" : "ol";
         paragraphe = null;
-        // Une liste à puces qui suit immédiatement une liste numérotée est bien
-        // une nouvelle liste : on ne fusionne que des items de même nature.
+        // Une ligne vide entre deux puces ne coupe pas la liste (sinon une
+        // liste numérotée repartirait à 1). Une liste à puces qui suit une liste
+        // numérotée est bien une nouvelle liste : seuls des items de même
+        // nature sont fusionnés.
+        if (!liste && listePrecedente && listePrecedente.kind === type) liste = listePrecedente;
         if (!liste || liste.kind !== type) {
           liste = { kind: type, items: [] };
           blocs.push(liste);
         }
-        liste.items.push(tokens((puce || numero)[1]));
+        listePrecedente = null;
+        liste.items.push({ tokens: tokens((puce || numero)[1].trim()), sub: [] });
         continue;
       }
 
       liste = null;
+      listePrecedente = null;
       if (!paragraphe) {
         paragraphe = { kind: "p", lines: [] };
         blocs.push(paragraphe);
@@ -236,7 +274,16 @@ const GwsMarkdown = (() => {
         const liste = d.createElement(bloc.kind);
         for (const item of bloc.items) {
           const li = d.createElement("li");
-          remplirLigne(d, li, item);
+          remplirLigne(d, li, item.tokens);
+          if (item.sub.length) {
+            const sous = d.createElement("ul");
+            for (const s of item.sub) {
+              const sli = d.createElement("li");
+              remplirLigne(d, sli, s);
+              sous.appendChild(sli);
+            }
+            li.appendChild(sous);
+          }
           liste.appendChild(li);
         }
         fragment.appendChild(liste);
@@ -269,7 +316,9 @@ const GwsMarkdown = (() => {
     return toBlocks(texte)
       .map((bloc) => {
         if (bloc.kind === "ul" || bloc.kind === "ol")
-          return bloc.items.map((i) => "• " + brut(i)).join("\n");
+          return bloc.items
+            .map((i) => ["• " + brut(i.tokens), ...i.sub.map((s) => "  – " + brut(s))].join("\n"))
+            .join("\n");
         if (bloc.kind === "h") return brut(bloc.tokens);
         return bloc.lines.map(brut).join("\n");
       })

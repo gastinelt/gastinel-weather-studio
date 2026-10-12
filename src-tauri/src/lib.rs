@@ -326,6 +326,9 @@ pub fn run() {
             // de `reset_rc5` : aucune confirmation n'est exigée, puisque rien
             // n'est perdu.
             commands::stop_rc5,
+            // Écritures vérifiées (heure, description, numéro de série,
+            // paramètres) : voir `elitech_serial::write_device`.
+            commands::write_rc5,
             // Export de la lecture en cours, sans passer par la base : sur le
             // terrain, on veut le fichier avant de décider s'il devient une
             // série.

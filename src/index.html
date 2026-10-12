@@ -48,6 +48,13 @@
       </button>
     </header>
 
+    <!-- Limite quotidienne Infoclimat atteinte (voir `surveillerLimiteInfoclimat`). -->
+    <div id="bandeau-quota" class="bandeau-quota" role="status" hidden>
+      <span class="point" aria-hidden="true"></span>
+      <span id="bandeau-quota-texte"></span>
+      <button type="button" id="bandeau-quota-fermer" aria-label="Masquer jusqu'à demain">×</button>
+    </div>
+
     <!-- ============ Avertissement de mise à jour ============
          Affiché seulement si une version plus récente existe et que
          l'utilisateur n'a pas coupé les vérifications (Paramètres → Mises à
@@ -365,30 +372,46 @@
                       réglée sur l'heure locale.
                     </span>
                   </label>
-                  <button type="button" class="btn" data-r="check-clock">
-                    Vérifier l'heure du logger
-                  </button>
+                  <div class="rc5-export-actions">
+                    <button type="button" class="btn" data-r="check-clock">
+                      Vérifier l'heure du logger
+                    </button>
+                    <button type="button" class="btn" data-r="set-clock">
+                      Remettre à l'heure
+                    </button>
+                  </div>
+                  <p class="hint">
+                    « Remettre à l'heure » écrit l'heure du PC dans le logger, dans le
+                    fuseau choisi ci-dessus. Rien n'est effacé, même pendant un
+                    enregistrement. Les mesures déjà prises gardent l'ancienne heure :
+                    l'écart mesuré juste avant est repris dans le champ « Dérive » de la
+                    sauvegarde. Le plus simple reste de sauvegarder d'abord.
+                  </p>
                   <dl class="kv" data-r="clock-kv" hidden></dl>
                   <p class="banner" data-r="clock-verdict" hidden></p>
                 </div>
               </section>
 
-              <!-- 1bis. Arrêt de l'enregistrement. Distinct de la réinitialisation
-                   plus bas : celle-ci n'efface rien, c'est pour ça qu'elle n'a pas
-                   besoin de la modale de confirmation qui protège l'effacement. -->
+              <!-- 1bis. Démarrer et arrêter l'enregistrement.
+
+                   Le RC-5 n'a pas de commande logicielle de démarrage : ElitechLog
+                   8.0.5 n'en envoie aucune pour cette famille (vérifié dans son code,
+                   voir `elitech_serial.rs`). On démarre en maintenant ▶ ; l'assistant
+                   dit quoi faire selon l'état du logger, puis le relit pour confirmer.
+
+                   L'arrêt, lui, est une commande. Il demande une confirmation : un
+                   logger arrêté ne repart qu'après une réinitialisation, qui efface. -->
               <section class="card rc5-block">
-                <header class="rc5-block-head"><h3>Arrêter l'enregistrement</h3></header>
+                <header class="rc5-block-head"><h3>Démarrer ou arrêter l'enregistrement</h3></header>
                 <div class="rc5-block-body">
-                  <p class="hint">
-                    Arrête l'enregistrement en cours sur le <strong>boîtier physique</strong>,
-                    sans effacer les mesures déjà prises. <strong>C'est sans retour</strong> :
-                    le manuel officiel du RC-5 précise qu'un logger arrêté ne peut pas être
-                    relancé par son bouton, mais seulement en le reprogrammant depuis
-                    ElitechLog. Il n'existe donc ni commande de reprise, ni bouton ▶.
-                  </p>
-                  <button type="button" class="btn" data-r="stop">
-                    Arrêter l'enregistrement
-                  </button>
+                  <p class="hint" data-r="etat">État du logger : pas encore lu.</p>
+                  <div class="rc5-export-actions">
+                    <button type="button" class="btn" data-r="start">Démarrer…</button>
+                    <button type="button" class="btn" data-r="stop">
+                      Arrêter l'enregistrement
+                    </button>
+                  </div>
+                  <div class="rc5-demarrage" data-r="start-guide" hidden></div>
                   <p class="banner" data-r="stop-result" hidden></p>
                 </div>
               </section>
@@ -418,10 +441,6 @@
                   <label>
                     Dérive de l'horloge (s, positif = logger en avance)
                     <input type="number" data-r="drift" step="1" value="0" />
-                  </label>
-                  <label>
-                    Numéro de série complet (facultatif)
-                    <input type="text" data-r="serial" autocomplete="off" />
                   </label>
                   <p class="hint" data-r="offset-hint"></p>
                   <p class="hint" data-r="save-hint" hidden></p>
@@ -459,13 +478,32 @@
                    atteignable sans passer par la modale de confirmation. Celle-ci
                    est unique dans le document : effacer deux loggers à la fois
                    n'a aucun sens, et deux modales empilées encore moins. -->
+              <!-- 3bis. Les réglages de l'appareil : tout ce qu'ElitechLog sait écrire.
+                   La fenêtre est unique dans le document, comme celle de
+                   l'effacement, et dit avant l'envoi si la mémoire sera effacée. -->
+              <section class="card rc5-block">
+                <header class="rc5-block-head"><h3>Réglages du logger</h3></header>
+                <div class="rc5-block-body">
+                  <p class="hint">
+                    Intervalle, délai de démarrage, bouton d'arrêt, seuils d'alarme,
+                    unité, adresse, description, et les réglages avancés. Changer un
+                    paramètre efface la mémoire du logger, comme dans ElitechLog ; la
+                    description seule n'efface rien.
+                  </p>
+                  <button type="button" class="btn" data-r="settings">
+                    Modifier les réglages…
+                  </button>
+                </div>
+              </section>
+
               <section class="card rc5-block rc5-block-danger">
                 <header class="rc5-block-head"><h3>Réinitialiser le logger</h3></header>
                 <div class="rc5-block-body">
                   <p class="hint">
-                    Efface la mémoire du <strong>boîtier physique</strong>. Les mesures déjà
-                    enregistrées dans l'application ne sont pas touchées — elles restent en
-                    base, consultables et exportables.
+                    Efface la mémoire du <strong>boîtier physique</strong> et le remet à
+                    l'heure, en gardant tous ses réglages : c'est la « Réinitialisation
+                    rapide » d'ElitechLog. Les mesures déjà enregistrées dans
+                    l'application ne sont pas touchées.
                   </p>
                   <button type="button" class="btn btn-danger" data-r="reset">
                     Réinitialiser le logger…
@@ -481,10 +519,10 @@
                température décalée quand une calibration interne est active, un
                logger qui enregistre encore pendant qu'on le lit…).
 
-               Le tableau est rempli par `rc5.js` à partir de `Rc5Analysis`. Deux
-               champs souvent attendus n'y sont pas, et ce n'est pas un oubli : le
-               protocole série du RC-5 ne transmet **ni version de firmware, ni
-               niveau de batterie**. La ligne le dit plutôt que de laisser chercher.
+               Le tableau est rempli par `rc5.js` à partir de `Rc5Analysis`. La
+               version de firmware (octet 4) et la batterie (octet 28) y figurent
+               depuis la 0.6.0 : on les croyait absentes du protocole, ElitechLog
+               les lit pourtant à ces deux offsets.
           -->
           <section class="card rc5-block rc5-block-infos" data-r="infos" hidden>
             <header class="rc5-block-head">
@@ -1385,6 +1423,9 @@
         </div>
         </details>
 
+        <!-- Extensions accrochées aux Paramètres (`hook: settings`). -->
+        <div class="settings-extensions" id="settings-extensions" hidden></div>
+
         <p class="form-error" id="setting-error" hidden></p>
         <div class="dialog-actions settings-pied">
           <div class="quota-bandeau" id="quota-bandeau" hidden>
@@ -1736,10 +1777,23 @@
           </button>
         </div>
 
-        <label id="import-point-field">
-          Point
-          <select id="import-point" required></select>
-        </label>
+        <!-- Point et rôle côte à côte : le rôle décide dans quelle série vont les
+             mesures, il ne doit jamais être caché. Il repart sur « Principal » à
+             chaque ouverture : un « Secours » oublié d'un import précédent
+             rangerait des mesures dans la mauvaise série sans que rien ne se voie. -->
+        <div class="import-cible" id="import-point-field">
+          <label>
+            Point
+            <select id="import-point" required></select>
+          </label>
+          <label>
+            Rôle de la série
+            <select id="import-role">
+              <option value="Primary">Principal</option>
+              <option value="Backup">Secours</option>
+            </select>
+          </label>
+        </div>
 
         <label class="file-field" id="import-file-field">
           <span id="import-file-label">Fichier (.txt, .csv) — ou collez le contenu ci-dessous</span>
@@ -1760,15 +1814,7 @@
         </label>
 
         <details class="import-avance" id="import-avance">
-          <summary>Réglages avancés (rôle, fuseau, horloge, numéro de série)</summary>
-          <label>
-            Rôle de la série
-            <select id="import-role">
-              <option value="Primary">Principal</option>
-              <option value="Backup">Secours</option>
-            </select>
-            <span class="hint">Jamais déduit : les séries ne sont jamais fusionnées.</span>
-          </label>
+          <summary>Réglages avancés (fuseau, dérive d'horloge, numéro de série)</summary>
         <fieldset id="import-clock">
           <legend>Horloge du logger</legend>
           <div class="grid-3">
@@ -2144,6 +2190,10 @@
         </p>
         <p class="hint" id="rc5-reset-unsaved" hidden></p>
         <p class="banner is-warning" id="rc5-reset-running" hidden></p>
+        <label class="checkbox">
+          <input type="checkbox" id="rc5-reset-clock" checked />
+          Remettre aussi le logger à l'heure (fuseau choisi dans « Heure du logger »)
+        </label>
         <label>
           Pour confirmer, recopiez le mot <strong>EFFACER</strong>
           <input type="text" id="rc5-reset-word" autocomplete="off" spellcheck="false" />
@@ -2153,6 +2203,134 @@
           <button type="button" class="btn" id="rc5-reset-cancel" autofocus>Annuler</button>
           <button type="button" class="btn btn-danger" id="rc5-reset-confirm" disabled>
             Effacer la mémoire du logger
+          </button>
+        </menu>
+      </form>
+    </dialog>
+
+    <!-- ================= Modale : réglages du logger RC-5 =================
+         Unique dans le document, comme l'effacement. Pré-remplie par une
+         relecture de l'appareil à l'ouverture. Le bas de la fenêtre dit, à chaque
+         changement, ce qui sera écrit et si la mémoire sera effacée ; le mot
+         CONFIRMER n'est demandé que dans ce cas, ou pour le numéro de série. -->
+    <dialog id="dlg-rc5-settings">
+      <form method="dialog" class="dialog-form wide" id="form-rc5-settings">
+        <h3>Réglages du logger</h3>
+        <p class="hint" id="rc5-set-who"></p>
+
+        <fieldset class="subgroup">
+          <legend>Enregistrement</legend>
+          <div class="grid-3">
+            <label>
+              Intervalle d'enregistrement
+              <span class="rc5-hms">
+                <input type="number" id="rc5-set-h" min="0" max="24" step="1" aria-label="Heures" /> h
+                <input type="number" id="rc5-set-m" min="0" max="59" step="1" aria-label="Minutes" /> min
+                <input type="number" id="rc5-set-s" min="0" max="59" step="1" aria-label="Secondes" /> s
+              </span>
+            </label>
+            <label>
+              Délai de démarrage
+              <select id="rc5-set-delay"></select>
+              <span class="hint">Temps entre l'appui sur ▶ et la première mesure.</span>
+            </label>
+            <label>
+              Bouton d'arrêt
+              <select id="rc5-set-stop">
+                <option value="1">Activé</option>
+                <option value="0">Désactivé</option>
+              </select>
+              <span class="hint">Désactivé : seul le logiciel peut arrêter le logger.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="subgroup">
+          <legend>Seuils d'alarme et affichage</legend>
+          <div class="grid-3">
+            <label>Limite haute (°C) <input type="number" id="rc5-set-upper" step="0.1" min="-40" max="90" /></label>
+            <label>Limite basse (°C) <input type="number" id="rc5-set-lower" step="0.1" min="-40" max="90" /></label>
+            <label>
+              Unité de l'écran
+              <select id="rc5-set-unit">
+                <option value="0">°C</option>
+                <option value="1">°F</option>
+              </select>
+              <span class="hint">L'écran seulement : les mesures lues restent en °C.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="subgroup">
+          <legend>Identification</legend>
+          <div class="grid-2">
+            <label>
+              Description du voyage
+              <input type="text" id="rc5-set-info" maxlength="100" autocomplete="off" spellcheck="false" />
+              <span class="hint">100 caractères, sans accent. N'efface rien.</span>
+            </label>
+            <label>
+              Adresse
+              <input type="number" id="rc5-set-station" min="1" max="254" step="1" />
+              <span class="hint">1 en usage normal.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <details class="import-avance">
+          <summary>Réglages avancés (grisés dans ElitechLog pour le RC-5)</summary>
+          <p class="hint">
+            Le protocole les porte, mais Elitech ne les propose pas pour ce modèle. À
+            modifier en connaissance de cause.
+          </p>
+          <div class="grid-3">
+            <label>
+              Tonalité des boutons
+              <select id="rc5-set-tone">
+                <option value="1">Activée</option>
+                <option value="0">Désactivée</option>
+              </select>
+            </label>
+            <label>
+              Alarme sonore
+              <select id="rc5-set-alarm">
+                <option value="0">Désactivée</option>
+                <option value="3">Code 3</option>
+                <option value="10">Code 10</option>
+              </select>
+              <span class="hint">Valeurs du protocole ; le RC-5 standard n'a pas de buzzer d'alarme.</span>
+            </label>
+            <label>
+              Correction de température (°C)
+              <input type="number" id="rc5-set-calib" step="0.1" min="-5" max="5" />
+              <span class="hint">Appliquée par le logger à ses mesures, sans retour possible. GWS corrige plutôt à l'import, en gardant le brut.</span>
+            </label>
+          </div>
+          <label>
+            Numéro de série (10 caractères)
+            <input type="text" id="rc5-set-serial" maxlength="10" autocomplete="off" spellcheck="false" />
+            <span class="hint">
+              Change l'identité du logger : ses noms, ses séries et la détection des
+              doublons s'appuient sur ce numéro. N'efface rien, mais demande CONFIRMER.
+            </span>
+          </label>
+        </details>
+
+        <label class="checkbox">
+          <input type="checkbox" id="rc5-set-clock" checked />
+          Remettre le logger à l'heure en même temps (fuseau choisi dans « Heure du logger »)
+        </label>
+
+        <div class="banner" id="rc5-set-bilan" aria-live="polite"></div>
+        <label id="rc5-set-word-field" hidden>
+          Pour confirmer, recopiez le mot <strong>CONFIRMER</strong>
+          <input type="text" id="rc5-set-word" autocomplete="off" spellcheck="false" />
+        </label>
+        <p class="form-error" id="rc5-set-error" hidden></p>
+        <menu>
+          <button type="button" class="btn" id="rc5-set-cancel">Annuler</button>
+          <button type="button" class="btn btn-primary" id="rc5-set-confirm" disabled>
+            Écrire sur le logger
           </button>
         </menu>
       </form>
@@ -2457,10 +2635,19 @@
     </div>
     <!-- Projet Cloud au démarrage : côté opposé à la synchro manuelle, barre verte.
          Reste affiché pendant qu'on travaille sur un projet, jusqu'à la fin des étapes. -->
+    <!-- Import poursuivi après fermeture de sa fenêtre. Un clic la rouvre. -->
+    <div id="import-fond" class="cloud-progress import-fond" popover="manual" role="status" aria-live="polite">
+      <div class="cloud-progress-head">
+        <span class="cloud-progress-icon" aria-hidden="true"></span>
+        <strong>Import en arrière-plan</strong>
+      </div>
+      <div id="import-fond-label" class="cloud-progress-label"></div>
+      <div class="cloud-progress-track"><div class="cloud-progress-bar indetermine"></div></div>
+    </div>
     <div id="cloud-demarrage" class="cloud-progress cloud-demarrage" popover="manual" role="status" aria-live="polite">
       <div class="cloud-progress-head">
         <span class="cloud-progress-icon" aria-hidden="true"></span>
-        <strong>Projet Cloud</strong>
+        <strong id="cloud-demarrage-titre">Projet Cloud</strong>
         <span id="cloud-demarrage-count" class="cloud-progress-count"></span>
       </div>
       <div id="cloud-demarrage-label" class="cloud-progress-label">Chargement des projets…</div>

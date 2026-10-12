@@ -185,21 +185,30 @@ const GwsExtensions = (() => {
     await rafraichir();
   }
 
-  /** Un bouton par extension active accrochée à la carte (`hook: map_view`). */
+  /**
+   * Un bouton par extension active, à son point d'accroche : sur la carte
+   * (`hook: map_view`) ou en bas des Paramètres, avant la barre d'usage
+   * (`hook: settings`, depuis la 0.6.0 — réglages d'affichage).
+   */
   function rendreBoutons() {
-    const zone = document.getElementById("map-extensions");
-    if (!zone) return;
-    zone.textContent = "";
+    const zones = {
+      map_view: { el: document.getElementById("map-extensions"), classe: "btn btn-sm map-ext-btn" },
+      settings: { el: document.getElementById("settings-extensions"), classe: "btn btn-sm" },
+    };
+    for (const z of Object.values(zones)) if (z.el) z.el.textContent = "";
     for (const x of extensions) {
-      if (x.hook !== "map_view" || x.state.kind !== "Active" || !x.ui_entry) continue;
+      const z = zones[x.hook];
+      if (!z || !z.el || x.state.kind !== "Active" || !x.ui_entry) continue;
       const b = document.createElement("button");
       b.type = "button";
-      b.className = "btn btn-sm map-ext-btn";
+      b.className = z.classe;
       b.textContent = x.name;
       b.title = x.description || x.name;
       b.addEventListener("click", () => ouvrir(x));
-      zone.appendChild(b);
+      z.el.appendChild(b);
     }
+    const reglages = zones.settings.el;
+    if (reglages) reglages.hidden = !reglages.children.length;
   }
 
   function ouvrir(x) {
@@ -229,6 +238,12 @@ const GwsExtensions = (() => {
       // l'extension la relaie et la fenêtre se ferme comme avec « Fermer ».
       const dlg = document.getElementById("dlg-extension");
       if (dlg.open) dlg.close();
+      return;
+    }
+    if (m.gws === "map_tile_style") {
+      // Extension « Couleurs de la carte » : seul message qui agit hors de
+      // l'iframe, et il ne fait que poser un filtre visuel sur le fond.
+      if (typeof GwsMap !== "undefined" && GwsMap.setTileFilters) GwsMap.setTileFilters(m.payload || {});
       return;
     }
     if (m.gws === "ready") {

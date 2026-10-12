@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Couleurs de la carte</title>
+  <link rel="stylesheet" href="couleurs.css" />
+</head>
+<body>
+  <div class="panneau">
+    <header class="entete">
+      <h1>Couleurs de la carte</h1>
+      <p class="description">
+        Ajustez le rendu visuel du fond de carte (photo aérienne ou TOP25). Les marqueurs et étiquettes restent intacts.
+      </p>
+    </header>
+
+    <main class="contenu">
+      <!-- Curseur Luminosité -->
+      <div class="ligne-curseur">
+        <div class="label-curseur">
+          <label for="curseur-luminosite">Luminosité</label>
+          <span class="valeur" id="valeur-luminosite">0</span>
+        </div>
+        <input
+          type="range"
+          id="curseur-luminosite"
+          min="-100"
+          max="100"
+          step="1"
+          value="0"
+          aria-label="Luminosité du fond de carte"
+        />
+        <div class="echelle">
+          <span>-100 (sombre)</span>
+          <span>0 (neutre)</span>
+          <span>+100 (clair)</span>
+        </div>
+      </div>
+
+      <!-- Curseur Saturation -->
+      <div class="ligne-curseur">
+        <div class="label-curseur">
+          <label for="curseur-saturation">Saturation</label>
+          <span class="valeur" id="valeur-saturation">0</span>
+        </div>
+        <input
+          type="range"
+          id="curseur-saturation"
+          min="-100"
+          max="100"
+          step="1"
+          value="0"
+          aria-label="Saturation du fond de carte"
+        />
+        <div class="echelle">
+          <span>-100 (noir & blanc)</span>
+          <span>0 (neutre)</span>
+          <span>+100 (vif)</span>
+        </div>
+      </div>
+
+      <!-- Curseur Netteté -->
+      <div class="ligne-curseur">
+        <div class="label-curseur">
+          <label for="curseur-nettete">Netteté</label>
+          <span class="valeur" id="valeur-nettete">0</span>
+        </div>
+        <input
+          type="range"
+          id="curseur-nettete"
+          min="-100"
+          max="100"
+          step="1"
+          value="0"
+          aria-label="Netteté du fond de carte"
+        />
+        <div class="echelle">
+          <span>-100 (doux / flou)</span>
+          <span>0 (neutre)</span>
+          <span>+100 (précis)</span>
+        </div>
+      </div>
+    </main>
+
+    <footer class="pied">
+      <button type="button" class="btn btn-secondaire" id="btn-reinitialiser">
+        Réinitialiser
+      </button>
+      <span class="statut" id="statut"></span>
+    </footer>
+  </div>
+
+  <script src="couleurs.js"></script>
+</body>
+</html>

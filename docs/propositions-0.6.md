@@ -252,3 +252,26 @@ manuel ou une synchro Cloud tourne.
   session » comme en 0.5.0 ?
 - Règles d'usage Infoclimat et CGU du portail Météo-France pour des appels périodiques
   automatisés *(à vérifier auprès des fournisseurs)*.
+
+---
+
+## C. Ce que la 0.6.0 a retenu, et la suite (12/10/2026)
+
+La 0.6.0-beta.1 ne reprend pas les refontes A et B ci-dessus. Elle corrige l'import et
+complète le RC-5 :
+- l'import continue en arrière-plan quand on ferme la fenêtre (une barre en bas à gauche le
+  suit, et un message donne le bilan) ;
+- le rôle Principal / Secours est revenu dans la fenêtre d'import ;
+- les imports tournent hors du fil de l'interface ;
+- le RC-5 gagne la remise à l'heure sans effacer, un assistant de démarrage, l'arrêt
+  confirmé, tous ses réglages, et une réinitialisation qui garde les réglages ;
+- les messages d'erreur sont clarifiés.
+
+Le détail du RC-5 est dans `docs/rc5-reglages.md`.
+
+### Notes de Théo pour la suite
+
+- **Pour la V1.00 ou avant** : ajouter la compatibilité avec le **RC-5 Pro**, le
+  **Voltcraft DL-101T** et le **Voltcraft DL-121TH**.
+- **Pour la V1.5, la V2 ou plus tard** : extensions, et compatibilité avec de nouveaux
+  appareils « vibe-codée » par l'IA de Théo directement dans le logiciel.

@@ -47,10 +47,16 @@ pub enum AppError {
     #[error("{0}")]
     ManualEntry(#[from] crate::manual_entry::ManualEntryError),
 
-    #[error("Erreur de base de données : {0}")]
+    #[error(
+        "La base de données a refusé l'opération (détail : {0}). Réessayez ; si le \
+         message revient, fermez puis rouvrez GWS."
+    )]
     Database(#[from] rusqlite::Error),
 
-    #[error("Erreur d'accès fichier : {0}")]
+    #[error(
+        "Fichier inaccessible ({0}). Vérifiez qu'il existe, qu'il n'est pas ouvert \
+         dans un autre logiciel (Excel…) et que le dossier est accessible."
+    )]
     Io(#[from] std::io::Error),
 
     /// Messages déjà rédigés pour l'utilisateur (tuile indisponible, zone de
@@ -58,7 +64,10 @@ pub enum AppError {
     #[error("{0}")]
     Tile(#[from] crate::tiles::TileError),
 
-    #[error("{0} introuvable : {1}")]
+    #[error(
+        "{0} introuvable (identifiant {1}) : il a peut-être été supprimé entre-temps. \
+         Rechargez la liste et réessayez."
+    )]
     NotFound(&'static str, String),
 
     #[error("{0}")]

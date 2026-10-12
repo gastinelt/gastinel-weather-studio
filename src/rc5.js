@@ -24,9 +24,12 @@
  * | Lire le logger | `read_rc5` — la même commande que l'onglet d'import |
  * | Tracer les données | Chart.js vendorisé, comme le bloc Croisement |
  * | Vérifier l'heure | `check_rc5_clock` → `elitech_serial::compare_clock` |
+ * | Remettre à l'heure | `write_rc5` (heure seule) → `elitech_serial::write_device` |
  * | Enregistrer | `import_rc5` → `persist_import`, donc même empreinte SHA-256 |
+ * | Démarrer | rien : le RC-5 démarre par son bouton ▶, l'assistant relit l'état (`identify_rc5`) |
  * | Arrêter (sans effacer) | `stop_rc5` → `elitech_serial::stop_recording` |
- * | Effacer | `reset_rc5` → `elitech_serial::clear_memory` |
+ * | Modifier les réglages | `write_rc5` → `elitech_serial::write_device` |
+ * | Effacer | `reset_rc5` → `elitech_serial::clear_memory_at` |
  * | Exporter | `build_rc5_export` → `export::build_rc5_csv` / `build_rc5_txt` |
  *
  * Toutes ces commandes reçoivent désormais le **port du panneau**, jamais
@@ -78,6 +81,37 @@ const GwsRc5Panel = (() => {
 
   function clear(node) {
     while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  /**
+   * Au-delà, un écart d'horloge n'est pas une **dérive**.
+   *
+   * L'horloge d'un RC-5 dérive de quelques minutes par an au plus. Un écart de
+   * plusieurs heures ou de plusieurs mois signale une horloge arrêtée ou remise
+   * à zéro (pile changée), ou un fuseau mal choisi. Les mesures, elles, sont
+   * datées depuis l'instant de départ et restent justes : recopier cet écart
+   * dans « Dérive » les décalerait toutes — c'est ce qui faisait finir une
+   * série de décembre 2025… le jour de la lecture.
+   */
+  const DERIVE_PLAUSIBLE_MAX_S = 3600;
+
+  /** « 288 jours », « 5 h », « 12 min » : un écart lisible. */
+  function ecartLisible(secondes) {
+    const s = Math.abs(secondes);
+    if (s >= 172800) return `${Math.round(s / 86400)} jours`;
+    if (s >= 7200) return `${Math.round(s / 3600)} h`;
+    if (s >= 120) return `${Math.round(s / 60)} min`;
+    return `${s} s`;
+  }
+
+  /** Phrase dite quand un écart trop grand n'est **pas** repris comme dérive. */
+  function ecartNonRepris(secondes) {
+    return (
+      ` L'écart (${secondes > 0 ? "avance" : "retard"} de ${ecartLisible(secondes)}) est trop grand ` +
+      "pour une dérive : l'horloge a sans doute été arrêtée ou remise à zéro, ou le fuseau " +
+      "choisi n'est pas le bon. Il n'est pas repris dans le champ « Dérive » : les dates des " +
+      "mesures, calculées depuis l'instant de départ, restent celles du logger."
+    );
   }
 
   const nombre = (v) => (v === null || v === undefined ? "—" : Number(v).toLocaleString("fr-FR"));
@@ -194,6 +228,254 @@ const GwsRc5Panel = (() => {
     });
   }
 
+  // ------------------------------------------------- états de fonctionnement
+
+  /** `WorkStatus` du backend → texte. `Unknown(n)` arrive comme `{ Unknown: n }`. */
+  function libelleEtat(statut) {
+    switch (statut) {
+      case "NotStarted":
+        return "en attente de démarrage (appui long sur ▶)";
+      case "Running":
+        return "enregistrement en cours";
+      case "Stopped":
+        return "arrêté";
+      case "DelayedStart":
+        return "démarrage différé programmé";
+      default:
+        return statut && typeof statut === "object" && "Unknown" in statut
+          ? `inconnu (code ${statut.Unknown})`
+          : "inconnu";
+    }
+  }
+
+  /** « Aucun », « 30 min », « 1 h », « 1 h 30 » — le délai est en demi-heures. */
+  function libelleDelai(demiHeures) {
+    if (!demiHeures) return "Aucun";
+    const h = Math.floor(demiHeures / 2);
+    const demi = demiHeures % 2 === 1;
+    if (h === 0) return "30 min";
+    return demi ? `${h} h 30` : `${h} h`;
+  }
+
+  const ouiNon = (v) => (v ? "activé" : "désactivé");
+
+  function libelleAlarme(code) {
+    return code === 0 ? "désactivée" : `code ${code}`;
+  }
+
+  // ----------------------------------------- modale des réglages (unique)
+
+  /**
+   * Panneau qui a ouvert la modale des réglages, et ce que le logger annonçait
+   * à l'ouverture (`Rc5Identity`). Le bilan compare le formulaire à cette
+   * relecture, jamais à une lecture plus ancienne : c'est elle que l'écriture
+   * va remplacer.
+   */
+  let reglages = null;
+  let reglagesCables = false;
+
+  /**
+   * Champs de la modale. Une seule source pour lire, remplir et comparer :
+   * oublier un champ ici le ferait disparaître des trois à la fois, ce qui se voit.
+   */
+  function lireFormulaireReglages() {
+    const n = (id) => {
+      const v = el(id).value.trim();
+      return v === "" ? NaN : Number(v.replace(",", "."));
+    };
+    const zero = (id) => (el(id).value.trim() === "" ? 0 : n(id));
+    return {
+      sample_interval_seconds: zero("rc5-set-h") * 3600 + zero("rc5-set-m") * 60 + zero("rc5-set-s"),
+      start_delay_half_hours: Number(el("rc5-set-delay").value),
+      stop_button_enabled: el("rc5-set-stop").value === "1",
+      upper_limit_celsius: n("rc5-set-upper"),
+      lower_limit_celsius: n("rc5-set-lower"),
+      fahrenheit: el("rc5-set-unit").value === "1",
+      station_no: n("rc5-set-station"),
+      key_tone_enabled: el("rc5-set-tone").value === "1",
+      alarm: Number(el("rc5-set-alarm").value),
+      temperature_calibration: n("rc5-set-calib"),
+    };
+  }
+
+  function remplirFormulaireReglages(r) {
+    const i = r.sample_interval_seconds;
+    el("rc5-set-h").value = String(Math.floor(i / 3600));
+    el("rc5-set-m").value = String(Math.floor((i % 3600) / 60));
+    el("rc5-set-s").value = String(i % 60);
+    el("rc5-set-delay").value = String(Math.min(r.start_delay_half_hours, 12));
+    el("rc5-set-stop").value = r.stop_button_enabled ? "1" : "0";
+    el("rc5-set-upper").value = r.upper_limit_celsius.toFixed(1);
+    el("rc5-set-lower").value = r.lower_limit_celsius.toFixed(1);
+    el("rc5-set-unit").value = r.fahrenheit ? "1" : "0";
+    el("rc5-set-station").value = String(r.station_no);
+    el("rc5-set-tone").value = r.key_tone_enabled ? "1" : "0";
+    // Une valeur hors liste (logger réglé ailleurs) resterait invisible dans le
+    // menu : on l'y ajoute plutôt que d'afficher « Désactivée » à tort.
+    const alarme = el("rc5-set-alarm");
+    if (![...alarme.options].some((o) => Number(o.value) === r.alarm)) {
+      alarme.appendChild(h("option", { value: String(r.alarm) }, `Code ${r.alarm} (actuel)`));
+    }
+    alarme.value = String(r.alarm);
+    el("rc5-set-calib").value = r.temperature_calibration.toFixed(1);
+  }
+
+  /**
+   * Ce que l'écriture fera, en clair. Mêmes bornes que `Rc5Settings::validate`
+   * côté Rust — qui reste juge : un réglage refusé ici le serait aussi là-bas,
+   * mais on le dit avant le clic plutôt qu'après.
+   */
+  function bilanReglages() {
+    const { identite: id } = reglages;
+    const avant = id.settings;
+    const apres = lireFormulaireReglages();
+    const dixiemes = (v) => Math.round(v * 10);
+
+    let erreur = null;
+    const i = apres.sample_interval_seconds;
+    if (!Number.isFinite(i) || i < 10 || i > 86400) {
+      erreur = "L'intervalle doit être compris entre 10 secondes et 24 heures.";
+    } else if (![apres.upper_limit_celsius, apres.lower_limit_celsius].every((v) => Number.isFinite(v) && v >= -40 && v <= 90)) {
+      erreur = "Les limites doivent être comprises entre −40 °C et 90 °C.";
+    } else if (dixiemes(apres.upper_limit_celsius) - dixiemes(apres.lower_limit_celsius) < 5) {
+      erreur = "La limite haute doit dépasser la limite basse d'au moins 0,5 °C.";
+    } else if (!Number.isInteger(apres.station_no) || apres.station_no < 1 || apres.station_no > 254) {
+      erreur = "L'adresse doit être un nombre entier entre 1 et 254.";
+    } else if (!Number.isFinite(apres.temperature_calibration) || Math.abs(apres.temperature_calibration) > 5) {
+      erreur = "La correction de température doit rester entre −5,0 °C et +5,0 °C.";
+    }
+
+    const info = el("rc5-set-info").value.trim();
+    const infoAvant = (id.device.user_info || "").trim();
+    const serie = el("rc5-set-serial").value.trim();
+    const serieAvant = (id.device.device_number || "").trim();
+    if (!erreur && !/^[\x20-\x7E]*$/.test(info)) {
+      erreur = "La description n'accepte que des lettres sans accent, des chiffres et la ponctuation courante.";
+    } else if (!erreur && serie !== serieAvant && !/^[A-Za-z0-9]{1,10}$/.test(serie)) {
+      erreur = "Le numéro de série : 1 à 10 lettres sans accent ou chiffres.";
+    }
+
+    const changements = [];
+    const comparer = (nom, a, b, fmt = (x) => x) => {
+      if (a !== b) changements.push(`${nom} : ${fmt(a)} → ${fmt(b)}`);
+    };
+    if (!erreur) {
+      comparer("intervalle", avant.sample_interval_seconds, apres.sample_interval_seconds, duree);
+      comparer("délai de démarrage", avant.start_delay_half_hours, apres.start_delay_half_hours, libelleDelai);
+      comparer("bouton d'arrêt", avant.stop_button_enabled, apres.stop_button_enabled, ouiNon);
+      comparer("limite haute", dixiemes(avant.upper_limit_celsius), dixiemes(apres.upper_limit_celsius), (d) => `${(d / 10).toFixed(1)} °C`);
+      comparer("limite basse", dixiemes(avant.lower_limit_celsius), dixiemes(apres.lower_limit_celsius), (d) => `${(d / 10).toFixed(1)} °C`);
+      comparer("unité de l'écran", avant.fahrenheit, apres.fahrenheit, (f) => (f ? "°F" : "°C"));
+      comparer("adresse", avant.station_no, apres.station_no);
+      comparer("tonalité des boutons", avant.key_tone_enabled, apres.key_tone_enabled, (v) => (v ? "activée" : "désactivée"));
+      comparer("alarme sonore", avant.alarm, apres.alarm, libelleAlarme);
+      comparer("correction de température", dixiemes(avant.temperature_calibration), dixiemes(apres.temperature_calibration), (d) => `${(d / 10).toFixed(1)} °C`);
+    }
+
+    const demande = {};
+    if (changements.length) demande.settings = apres;
+    if (!erreur && info !== infoAvant) demande.user_info = info;
+    if (!erreur && serie !== serieAvant) demande.device_number = serie;
+    if (el("rc5-set-clock").checked) demande.clock_timezone_offset_seconds = reglages.panneau.fuseau();
+
+    const efface = Boolean(demande.settings);
+    return {
+      erreur,
+      demande,
+      changements,
+      efface,
+      sensible: efface || demande.device_number !== undefined,
+      vide: Object.keys(demande).length === 0,
+    };
+  }
+
+  function majBilanReglages() {
+    const b = bilanReglages();
+    const { identite: id, panneau } = reglages;
+    const boite = el("rc5-set-bilan");
+    clear(boite);
+    el("rc5-set-error").hidden = true;
+
+    if (b.erreur) {
+      boite.className = "banner is-danger";
+      boite.textContent = `${b.erreur} Rien ne sera écrit tant que ce n'est pas corrigé.`;
+    } else if (b.vide) {
+      boite.className = "banner";
+      boite.textContent = "Rien à écrire : aucun réglage n'a changé.";
+    } else {
+      const lignes = [];
+      if (b.changements.length) lignes.push(`Réglages modifiés — ${b.changements.join(" ; ")}.`);
+      if (b.demande.user_info !== undefined) lignes.push("La description change (n'efface rien).");
+      if (b.demande.device_number !== undefined) {
+        lignes.push(
+          `Le numéro de série change : ${id.device.device_number || "aucun"} → ${b.demande.device_number}. ` +
+            "Le nom donné à ce logger le suivra ; les séries déjà en base gardent l'ancien numéro."
+        );
+      }
+      if (b.demande.clock_timezone_offset_seconds !== undefined) lignes.push("Le logger sera remis à l'heure.");
+      if (b.efface) {
+        lignes.push(
+          `La mémoire du logger sera effacée${id.rec_count ? ` (${nombre(id.rec_count)} mesure(s))` : ""}, ` +
+            "comme dans ElitechLog : c'est le seul moyen d'écrire ces paramètres."
+        );
+        if (id.device.work_status === "Running" || id.device.work_status === "DelayedStart") {
+          lignes.push("L'enregistrement en cours sera arrêté avant l'écriture.");
+        }
+        if (id.rec_count && panneau.lectureNonSauvegardee()) {
+          lignes.push("Des mesures sont affichées dans ce panneau : sauvegardez-les d'abord si ce n'est pas fait.");
+        }
+        lignes.push("Ensuite, le logger attendra son démarrage : maintenez son bouton ▶ environ 5 secondes.");
+      } else {
+        lignes.push("Rien n'est effacé.");
+      }
+      boite.className = b.efface ? "banner is-danger" : "banner is-ok";
+      for (const l of lignes) boite.appendChild(h("p", { text: l }));
+    }
+
+    el("rc5-set-word-field").hidden = !b.sensible || Boolean(b.erreur);
+    const mot = el("rc5-set-word").value.trim();
+    el("rc5-set-confirm").disabled = Boolean(b.erreur) || b.vide || (b.sensible && mot !== "CONFIRMER");
+    el("rc5-set-confirm").textContent = b.efface ? "Effacer et écrire sur le logger" : "Écrire sur le logger";
+  }
+
+  function cablerModaleReglages() {
+    if (reglagesCables) return;
+    reglagesCables = true;
+
+    const delai = el("rc5-set-delay");
+    for (let d = 0; d <= 12; d += 1) delai.appendChild(h("option", { value: String(d) }, libelleDelai(d)));
+
+    const form = el("form-rc5-settings");
+    form.addEventListener("input", () => reglages && majBilanReglages());
+    form.addEventListener("change", () => reglages && majBilanReglages());
+    el("rc5-set-cancel").addEventListener("click", () => el("dlg-rc5-settings").close());
+    el("rc5-set-confirm").addEventListener("click", () => {
+      if (!reglages) return;
+      const b = bilanReglages();
+      if (b.erreur || b.vide) return;
+      reglages.panneau.ecrireReglages(b.demande, b.sensible ? el("rc5-set-word").value.trim() : null);
+    });
+    el("dlg-rc5-settings").addEventListener("close", () => {
+      reglages = null;
+    });
+  }
+
+  function ouvrirModaleReglages(panneau, identiteLue) {
+    cablerModaleReglages();
+    reglages = { panneau, identite: identiteLue };
+    el("rc5-set-who").textContent =
+      `« ${panneau.libelle()} » — ${identiteLue.model_label}, ${libelleEtat(identiteLue.device.work_status)}, ` +
+      `${nombre(identiteLue.rec_count)} mesure(s) en mémoire. Valeurs relues à l'instant sur l'appareil.`;
+    remplirFormulaireReglages(identiteLue.settings);
+    el("rc5-set-info").value = identiteLue.device.user_info || "";
+    el("rc5-set-serial").value = identiteLue.device.device_number || "";
+    el("rc5-set-clock").checked = true;
+    el("rc5-set-word").value = "";
+    el("rc5-set-error").hidden = true;
+    majBilanReglages();
+    el("dlg-rc5-settings").showModal();
+  }
+
   // --------------------------------------------------------------- fabrique
 
   /**
@@ -205,7 +487,7 @@ const GwsRc5Panel = (() => {
    * @param {string}   [ctx.loggerSerial]  numéro de série annoncé par la détection
    * @param {function} ctx.invoke          pont Tauri
    * @param {function} ctx.onToast         message éphémère
-   * @param {function} ctx.onError         message d'erreur global
+   * @param {function} [ctx.onError]       ignoré : une erreur reste dans le cadre du panneau
    * @param {function} ctx.confirmDuplicate dialogue de ré-import partagé
    * @param {function} ctx.onSaved         rappel après enregistrement en base
    * @param {function} ctx.onIdentity      rappel quand le nom ou l'identité changent
@@ -220,7 +502,6 @@ const GwsRc5Panel = (() => {
 
     const invoke = ctx.invoke;
     const onToast = ctx.onToast || (() => {});
-    const onError = ctx.onError || (() => {});
 
     let portName = ctx.portName;
     let modelLabel = ctx.modelLabel || "Logger RC-5";
@@ -424,8 +705,8 @@ const GwsRc5Panel = (() => {
         afficherEntete(a);
         tracer(a);
         afficherInformations(a);
+        majEtat(a.work_status);
         majBoutonsExport();
-        q("serial").placeholder = a.logger_serial || "";
         majApercuDecalage();
 
         // Les avertissements matériels (logger encore en marche, calibration
@@ -501,9 +782,9 @@ const GwsRc5Panel = (() => {
      * Remplit le tableau du bas avec tout ce que le protocole a transmis.
      *
      * Rien n'y est calculé : ce sont les champs de `DevInfo` tels que
-     * `elitech_serial.rs` les a décodés. Ce que le protocole ne transmet pas est
-     * **nommé** plutôt que passé sous silence — chercher une version de firmware
-     * absente coûte plus cher que lire une ligne qui dit qu'elle n'existe pas.
+     * `elitech_serial.rs` les a décodés — y compris le firmware et la pile, que
+     * l'on a longtemps crus absents du protocole (ElitechLog les lit aux octets
+     * 4 et 28). Une valeur non transmise est **nommée** plutôt que masquée.
      */
     function afficherInformations(a) {
       const bloc = q("infos");
@@ -516,6 +797,14 @@ const GwsRc5Panel = (() => {
 
       ligne(dl, "Nom donné à l'appareil", nomEnregistre(deviceId) || "aucun (nom par défaut)");
       ligne(dl, "Modèle", a.model_label);
+      ligne(dl, "Version du firmware", a.firmware_label || "non transmise");
+      ligne(
+        dl,
+        "Pile",
+        a.battery_percent === null || a.battery_percent === undefined
+          ? "non transmise"
+          : `${a.battery_percent} % (valeur annoncée par l'appareil)`
+      );
       ligne(
         dl,
         "Numéro de série",
@@ -533,6 +822,15 @@ const GwsRc5Panel = (() => {
       );
       ligne(dl, "Seuil d'alarme haut", reglageDegres(a.upper_limit_celsius));
       ligne(dl, "Seuil d'alarme bas", reglageDegres(a.lower_limit_celsius));
+      const r = a.settings;
+      if (r) {
+        ligne(dl, "Délai de démarrage", libelleDelai(r.start_delay_half_hours));
+        ligne(dl, "Bouton d'arrêt", ouiNon(r.stop_button_enabled));
+        ligne(dl, "Unité de l'écran", r.fahrenheit ? "°F (les mesures lues restent en °C)" : "°C");
+        ligne(dl, "Adresse", String(r.station_no));
+        ligne(dl, "Tonalité des boutons", r.key_tone_enabled ? "activée" : "désactivée");
+        ligne(dl, "Alarme sonore", libelleAlarme(r.alarm));
+      }
       // Cette ligne n'est pas décorative : une calibration non nulle est déjà
       // comprise dans les températures tracées au-dessus.
       ligne(
@@ -542,10 +840,9 @@ const GwsRc5Panel = (() => {
       );
 
       q("infos-absents").textContent =
-        "Le protocole série du RC-5 ne transmet ni version de firmware, ni niveau de " +
-        "batterie : ces deux informations sont absentes de l'appareil, pas de cet écran. " +
-        "Le nom donné à l'appareil, à l'inverse, ne vient pas du protocole — il est rangé " +
-        "sur ce poste seulement.";
+        "Le nom donné à l'appareil ne vient pas du protocole : il est rangé sur ce poste " +
+        "seulement. Tout le reste est lu sur le logger ; « Modifier les réglages » permet " +
+        "de changer ce qui est modifiable.";
       bloc.hidden = false;
     }
 
@@ -583,7 +880,9 @@ const GwsRc5Panel = (() => {
         dl.hidden = false;
 
         const verdict = q("clock-verdict");
-        verdict.textContent = r.check.message;
+        const d = r.check.drift_seconds;
+        const plausible = d !== null && Math.abs(d) <= DERIVE_PLAUSIBLE_MAX_S;
+        verdict.textContent = r.check.message + (d !== null && !plausible ? ecartNonRepris(d) : "");
         verdict.className = `banner${r.check.severity === "aligned" ? " is-ok" : ""}${
           r.check.severity === "severe" ? " is-danger" : ""
         }`;
@@ -591,8 +890,8 @@ const GwsRc5Panel = (() => {
 
         // La dérive mesurée alimente directement le champ de l'enregistrement :
         // c'est tout l'intérêt d'avoir les deux sur le même écran.
-        if (r.check.drift_seconds !== null) {
-          q("drift").value = String(r.check.drift_seconds);
+        if (plausible) {
+          q("drift").value = String(d);
           majApercuDecalage();
         }
       } catch (e) {
@@ -602,9 +901,135 @@ const GwsRc5Panel = (() => {
       }
     }
 
-    // ----------------------------------------------------- arrêt (sans effacer)
+    /**
+     * Écrit l'heure du PC dans le logger, sans rien effacer.
+     *
+     * Les mesures déjà prises gardent l'ancienne heure. La dérive mesurée juste
+     * avant passe dans le champ de l'enregistrement : elle vaut pour la lecture
+     * affichée, faite avant la remise à l'heure. Une lecture faite **après**
+     * mélangerait des mesures décalées et d'autres à l'heure, qu'aucune
+     * correction unique ne remet d'aplomb — d'où la question posée avant.
+     */
+    async function remettreALHeure() {
+      if (lecture && lecture.measurement_count > 0) {
+        const ok = await window.confirm(
+          `« ${instance.libelle()} » contient ${nombre(lecture.measurement_count)} mesure(s). ` +
+            "Elles garderont l'heure d'avant la remise à l'heure.\n\n" +
+            "Le plus simple : sauvegardez-les d'abord (la dérive mesurée sera reprise " +
+            "dans le champ « Dérive »). Remettre à l'heure maintenant ?"
+        );
+        if (!ok) return;
+      }
+      const bouton = q("set-clock");
+      bouton.disabled = true;
+      cacherErreur();
+      try {
+        const r = await invoke("write_rc5", {
+          port_name: portName,
+          request: { clock_timezone_offset_seconds: fuseau() },
+          confirmation: null,
+        });
+        portName = r.port_name;
+        const avant = r.report.clock ? r.report.clock.drift_before_seconds : null;
+        let texte = r.message;
+        if (avant !== null && avant !== undefined && avant !== 0) {
+          texte += ` L'horloge avait ${avant > 0 ? "+" : ""}${avant} s d'écart.`;
+          if (Math.abs(avant) > DERIVE_PLAUSIBLE_MAX_S) {
+            texte += ecartNonRepris(avant);
+          } else if (r.report.before.rec_count > 0) {
+            // Les mesures déjà en mémoire portent cet écart : le garder dans le
+            // champ « Dérive » évite de le perdre — « Vérifier l'heure » dira
+            // désormais « à l'heure ».
+            q("drift").value = String(avant);
+            majApercuDecalage();
+            texte += lecture
+              ? " Cet écart est repris dans le champ « Dérive » pour sauvegarder la lecture affichée."
+              : " Cet écart est repris dans le champ « Dérive » : il vaut pour les mesures prises " +
+                "avant la remise à l'heure. Relisez puis sauvegardez sans tarder.";
+          }
+        }
+        const verdict = q("clock-verdict");
+        verdict.textContent = texte;
+        verdict.className = r.report.mismatches.length ? "banner is-danger" : "banner is-ok";
+        verdict.hidden = false;
+        q("clock-kv").hidden = true;
+        majEtat(r.report.after.work_status);
+        onToast("Logger remis à l'heure.");
+      } catch (e) {
+        montrerErreur(String(e));
+      } finally {
+        bouton.disabled = !branche;
+      }
+    }
+
+    // ------------------------------------------------- démarrage et arrêt
+
+    function majEtat(statut) {
+      q("etat").textContent = `État du logger : ${libelleEtat(statut)}.`;
+    }
+
+    /**
+     * Assistant de démarrage. Il n'envoie rien : le RC-5 n'a pas de commande de
+     * démarrage (ElitechLog n'en a pas non plus pour lui). Il relit l'état, dit
+     * quoi faire, et relit de nouveau pour confirmer.
+     */
+    async function demarrer(verification = false) {
+      const bouton = q("start");
+      bouton.disabled = true;
+      cacherErreur();
+      const guide = q("start-guide");
+      try {
+        const id = await invoke("identify_rc5", { port_name: portName });
+        portName = id.port_name;
+        const statut = id.device.work_status;
+        majEtat(statut);
+        clear(guide);
+        const p = (texte, cls) => guide.appendChild(h("p", { class: cls || null, text: texte }));
+        if (statut === "Running") {
+          const depuis = id.device.start_time ? ` depuis ${id.device.start_time.replace("T", " ")} (heure du logger)` : "";
+          p(`${verification ? "C'est parti : le" : "Le"} logger enregistre${depuis}, toutes les ${duree(id.sample_interval_seconds)}.`, "banner is-ok");
+        } else if (statut === "DelayedStart") {
+          p(
+            `Démarrage différé en cours : la première mesure viendra après le délai réglé (${libelleDelai(id.settings.start_delay_half_hours)}).`,
+            "banner is-ok"
+          );
+        } else if (statut === "Stopped") {
+          p(
+            "Ce logger est arrêté, et un RC-5 arrêté ne repart pas. Sauvegardez ses données, " +
+              "puis réinitialisez-le (plus bas) : il attendra alors son démarrage par ▶.",
+            "banner"
+          );
+        } else if (statut === "NotStarted") {
+          if (verification) p("Le logger n'a pas encore démarré.", "banner");
+          p(
+            "Maintenez le bouton ▶ du logger environ 5 secondes, jusqu'à ce que le symbole ▶ " +
+              "s'affiche à l'écran. Si rien ne se passe, débranchez le câble USB et recommencez."
+          );
+          if (id.settings.start_delay_half_hours > 0) {
+            p(`Délai réglé : ${libelleDelai(id.settings.start_delay_half_hours)} entre l'appui et la première mesure.`);
+          }
+          p("Pensez à le remettre à l'heure avant (bouton « Remettre à l'heure » plus haut) : rien n'est effacé.", "hint");
+          guide.appendChild(
+            h("button", { type: "button", class: "btn", onclick: () => demarrer(true) }, "Vérifier le démarrage")
+          );
+        } else {
+          p(`État inattendu (${libelleEtat(statut)}) : relisez le logger avant toute action.`, "banner is-danger");
+        }
+        guide.hidden = false;
+      } catch (e) {
+        montrerErreur(String(e));
+      } finally {
+        bouton.disabled = !branche;
+      }
+    }
 
     async function arreterEnregistrement() {
+      const ok = await window.confirm(
+        `Arrêter l'enregistrement de « ${instance.libelle()} » ?\n\n` +
+          "Les mesures déjà prises restent en mémoire. Mais un RC-5 arrêté ne repart pas : " +
+          "pour enregistrer de nouveau, il faudra le réinitialiser, ce qui efface sa mémoire."
+      );
+      if (!ok) return;
       const bouton = q("stop");
       bouton.disabled = true;
       cacherErreur();
@@ -616,12 +1041,17 @@ const GwsRc5Panel = (() => {
           `${nombre(r.rec_count)} mesure(s) toujours en mémoire.`;
         resultat.className = "banner is-ok";
         resultat.hidden = false;
+        q("etat").textContent = `État du logger : ${r.work_status}.`;
+        q("start-guide").hidden = true;
       } catch (e) {
         montrerErreur(String(e));
       } finally {
         bouton.disabled = !branche;
       }
     }
+
+    /** Fuseau réglé sur le logger, en secondes, tel que choisi dans « Heure du logger ». */
+    const fuseau = () => Number(q("tz").value) || 0;
 
     /** `clock_offset_seconds` = secondes à AJOUTER au brut pour obtenir l'UTC. */
     function decalage() {
@@ -637,7 +1067,19 @@ const GwsRc5Panel = (() => {
       q("offset-hint").textContent =
         `Chaque mesure sera enregistrée en UTC = heure du logger ${offset >= 0 ? "+" : "−"} ` +
         `${Math.abs(offset)} s (fuseau ${tz === 0 ? "UTC" : `UTC+${tz / 3600}`}, dérive ${derive} s). ` +
-        `L'heure brute est conservée : un recalibrage reste possible plus tard.`;
+        `L'heure brute est conservée : un recalibrage reste possible plus tard.` +
+        periodeEnregistree(offset);
+    }
+
+    /**
+     * « Période enregistrée : du … au … (UTC) », correction comprise. Une dérive
+     * aberrante se voit alors avant l'enregistrement, et non après.
+     */
+    function periodeEnregistree(offset) {
+      if (!lecture || !lecture.raw_period_start || !lecture.raw_period_end) return "";
+      const fmt = (brut) =>
+        new Date(instant(brut) + offset * 1000).toISOString().slice(0, 16).replace("T", " ");
+      return ` Période enregistrée : du ${fmt(lecture.raw_period_start)} au ${fmt(lecture.raw_period_end)} (UTC).`;
     }
 
     // ---------------------------------------------------- projet et points
@@ -726,7 +1168,9 @@ const GwsRc5Panel = (() => {
               role: q("role").value,
               clock_offset_seconds: decalage(),
               raw_timestamp_was_utc: Number(q("tz").value) === 0,
-              logger_serial: q("serial").value.trim() || null,
+              // Le numéro transmis par le logger : il figure dans la série, les
+              // exports et le bilan, sans champ à remplir.
+              logger_serial: lecture.logger_serial || null,
               label: null,
               reading_id: lecture.reading_id,
               port_name: lecture.port_name,
@@ -742,9 +1186,10 @@ const GwsRc5Panel = (() => {
 
         // Le jeton de lecture a été consommé par le backend : relire le logger
         // avant un second enregistrement, sinon la commande relirait l'appareil.
+        const serie = lecture.logger_serial;
         lecture = null;
         majBoutonsExport();
-        afficherRapport(rapport);
+        afficherRapport(rapport, serie);
         onToast(
           `${nombre(rapport.imported_count)} mesures enregistrées sur « ${rapport.point_name} ».`
         );
@@ -756,12 +1201,13 @@ const GwsRc5Panel = (() => {
       }
     }
 
-    function afficherRapport(r) {
+    function afficherRapport(r, serie) {
       const box = q("report");
       clear(box);
       box.className = "report is-ok";
       const dl = h("dl", { class: "kv" });
       ligne(dl, "Point", r.point_name);
+      ligne(dl, "Logger", serie ? `n° ${serie}` : "numéro de série non transmis");
       ligne(dl, "Mesures enregistrées", nombre(r.imported_count));
       ligne(
         dl,
@@ -783,6 +1229,61 @@ const GwsRc5Panel = (() => {
         })
       );
       box.hidden = false;
+    }
+
+    // ------------------------------------------------------------- réglages
+
+    /** Relit l'appareil puis ouvre la modale : jamais de réglages périmés. */
+    async function ouvrirReglages() {
+      const bouton = q("settings");
+      bouton.disabled = true;
+      cacherErreur();
+      try {
+        const id = await invoke("identify_rc5", { port_name: portName });
+        portName = id.port_name;
+        majEtat(id.device.work_status);
+        ouvrirModaleReglages(instance, id);
+      } catch (e) {
+        montrerErreur(String(e));
+      } finally {
+        bouton.disabled = !branche;
+      }
+    }
+
+    /** Appelé par la modale avec la demande prête (`Rc5Write`). */
+    async function ecrireReglages(demande, confirmation) {
+      const bouton = el("rc5-set-confirm");
+      bouton.disabled = true;
+      const erreur = el("rc5-set-error");
+      erreur.hidden = true;
+      try {
+        const r = await invoke("write_rc5", { port_name: portName, request: demande, confirmation });
+        el("dlg-rc5-settings").close();
+        portName = r.port_name;
+        if (r.memory_cleared) memoireVidee("Mémoire effacée par l'écriture des réglages.");
+        if (demande.device_number !== undefined) majIdentite(r.report.after.device_number);
+        majEtat(r.report.after.work_status);
+
+        const box = q("report");
+        clear(box);
+        box.className = r.report.mismatches.length ? "report" : "report is-ok";
+        box.appendChild(h("p", { text: r.message }));
+        box.hidden = false;
+        onToast(r.memory_cleared ? "Réglages écrits ; la mémoire du logger a été vidée." : "Réglages écrits sur le logger.");
+      } catch (e) {
+        erreur.textContent = String(e);
+        erreur.hidden = false;
+        bouton.disabled = false;
+      }
+    }
+
+    /** La lecture affichée ne décrit plus rien : l'appareil est vide. */
+    function memoireVidee(texteGraphique) {
+      lecture = null;
+      detruireGraphique();
+      majBoutonsExport();
+      messageGraphique(texteGraphique);
+      q("sub").textContent = "0 mesure en mémoire — le logger attend son démarrage (▶).";
     }
 
     // ------------------------------------------------------ réinitialisation
@@ -812,8 +1313,8 @@ const GwsRc5Panel = (() => {
       const marche = Boolean(lecture && /en cours/i.test(lecture.work_status_label || ""));
       enCours.hidden = !marche;
       enCours.textContent = marche
-        ? "Ce logger enregistre actuellement. Il sera arrêté avant l'effacement, et ne " +
-          "redémarrera pas tout seul : il faudra le reprogrammer depuis ElitechLog pour " +
+        ? "Ce logger enregistre actuellement. Il sera arrêté avant l'effacement, puis " +
+          "attendra son démarrage : maintenez son bouton ▶ environ 5 secondes pour " +
           "relancer un enregistrement."
         : "";
 
@@ -834,17 +1335,13 @@ const GwsRc5Panel = (() => {
         const r = await invoke("reset_rc5", {
           port_name: portName,
           confirmation: el("rc5-reset-word").value.trim(),
+          timezone_offset_seconds: el("rc5-reset-clock").checked ? fuseau() : null,
         });
         el("dlg-rc5-reset").close();
 
-        // La lecture affichée ne décrit plus rien : l'appareil est vide.
-        lecture = null;
-        detruireGraphique();
-        majBoutonsExport();
-        messageGraphique("Mémoire effacée : le logger ne contient plus aucune mesure.");
-        q("sub").textContent = r.recording_stopped
-          ? "0 mesure en mémoire — logger arrêté puis réinitialisé."
-          : "0 mesure en mémoire — logger réinitialisé.";
+        memoireVidee("Mémoire effacée : le logger ne contient plus aucune mesure.");
+        majEtat("NotStarted");
+        q("start-guide").hidden = true;
 
         const box = q("report");
         clear(box);
@@ -869,11 +1366,16 @@ const GwsRc5Panel = (() => {
 
     // --------------------------------------------------------------- erreurs
 
+    /**
+     * Une erreur, **un** affichage : le cadre du panneau, amené à l'écran.
+     * Avant la 0.6.0, elle partait aussi dans un message rouge en bas de page —
+     * le même texte deux fois.
+     */
     function montrerErreur(message) {
       const box = q("error");
       box.textContent = message;
       box.hidden = false;
-      onError(message);
+      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
     function cacherErreur() {
@@ -923,11 +1425,17 @@ const GwsRc5Panel = (() => {
     };
     window.addEventListener("resize", surRedimensionnement);
 
+    /** Les boutons qui parlent au logger : coupés quand il est débranché. */
+    const BOUTONS_MATERIEL = ["reload", "check-clock", "set-clock", "start", "stop", "settings", "reset"];
+
     // ---------------------------------------------------------------- câblage
 
     q("reload").addEventListener("click", relire);
     q("check-clock").addEventListener("click", verifierHorloge);
+    q("set-clock").addEventListener("click", remettreALHeure);
+    q("start").addEventListener("click", () => demarrer(false));
     q("stop").addEventListener("click", arreterEnregistrement);
+    q("settings").addEventListener("click", ouvrirReglages);
     q("save").addEventListener("click", sauvegarder);
     q("tz").addEventListener("change", majApercuDecalage);
     q("drift").addEventListener("input", majApercuDecalage);
@@ -968,6 +1476,12 @@ const GwsRc5Panel = (() => {
       },
 
       remplirProjets,
+      fuseau,
+      ecrireReglages,
+      /** Une lecture est affichée (et n'a pas été enregistrée depuis). */
+      lectureNonSauvegardee() {
+        return Boolean(lecture);
+      },
 
       /** Première venue sur l'onglet : on lit, comme le faisait l'ancienne page. */
       activer() {
@@ -985,20 +1499,16 @@ const GwsRc5Panel = (() => {
        */
       debrancher() {
         branche = false;
-        q("reload").disabled = true;
-        q("check-clock").disabled = true;
-        q("stop").disabled = true;
-        q("reset").disabled = true;
+        for (const b of BOUTONS_MATERIEL) q(b).disabled = true;
+        q("start-guide").hidden = true;
         q("offline").hidden = false;
+        if (reglages && reglages.panneau === instance) el("dlg-rc5-settings").close();
       },
 
       /** Rebranché sur le même port : tout redevient possible. */
       rebrancher() {
         branche = true;
-        q("reload").disabled = false;
-        q("check-clock").disabled = false;
-        q("stop").disabled = false;
-        q("reset").disabled = false;
+        for (const b of BOUTONS_MATERIEL) q(b).disabled = false;
         q("offline").hidden = true;
       },
 
@@ -1012,6 +1522,7 @@ const GwsRc5Panel = (() => {
           el("dlg-rc5-reset").close();
           proprietaireEffacement = null;
         }
+        if (reglages && reglages.panneau === instance) el("dlg-rc5-settings").close();
         racine.remove();
       },
     });

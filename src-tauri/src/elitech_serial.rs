@@ -78,20 +78,29 @@
 //! * Le **RC-5+** : modèle différent, non couvert par la référence utilisée et
 //!   non testé ici. Un `model_no` inattendu est refusé explicitement plutôt que
 //!   décodé au hasard.
-//! * L'**écriture de configuration** : réglage d'horloge, numéro de station,
-//!   seuils d'alarme. Le protocole les prévoit ; ce module ne les implémente
-//!   pas. Une application de relevé n'a aucune raison de reprogrammer l'appareil
-//!   qu'elle lit — c'est le travail d'ElitechLog.
+//! * Le **démarrage par logiciel**. ElitechLog 8.0.5 n'en a pas pour cette
+//!   famille (son module série n'envoie que lecture, heure, description,
+//!   paramètres, numéro de série et arrêt) : le RC-5 démarre par un appui long
+//!   sur ▶. Seuls les RC-5+ (USB HID) ont un démarrage immédiat ou programmé.
+//! * Le changement de **numéro de modèle** (`33 st 04 00`, commande d'usine
+//!   présente dans ElitechLog) : un logger qui n'annonce plus le modèle 50 n'est
+//!   plus reconnu, ni ici ni par ElitechLog.
 //!
-//! ## La seule exception : l'effacement de la mémoire
+//! ## Les écritures
 //!
-//! [`clear_memory`] est la **seule** commande d'écriture de ce module, et la
-//! seule dont le comportement n'ait pas été vérifié sur le logger réel. Elle ne
-//! configure rien : elle remet le boîtier à zéro pour la campagne suivante,
-//! c'est-à-dire le geste qui suit un relevé. Tout ce qui l'encadre — pourquoi la
-//! requête renvoie à l'appareil sa propre fiche d'identité, et comment le
-//! résultat est vérifié plutôt que supposé — est documenté sur
-//! [`CMD_PARAM_PUT`]. **À lire avant d'y toucher.**
+//! Depuis la 0.6.0, GWS écrit ce qu'écrit ElitechLog, et rien d'autre :
+//!
+//! | Commande | Trame | Efface la mémoire |
+//! |---|---|---|
+//! | Heure ([`clock_set_request`]) | `33 st 07 00` + date sur 7 octets | non |
+//! | Description ([`user_info_request`]) | `33 st 09 00` + 100 octets | non |
+//! | Numéro de série ([`dev_num_request`]) | `33 st 0B 00` + 10 octets | non |
+//! | Paramètres ([`CMD_PARAM_PUT`]) | `33 st 05 00` + 20 octets | **oui** |
+//! | Arrêt ([`CMD_STOP`]) | `33 st 08 00` | non |
+//!
+//! Toutes passent par [`write_device`], qui relit l'appareil après coup et
+//! compare ce qu'il annonce à ce qui a été demandé : la réussite est toujours
+//! **lue**, jamais supposée.
 
 #[cfg(not(target_os = "android"))]
 use std::io::{Read, Write};
@@ -157,7 +166,10 @@ pub const TIMEOUT_IDENTIFICATION: Duration = Duration::from_millis(1_500);
 /// s'est passé.
 #[derive(Debug, Clone, PartialEq, thiserror::Error, Serialize, Deserialize)]
 pub enum SerialError {
-    #[error("Impossible d'énumérer les ports série : {0}")]
+    #[error(
+        "Le système n'a pas pu lister les ports USB-série ({0}). Débranchez puis \
+         rebranchez le logger ; si le problème persiste, redémarrez l'ordinateur."
+    )]
     Enumeration(String),
 
     #[error(
@@ -166,21 +178,40 @@ pub enum SerialError {
     )]
     NoDevice,
 
+    /// Le système refuse l'ouverture : un **autre logiciel** tient le port.
+    /// Les opérations de GWS lui-même ne le déclenchent plus (elles attendent
+    /// leur tour, voir [`reserver_port`]), d'où un message qui ne parle que de
+    /// ce qui reste possible.
     #[error(
-        "Le port {port} est déjà utilisé par un autre programme. La cause la plus \
-         probable est ElitechLog resté ouvert : un seul logiciel à la fois peut parler \
-         au logger. Fermez ElitechLog — y compris son icône dans la zone de \
-         notification — puis réessayez."
+        "Le port {port} est tenu par un autre logiciel : un seul à la fois peut parler \
+         au logger. C'est le plus souvent ElitechLog (pensez à son icône près de \
+         l'horloge), ou une seconde fenêtre de GWS. Fermez-le, puis réessayez."
     )]
     PortBusy { port: String },
+
+    /// GWS lui-même parle déjà au logger, et l'opération en cours ne s'est pas
+    /// terminée dans le délai d'attente.
+    #[error(
+        "GWS est déjà en train d'échanger avec le logger sur {port}, et cet échange \
+         dure depuis plus d'une minute et demie. Attendez qu'il se termine ; s'il \
+         semble bloqué, débranchez puis rebranchez le logger."
+    )]
+    PortReserve { port: String },
 
     #[error("Le port {port} a disparu — le logger a-t-il été débranché ?")]
     PortGone { port: String },
 
-    #[error("Ouverture du port {port} impossible : {message}")]
+    #[error(
+        "Le port {port} n'a pas pu être ouvert ({message}). Vérifiez qu'aucun autre \
+         logiciel ne l'utilise (ElitechLog notamment), puis débranchez et rebranchez \
+         le logger."
+    )]
     OpenFailed { port: String, message: String },
 
-    #[error("Échec de la communication sur le port {port} : {message}")]
+    #[error(
+        "La communication avec le logger a été coupée sur le port {port} ({message}). \
+         Le câble a peut-être bougé : rebranchez le logger et réessayez."
+    )]
     WriteFailed { port: String, message: String },
 
     #[error(
@@ -233,14 +264,17 @@ pub enum SerialError {
     ResetNotApplied { remaining: u16 },
 
     #[error(
-        "Confirmation absente ou incorrecte : la réinitialisation n'a pas été envoyée,          et la mémoire du logger est intacte."
+        "Confirmation absente ou incorrecte : rien n'a été envoyé au logger, et sa mémoire est intacte. Recopiez le mot demandé, en majuscules."
     )]
     ResetNotConfirmed,
 
     #[error(
-        "L'arrêt n'a pas été pris en compte : le logger annonce toujours l'état          « {etat} ». Ses mesures n'ont pas été touchées."
+        "L'arrêt n'a pas été pris en compte : le logger annonce toujours l'état « {etat} ». Ses mesures n'ont pas été touchées. Débranchez-le, rebranchez-le, puis réessayez."
     )]
     StopNotApplied { etat: String },
+
+    #[error("Réglage refusé : {0}. Rien n'a été écrit sur le logger.")]
+    InvalidSetting(String),
 }
 
 #[cfg(not(target_os = "android"))]
@@ -395,10 +429,10 @@ impl WorkStatus {
 
 /// Fiche d'identité lue dans la réponse `DevInfo`.
 ///
-/// Les champs conservés sont ceux qui servent : identifier l'appareil, savoir
-/// combien de mesures lire, reconstruire leurs instants. Les réglages d'alarme
-/// sonore ou de bouton d'arrêt sont volontairement laissés de côté —
-/// l'application ne les affiche nulle part et ne les modifie jamais.
+/// Les champs en clair sont ceux qui servent à lire : identifier l'appareil,
+/// savoir combien de mesures lire, reconstruire leurs instants. Les autres
+/// réglages (bouton d'arrêt, délai, tonalité, alarme) sont gardés bruts dans
+/// [`DevInfo::raw`], pour être réécrits à l'identique.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DevInfo {
     /// Numéro de station : l'adresse de l'appareil sur le bus. Vaut 1 en usage
@@ -438,6 +472,211 @@ pub struct DevInfo {
     /// l'affichage sur l'écran du logger. Conservé pour le signaler à
     /// l'utilisateur, jamais pour convertir quoi que ce soit.
     pub celsius: bool,
+    /// Octets de réglage **tels que l'appareil les transmet**. Ce sont eux qui
+    /// repartent dans une écriture de paramètres : un réglage qu'on ne modifie
+    /// pas est recopié à l'octet près, jamais reconstruit. Voir [`Rc5RawBytes`].
+    #[serde(default)]
+    pub raw: Rc5RawBytes,
+}
+
+/// Les octets de `DevInfo` qui ne servent pas à lire les mesures, mais à les
+/// réécrire tels quels.
+///
+/// Offsets relevés dans ElitechLog 8.0.5 (`COMCommand::ParseParameter`) et
+/// recoupés avec `elitech-datareader` : firmware à l'octet 4, batterie à 28,
+/// bouton d'arrêt à 27, puis délai, tonalité, alarme et unité de 148 à 151.
+///
+/// Avant la 0.6.0, l'effacement réécrivait le bouton d'arrêt, la tonalité, le
+/// délai et l'alarme avec des valeurs en dur : sur un logger réglé autrement,
+/// il changeait ces réglages sans le dire.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Rc5RawBytes {
+    /// Version du firmware, en dixièmes (`0x0C` = V1.2).
+    pub firmware: u8,
+    /// Charge de la pile en %, ou une valeur hors 0-100 quand l'appareil ne la
+    /// mesure pas (ElitechLog affiche alors « N/A »).
+    pub battery: u8,
+    /// `0x13` = bouton d'arrêt autorisé, `0x31` = interdit.
+    pub stop_button: u8,
+    /// Délai de démarrage : heures dans le quartet haut, demi-heure dans le bas.
+    pub start_delay: u8,
+    /// `0x13` = bip des touches, `0x31` = muet.
+    pub key_tone: u8,
+    /// `0x00` = sans alarme sonore, `0x03` / `0x0A` = codes d'alarme.
+    pub alarm: u8,
+    /// `0x31` = °C, `0x13` = °F (affichage seulement).
+    pub unit: u8,
+}
+
+/// Les deux valeurs « oui / non » du protocole, en miroir l'une de l'autre.
+pub const OCTET_OUI: u8 = 0x13;
+pub const OCTET_NON: u8 = 0x31;
+
+/// Délai de démarrage maximal accepté par ElitechLog : 6 h, soit 12 demi-heures.
+pub const DELAI_MAX_DEMI_HEURES: u8 = 12;
+
+/// Décode l'octet de délai : `0x10` = 1 h, `0x11` = 1 h 30. Comme ElitechLog,
+/// une valeur au-delà de 6 h est lue comme « pas de délai ».
+pub fn decoder_delai(octet: u8) -> u8 {
+    if octet > 0x60 {
+        return 0;
+    }
+    (octet >> 4) * 2 + u8::from(octet & 0x0F != 0)
+}
+
+/// Encode un délai en demi-heures, au format de [`decoder_delai`].
+pub fn encoder_delai(demi_heures: u8) -> u8 {
+    ((demi_heures / 2) << 4) | (demi_heures % 2)
+}
+
+/// Les réglages modifiables du RC-5, en clair.
+///
+/// C'est le contenu de l'écriture de paramètres ([`CMD_PARAM_PUT`]), plus rien.
+/// Les réglages qu'ElitechLog grise pour ce modèle (tonalité, alarme, correction)
+/// en font partie : le protocole les porte, et l'utilisateur peut les vouloir.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Rc5Settings {
+    pub sample_interval_seconds: i64,
+    /// Délai entre l'appui sur ▶ et la première mesure, en demi-heures (0 à 12).
+    pub start_delay_half_hours: u8,
+    pub stop_button_enabled: bool,
+    pub upper_limit_celsius: f64,
+    pub lower_limit_celsius: f64,
+    /// Unité de l'écran du logger. Les mesures transmises restent en °C.
+    pub fahrenheit: bool,
+    /// Adresse de l'appareil (« Adresse » dans ElitechLog), 1 à 254.
+    pub station_no: u8,
+    pub key_tone_enabled: bool,
+    /// Octet d'alarme sonore : 0, 3 ou 10.
+    pub alarm: u8,
+    /// Correction appliquée par l'appareil à ses propres mesures, en °C.
+    pub temperature_calibration: f64,
+}
+
+/// Bornes de validation, reprises d'ElitechLog (`Setting.COM.Base::validateParameters`).
+pub const INTERVALLE_MIN_S: i64 = 10;
+pub const INTERVALLE_MAX_S: i64 = 86_400;
+pub const SEUIL_MIN_C: f64 = -40.0;
+pub const SEUIL_MAX_C: f64 = 90.0;
+pub const CORRECTION_MAX_C: f64 = 5.0;
+
+/// Dixièmes de degré, pour comparer des réglages sans erreur d'arrondi.
+fn dixiemes(v: f64) -> i64 {
+    (v * 10.0).round() as i64
+}
+
+impl Rc5Settings {
+    /// Les réglages que porte l'appareil.
+    pub fn from_info(info: &DevInfo) -> Self {
+        Rc5Settings {
+            sample_interval_seconds: info.sample_interval_seconds,
+            start_delay_half_hours: decoder_delai(info.raw.start_delay),
+            stop_button_enabled: info.raw.stop_button == OCTET_OUI,
+            upper_limit_celsius: info.upper_limit_celsius,
+            lower_limit_celsius: info.lower_limit_celsius,
+            fahrenheit: !info.celsius,
+            station_no: info.station_no,
+            key_tone_enabled: info.raw.key_tone == OCTET_OUI,
+            alarm: info.raw.alarm,
+            temperature_calibration: info.temperature_calibration,
+        }
+    }
+
+    /// Vrai si les deux jeux de réglages écrivent les mêmes octets.
+    pub fn same_as(&self, autre: &Rc5Settings) -> bool {
+        self.sample_interval_seconds == autre.sample_interval_seconds
+            && self.start_delay_half_hours == autre.start_delay_half_hours
+            && self.stop_button_enabled == autre.stop_button_enabled
+            && dixiemes(self.upper_limit_celsius) == dixiemes(autre.upper_limit_celsius)
+            && dixiemes(self.lower_limit_celsius) == dixiemes(autre.lower_limit_celsius)
+            && self.fahrenheit == autre.fahrenheit
+            && self.station_no == autre.station_no
+            && self.key_tone_enabled == autre.key_tone_enabled
+            && self.alarm == autre.alarm
+            && dixiemes(self.temperature_calibration) == dixiemes(autre.temperature_calibration)
+    }
+
+    /// Refuse un réglage que l'appareil ne peut pas porter, **avant** toute
+    /// écriture. Les messages disent la plage permise.
+    pub fn validate(&self) -> Result<(), SerialError> {
+        let refus = |m: String| Err(SerialError::InvalidSetting(m));
+        if !(INTERVALLE_MIN_S..=INTERVALLE_MAX_S).contains(&self.sample_interval_seconds) {
+            return refus(format!(
+                "l'intervalle d'enregistrement doit être compris entre 10 secondes et 24 heures \
+                 (demandé : {} s)",
+                self.sample_interval_seconds
+            ));
+        }
+        if self.start_delay_half_hours > DELAI_MAX_DEMI_HEURES {
+            return refus("le délai de démarrage ne peut pas dépasser 6 heures".to_string());
+        }
+        for (nom, v) in [
+            ("haute", self.upper_limit_celsius),
+            ("basse", self.lower_limit_celsius),
+        ] {
+            if !v.is_finite() || !(SEUIL_MIN_C..=SEUIL_MAX_C).contains(&v) {
+                return refus(format!(
+                    "la limite {nom} doit être comprise entre {SEUIL_MIN_C} °C et {SEUIL_MAX_C} °C \
+                     (demandée : {v} °C)"
+                ));
+            }
+        }
+        if dixiemes(self.upper_limit_celsius) - dixiemes(self.lower_limit_celsius) < 5 {
+            return refus(format!(
+                "la limite haute ({} °C) doit dépasser la limite basse ({} °C) d'au moins 0,5 °C",
+                self.upper_limit_celsius, self.lower_limit_celsius
+            ));
+        }
+        if !(1..=254).contains(&self.station_no) {
+            return refus(format!(
+                "l'adresse doit être comprise entre 1 et 254 (demandée : {})",
+                self.station_no
+            ));
+        }
+        if ![0x00, 0x03, 0x0A].contains(&self.alarm) {
+            return refus(format!(
+                "l'alarme sonore ne connaît que les valeurs 0, 3 et 10 (demandée : {})",
+                self.alarm
+            ));
+        }
+        let c = self.temperature_calibration;
+        if !c.is_finite() || c.abs() > CORRECTION_MAX_C + 1e-9 {
+            return refus(format!(
+                "la correction de température doit rester entre −5,0 °C et +5,0 °C (demandée : {c} °C)"
+            ));
+        }
+        Ok(())
+    }
+
+    /// La fiche `info` avec ces réglages appliqués.
+    ///
+    /// Un octet « oui / non » n'est réécrit que si sa valeur **en clair** change :
+    /// une valeur inconnue de l'appareil, qu'on ne touche pas, repart telle quelle.
+    pub fn apply_to(&self, info: &DevInfo) -> DevInfo {
+        let actuel = Rc5Settings::from_info(info);
+        let mut out = info.clone();
+        out.sample_interval_seconds = self.sample_interval_seconds;
+        out.upper_limit_celsius = self.upper_limit_celsius;
+        out.lower_limit_celsius = self.lower_limit_celsius;
+        out.station_no = self.station_no;
+        out.temperature_calibration = self.temperature_calibration;
+        out.raw.alarm = self.alarm;
+        let oui_non = |b: bool| if b { OCTET_OUI } else { OCTET_NON };
+        if self.start_delay_half_hours != actuel.start_delay_half_hours {
+            out.raw.start_delay = encoder_delai(self.start_delay_half_hours);
+        }
+        if self.stop_button_enabled != actuel.stop_button_enabled {
+            out.raw.stop_button = oui_non(self.stop_button_enabled);
+        }
+        if self.key_tone_enabled != actuel.key_tone_enabled {
+            out.raw.key_tone = oui_non(self.key_tone_enabled);
+        }
+        if self.fahrenheit != actuel.fahrenheit {
+            out.celsius = !self.fahrenheit;
+            out.raw.unit = if self.fahrenheit { OCTET_OUI } else { OCTET_NON };
+        }
+        out
+    }
 }
 
 impl DevInfo {
@@ -458,6 +697,21 @@ impl DevInfo {
     /// l'UI, qui la combine déjà avec le fuseau choisi.
     pub fn clock_drift_seconds(&self, reference: NaiveDateTime) -> Option<i64> {
         self.device_clock.map(|h| (h - reference).num_seconds())
+    }
+
+    /// « V1.2 » pour l'octet `0x0C`, comme le résumé d'ElitechLog.
+    pub fn firmware_label(&self) -> Option<String> {
+        let v = self.raw.firmware;
+        (v != 0).then(|| format!("V{}.{}", v / 10, v % 10))
+    }
+
+    /// Charge de la pile annoncée, si l'appareil en donne une (0 à 100 %).
+    pub fn battery_percent(&self) -> Option<u8> {
+        (self.raw.battery <= 100).then_some(self.raw.battery)
+    }
+
+    pub fn settings(&self) -> Rc5Settings {
+        Rc5Settings::from_info(self)
     }
 }
 
@@ -509,6 +763,15 @@ pub fn decode_dev_info(trame: &[u8]) -> Result<DevInfo, SerialError> {
         // 0x31 = Celsius, 0x13 = Fahrenheit — deux valeurs miroir, comme tous
         // les drapeaux de ce protocole.
         celsius: trame[151] != 0x13,
+        raw: Rc5RawBytes {
+            firmware: trame[4],
+            battery: trame[28],
+            stop_button: trame[27],
+            start_delay: trame[148],
+            key_tone: trame[149],
+            alarm: trame[150],
+            unit: trame[151],
+        },
     })
 }
 
@@ -905,6 +1168,69 @@ fn verrou_fermeture() -> std::sync::MutexGuard<'static, Option<Instant>> {
         .unwrap_or_else(|e| e.into_inner())
 }
 
+/// Durée maximale d'attente d'un port qu'une autre opération de GWS tient.
+///
+/// Une lecture complète d'une mémoire pleine prend une vingtaine de secondes ;
+/// une écriture de réglages, quelques secondes. 90 s laissent de la marge sans
+/// laisser une opération attendre indéfiniment derrière un échange bloqué.
+pub const ATTENTE_PORT_MAX: Duration = Duration::from_secs(90);
+
+/// Ports qu'une opération de GWS est en train d'utiliser.
+///
+/// Avant la 0.6.0, rien n'empêchait deux opérations de GWS d'ouvrir le même
+/// port en même temps — un « Vérifier l'heure » cliqué pendant une lecture
+/// complète, ou la détection d'un branchement pendant une écriture. La seconde
+/// se heurtait au refus du système, traduit en « un autre programme utilise le
+/// port » : faux, puisque c'était GWS lui-même. Désormais elle attend son tour.
+fn ports_reserves() -> &'static (std::sync::Mutex<std::collections::HashSet<String>>, std::sync::Condvar)
+{
+    static RESERVES: std::sync::OnceLock<(
+        std::sync::Mutex<std::collections::HashSet<String>>,
+        std::sync::Condvar,
+    )> = std::sync::OnceLock::new();
+    RESERVES.get_or_init(Default::default)
+}
+
+/// Réservation d'un port pour **une opération entière**, sessions comprises.
+/// Libérée à sa destruction, ce qui réveille l'opération suivante.
+#[derive(Debug)]
+pub struct ReservationPort(String);
+
+impl Drop for ReservationPort {
+    fn drop(&mut self) {
+        let (reserves, signal) = ports_reserves();
+        reserves.lock().unwrap_or_else(|e| e.into_inner()).remove(&self.0);
+        signal.notify_all();
+    }
+}
+
+/// Réserve un port, en attendant au plus `attente` qu'il se libère.
+pub fn reserver_port(port_name: &str, attente: Duration) -> Result<ReservationPort, SerialError> {
+    let (reserves, signal) = ports_reserves();
+    let limite = Instant::now() + attente;
+    let mut tenus = reserves.lock().unwrap_or_else(|e| e.into_inner());
+    while tenus.contains(port_name) {
+        let reste = limite.saturating_duration_since(Instant::now());
+        if reste.is_zero() {
+            return Err(SerialError::PortReserve {
+                port: port_name.to_string(),
+            });
+        }
+        tenus = signal
+            .wait_timeout(tenus, reste)
+            .unwrap_or_else(|e| e.into_inner())
+            .0;
+    }
+    tenus.insert(port_name.to_string());
+    Ok(ReservationPort(port_name.to_string()))
+}
+
+/// Ouvertures tentées avant de conclure qu'un autre logiciel tient le port.
+/// Windows libère parfois un port CH340 un instant après sa fermeture : un
+/// refus isolé juste après une autre opération n'est pas un logiciel tiers.
+const ESSAIS_OUVERTURE: u32 = 3;
+const PAUSE_ENTRE_ESSAIS: Duration = Duration::from_millis(700);
+
 /// Dort le temps qu'il reste à courir depuis la dernière fermeture, s'il en
 /// reste. Le premier port ouvert dans le processus n'attend donc rien.
 ///
@@ -932,6 +1258,9 @@ pub struct SerialTransport {
     port: Option<Box<dyn serialport::SerialPort>>,
     port_name: String,
     timeout: Duration,
+    /// Tenue pendant toute l'opération ; libérée **après** la fermeture du port
+    /// (les champs sont détruits après `Drop::drop`).
+    reservation: Option<ReservationPort>,
 }
 
 /// Le même transport, mais par l'USB-OTG d'Android.
@@ -947,6 +1276,7 @@ pub struct SerialTransport {
     port: Option<tauri_plugin_usbserial::SerialPort>,
     port_name: String,
     timeout: Duration,
+    reservation: Option<ReservationPort>,
 }
 
 impl Drop for SerialTransport {
@@ -958,6 +1288,27 @@ impl Drop for SerialTransport {
 }
 
 impl SerialTransport {
+    /// Ouvre le port pour une opération entière.
+    ///
+    /// Attend d'abord que toute autre opération de GWS sur ce port soit finie
+    /// ([`reserver_port`]), puis réessaie l'ouverture si le système la refuse
+    /// un court instant. Seul un refus qui persiste devient [`SerialError::PortBusy`].
+    pub fn open(port_name: &str, timeout: Duration) -> Result<Self, SerialError> {
+        let reservation = reserver_port(port_name, ATTENTE_PORT_MAX)?;
+        let mut essai = 1;
+        let mut transport = loop {
+            match Self::ouvrir_sans_reserver(port_name, timeout) {
+                Err(SerialError::PortBusy { .. }) if essai < ESSAIS_OUVERTURE => {
+                    std::thread::sleep(PAUSE_ENTRE_ESSAIS);
+                    essai += 1;
+                }
+                resultat => break resultat?,
+            }
+        };
+        transport.reservation = Some(reservation);
+        Ok(transport)
+    }
+
     #[cfg(not(target_os = "android"))]
     /// Ouvre le port aux paramètres du RC-5.
     ///
@@ -966,7 +1317,7 @@ impl SerialTransport {
     /// **reset de la carte**. Comme la détection envoie une commande
     /// d'identification à tout CH340 pour savoir ce qu'il est, laisser DTR à sa
     /// valeur par défaut redémarrerait l'Arduino du voisin à chaque branchement.
-    pub fn open(port_name: &str, timeout: Duration) -> Result<Self, SerialError> {
+    fn ouvrir_sans_reserver(port_name: &str, timeout: Duration) -> Result<Self, SerialError> {
         attendre_le_repos();
 
         let port = serialport::new(port_name, BAUD_RATE)
@@ -986,6 +1337,7 @@ impl SerialTransport {
             port: Some(port),
             port_name: port_name.to_string(),
             timeout,
+            reservation: None,
         })
     }
 
@@ -1000,7 +1352,7 @@ impl SerialTransport {
     ///
     /// **Peut demander une autorisation à l'utilisateur**, et attendre sa
     /// réponse : cet appel ne doit jamais partir du fil principal.
-    pub fn open(port_name: &str, timeout: Duration) -> Result<Self, SerialError> {
+    fn ouvrir_sans_reserver(port_name: &str, timeout: Duration) -> Result<Self, SerialError> {
         let device_id = device_id_du_port(port_name)?;
         attendre_le_repos();
 
@@ -1015,6 +1367,7 @@ impl SerialTransport {
             port: Some(port),
             port_name: port_name.to_string(),
             timeout,
+            reservation: None,
         })
     }
 
@@ -1039,7 +1392,8 @@ fn device_id_du_port(port_name: &str) -> Result<i32, SerialError> {
         .ok_or_else(|| SerialError::OpenFailed {
             port: port_name.to_string(),
             message: format!(
-                "Nom de port inattendu sur Android : « {port_name} ». Attendu                  « {PREFIXE_PORT_USB}<numéro> ». Débranchez et rebranchez le logger."
+                "Nom de port inattendu sur Android : « {port_name} ». Attendu \
+                 « {PREFIXE_PORT_USB}<numéro> ». Débranchez et rebranchez le logger."
             ),
         })
 }
@@ -1212,7 +1566,9 @@ impl Rc5Transport for SerialTransport {
     fn reset_session(&mut self) -> Result<(), SerialError> {
         eprintln!("[RC5-SESSION] === RESET SESSION ({}) ===", self.port_name);
         self.fermer();
-        let mut neuf = SerialTransport::open(&self.port_name, self.timeout)?;
+        // Sans réserver : `self` tient déjà la réservation de ce port, et la
+        // redemander ici attendrait… sa propre libération.
+        let mut neuf = SerialTransport::ouvrir_sans_reserver(&self.port_name, self.timeout)?;
         // `neuf` cède son port et repart sans rien à fermer : sans ce `take`,
         // sa libération en fin de portée refermerait le port qu'on vient
         // d'installer, et noterait une fermeture qui n'a pas eu lieu.
@@ -1694,43 +2050,353 @@ pub fn param_put_request(dev_info_frame: &[u8]) -> Result<Vec<u8>, SerialError> 
     }
     verifier_trame(dev_info_frame, "ParamPut")?;
     let info = decode_dev_info(dev_info_frame)?;
-    Ok(param_put_request_from_info(&info).to_vec())
+    Ok(param_put_request_from_info(info.station_no, &info).to_vec())
 }
 
-/// Construit directement la trame de 25 octets à partir d'un `DevInfo`.
-pub fn param_put_request_from_info(info: &DevInfo) -> [u8; 25] {
+/// Construit la trame de 25 octets à partir d'un `DevInfo`.
+///
+/// `station_actuelle` est l'adresse à laquelle l'appareil répond **avant**
+/// l'écriture ; `info.station_no` est celle qu'il aura après. ElitechLog distingue
+/// de même `OldDeviceAddress` et `NewDeviceAddress`.
+///
+/// Les octets de réglage viennent de [`DevInfo::raw`] : ce que l'appareil a
+/// transmis repart tel quel. Disposition relevée dans ElitechLog 8.0.5
+/// (`COMCommand::SetParameterCommand`, trame de 25 octets pour ce protocole).
+pub fn param_put_request_from_info(station_actuelle: u8, info: &DevInfo) -> [u8; 25] {
     let mut trame = [0u8; 25];
     trame[0] = 0x33;
-    trame[1] = info.station_no;
+    trame[1] = station_actuelle;
     trame[2] = CMD_PARAM_PUT[0]; // 0x05
     trame[3] = CMD_PARAM_PUT[1]; // 0x00
 
-    let h = (info.sample_interval_seconds / 3600) as u8;
-    let m = ((info.sample_interval_seconds % 3600) / 60) as u8;
-    let s = (info.sample_interval_seconds % 60) as u8;
-    trame[4] = h;
-    trame[5] = m;
-    trame[6] = s;
+    trame[4] = (info.sample_interval_seconds / 3600) as u8;
+    trame[5] = ((info.sample_interval_seconds % 3600) / 60) as u8;
+    trame[6] = (info.sample_interval_seconds % 60) as u8;
 
-    let upper = (info.upper_limit_celsius * 10.0) as i16;
+    let upper = dixiemes(info.upper_limit_celsius) as i16;
     trame[7..9].copy_from_slice(&upper.to_be_bytes());
-
-    let lower = (info.lower_limit_celsius * 10.0) as i16;
+    let lower = dixiemes(info.lower_limit_celsius) as i16;
     trame[9..11].copy_from_slice(&lower.to_be_bytes());
 
     trame[11] = info.station_no;
-    trame[12] = 0x13; // Bouton d'arrêt autorisé (0x13)
-    trame[13] = 0x00; // Délai
-    trame[14] = 0x31; // Signal sonore désactivé (0x31)
-    trame[15] = 0x00; // Alarme désactivée (0x00)
-    trame[16] = if info.celsius { 0x31 } else { 0x13 }; // Unité (°C = 0x31)
-    trame[17] = (info.temperature_calibration * 10.0) as i8 as u8;
-    // Octets 18..24 : humidité et réservé
+    trame[12] = info.raw.stop_button;
+    trame[13] = info.raw.start_delay;
+    trame[14] = info.raw.key_tone;
+    trame[15] = info.raw.alarm;
+    // Une fiche construite à la main (tests) n'a pas d'octet d'unité : on le
+    // déduit alors du drapeau en clair.
+    trame[16] = if info.raw.unit != 0 {
+        info.raw.unit
+    } else if info.celsius {
+        OCTET_NON
+    } else {
+        OCTET_OUI
+    };
+    trame[17] = dixiemes(info.temperature_calibration) as i8 as u8;
+    // Octets 18..24 : humidité, sans objet sur le RC-5.
     trame[24] = checksum(&trame[..24]);
     trame
 }
 
-/// Ce que la réinitialisation a produit, avant et après.
+/// Sous-commande de **mise à l'heure** : `33 <station> 07 00 <année:2> <mois>
+/// <jour> <h> <min> <s> <somme>`, 12 octets.
+///
+/// Relevée dans ElitechLog 8.0.5 (`COMCommand::SetDeviceTime`, qui écrit l'heure
+/// locale du PC) et dans `elitech-datareader` (`ClockSetRequest`). Elle **n'efface
+/// rien** : c'est ce qui permet de remettre un logger à l'heure en pleine
+/// campagne.
+pub const CMD_CLOCK_SET: u8 = 0x07;
+
+/// Sous-commande d'écriture de la **description** (« Description du voyage ») :
+/// `33 <station> 09 00 <100 octets> <somme>`, 105 octets.
+pub const CMD_USER_INFO: u8 = 0x09;
+
+/// Sous-commande d'écriture du **numéro de série** : `33 <station> 0B 00
+/// <10 octets> <somme>`, 15 octets. Présente dans ElitechLog
+/// (`COMCommand::SetSerialNumber`) sans y être proposée à l'utilisateur.
+pub const CMD_DEV_NUM: u8 = 0x0B;
+
+/// Longueur du champ description.
+pub const USER_INFO_LEN: usize = 100;
+/// Longueur du champ numéro de série.
+pub const DEV_NUM_LEN: usize = 10;
+
+pub fn clock_set_request(station_no: u8, heure: NaiveDateTime) -> [u8; 12] {
+    use chrono::{Datelike, Timelike};
+    let mut trame = [0u8; 12];
+    trame[0] = 0x33;
+    trame[1] = station_no;
+    trame[2] = CMD_CLOCK_SET;
+    trame[3] = 0x00;
+    trame[4..6].copy_from_slice(&(heure.year() as u16).to_be_bytes());
+    trame[6] = heure.month() as u8;
+    trame[7] = heure.day() as u8;
+    trame[8] = heure.hour() as u8;
+    trame[9] = heure.minute() as u8;
+    trame[10] = heure.second() as u8;
+    trame[11] = checksum(&trame[..11]);
+    trame
+}
+
+/// Texte que l'écran et ElitechLog savent afficher : ASCII imprimable.
+///
+/// ElitechLog impose la même règle (« Seuls les caractères alphabétiques
+/// anglais, les chiffres, les espaces et un ensemble limité de caractères
+/// spéciaux sont autorisés »). Les accents sont refusés, pas remplacés : un
+/// texte modifié en silence ne serait plus celui que l'utilisateur a tapé.
+fn texte_ascii(texte: &str, max: usize, quoi: &str) -> Result<Vec<u8>, SerialError> {
+    if let Some(c) = texte.chars().find(|c| !(' '..='~').contains(c)) {
+        return Err(SerialError::InvalidSetting(format!(
+            "{quoi} ne peut contenir que des lettres sans accent, des chiffres, des espaces \
+             et la ponctuation courante (caractère refusé : « {c} »)"
+        )));
+    }
+    if texte.len() > max {
+        return Err(SerialError::InvalidSetting(format!(
+            "{quoi} est limité à {max} caractères ({} saisis)",
+            texte.len()
+        )));
+    }
+    Ok(texte.as_bytes().to_vec())
+}
+
+pub fn user_info_request(station_no: u8, texte: &str) -> Result<[u8; 105], SerialError> {
+    let octets = texte_ascii(texte.trim(), USER_INFO_LEN, "Le champ description")?;
+    let mut trame = [0u8; 105];
+    trame[0] = 0x33;
+    trame[1] = station_no;
+    trame[2] = CMD_USER_INFO;
+    trame[3] = 0x00;
+    trame[4..4 + octets.len()].copy_from_slice(&octets);
+    trame[104] = checksum(&trame[..104]);
+    Ok(trame)
+}
+
+pub fn dev_num_request(station_no: u8, numero: &str) -> Result<[u8; 15], SerialError> {
+    let numero = numero.trim();
+    if numero.is_empty() || !numero.chars().all(|c| c.is_ascii_alphanumeric()) {
+        return Err(SerialError::InvalidSetting(
+            "le numéro de série ne peut contenir que des lettres sans accent et des chiffres"
+                .to_string(),
+        ));
+    }
+    let octets = texte_ascii(numero, DEV_NUM_LEN, "Le numéro de série")?;
+    let mut trame = [0u8; 15];
+    trame[0] = 0x33;
+    trame[1] = station_no;
+    trame[2] = CMD_DEV_NUM;
+    trame[3] = 0x00;
+    trame[4..4 + octets.len()].copy_from_slice(&octets);
+    trame[14] = checksum(&trame[..14]);
+    Ok(trame)
+}
+
+/// Ce qu'on demande d'écrire sur le logger. Chaque champ absent est laissé tel
+/// quel sur l'appareil.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Rc5Write {
+    /// Nouveaux paramètres. **Efface la mémoire**, comme dans ElitechLog.
+    #[serde(default)]
+    pub settings: Option<Rc5Settings>,
+    /// Réinitialisation rapide : réécrit les paramètres actuels, donc efface la
+    /// mémoire sans rien changer d'autre. Sans effet si `settings` est donné.
+    #[serde(default)]
+    pub erase: bool,
+    /// Nouvelle description (100 caractères ASCII au plus). N'efface rien.
+    #[serde(default)]
+    pub user_info: Option<String>,
+    /// Nouveau numéro de série (10 caractères au plus). N'efface rien.
+    #[serde(default)]
+    pub device_number: Option<String>,
+    /// Remise à l'heure : fuseau **réglé sur le logger**, en secondes (0 pour
+    /// UTC, 3600 pour UTC+1). Absent : l'horloge n'est pas touchée.
+    #[serde(default)]
+    pub clock_timezone_offset_seconds: Option<i64>,
+}
+
+impl Rc5Write {
+    /// Vrai si l'écriture efface la mémoire de l'appareil.
+    pub fn erases_memory(&self) -> bool {
+        self.settings.is_some() || self.erase
+    }
+}
+
+/// Résultat d'une remise à l'heure.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Rc5ClockSet {
+    /// Écart de l'horloge avec l'heure visée **avant** la remise à l'heure, en
+    /// secondes (positif = logger en avance). C'est la dérive à appliquer aux
+    /// mesures déjà prises : elles gardent l'ancienne heure.
+    pub drift_before_seconds: Option<i64>,
+    /// Même écart, relu après. Proche de 0 si la commande a été prise en compte.
+    pub drift_after_seconds: Option<i64>,
+}
+
+/// Bilan d'une écriture.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Rc5WriteReport {
+    pub before: DevInfo,
+    pub after: DevInfo,
+    /// Le logger enregistrait et a été arrêté avant l'écriture des paramètres.
+    pub recording_stopped: bool,
+    pub clock: Option<Rc5ClockSet>,
+    /// Ce que l'appareil annonce et qui diffère de ce qui était demandé. Vide
+    /// quand tout a été pris en compte. Une phrase par écart.
+    pub mismatches: Vec<String>,
+}
+
+/// Tolérance de la relecture de l'heure : l'aller-retour (fermeture, repos,
+/// réouverture, `DevInfo`) prend une à deux secondes.
+pub const HEURE_TOLERANCE_S: i64 = 10;
+
+/// Écrit sur le logger, puis **relit** pour vérifier.
+///
+/// Ordre des sessions, repris d'ElitechLog (`CCOM::setParameters` : heure, puis
+/// description, puis paramètres) :
+///
+/// 1. `DevInfo` : l'état avant, et le refus de tout ce qui n'est pas un RC-5 ;
+/// 2. si des paramètres vont être écrits et que le logger enregistre : arrêt,
+///    puis relecture qui le confirme (voir [`clear_memory`]) ;
+/// 3. heure, description, numéro de série, paramètres — une session chacun ;
+/// 4. `DevInfo` : l'état après, qui seul fait foi.
+///
+/// Les entrées sont toutes validées **avant** la première écriture : un réglage
+/// refusé ne laisse jamais l'appareil à moitié reprogrammé.
+///
+/// `maintenant` donne l'heure UTC du PC ; elle est lue au moment même de
+/// l'envoi, puis de nouveau à la vérification.
+pub fn write_device<T: Rc5Transport>(
+    transport: &mut T,
+    demande: &Rc5Write,
+    maintenant: &dyn Fn() -> DateTime<Utc>,
+) -> Result<Rc5WriteReport, SerialError> {
+    let avant = decode_dev_info(&transport.exchange(&dev_info_request(), DEV_INFO_LEN)?)?;
+    if avant.model_no != RC5_MODEL_NO {
+        return Err(SerialError::UnsupportedModel {
+            model_no: avant.model_no,
+        });
+    }
+
+    // Validation complète avant la moindre écriture.
+    if let Some(s) = &demande.settings {
+        s.validate()?;
+    }
+    let req_info = match &demande.user_info {
+        Some(t) => Some(user_info_request(avant.station_no, t)?),
+        None => None,
+    };
+    let req_num = match &demande.device_number {
+        Some(n) => Some(dev_num_request(avant.station_no, n)?),
+        None => None,
+    };
+
+    let ecrit_parametres = demande.erases_memory();
+    let mut gabarit = avant.clone();
+    let mut recording_stopped = false;
+    if ecrit_parametres && avant.work_status == WorkStatus::Running {
+        transport.reset_session()?;
+        transport.send(&stop_request(avant.station_no))?;
+        transport.reset_session()?;
+        let apres_arret = decode_dev_info(&transport.exchange(&dev_info_request(), DEV_INFO_LEN)?)?;
+        if apres_arret.work_status != WorkStatus::Stopped {
+            return Err(SerialError::StopNotApplied {
+                etat: apres_arret.work_status.label_fr(),
+            });
+        }
+        recording_stopped = true;
+        gabarit = apres_arret;
+    }
+
+    let fuseau = demande.clock_timezone_offset_seconds;
+    let heure_visee = |tz: i64| maintenant().naive_utc() + chrono::Duration::seconds(tz);
+    let mut drift_before = None;
+    if let Some(tz) = fuseau {
+        drift_before = avant.clock_drift_seconds(heure_visee(tz));
+        transport.reset_session()?;
+        transport.send(&clock_set_request(avant.station_no, heure_visee(tz)))?;
+    }
+    if let Some(r) = &req_info {
+        transport.reset_session()?;
+        transport.send(r)?;
+    }
+    if let Some(r) = &req_num {
+        transport.reset_session()?;
+        transport.send(r)?;
+    }
+    let attendu = demande.settings.as_ref().map(|s| s.apply_to(&gabarit));
+    if ecrit_parametres {
+        let cible = attendu.as_ref().unwrap_or(&gabarit);
+        transport.reset_session()?;
+        transport.send(&param_put_request_from_info(avant.station_no, cible))?;
+    }
+
+    transport.reset_session()?;
+    let apres = decode_dev_info(&transport.exchange(&dev_info_request(), DEV_INFO_LEN)?)?;
+
+    // Un effacement qui n'a pas eu lieu est une erreur, pas un écart : rien n'a
+    // été effacé, et l'utilisateur doit le savoir avant de repartir sur le terrain.
+    if ecrit_parametres && apres.rec_count != 0 {
+        return Err(SerialError::ResetNotApplied {
+            remaining: apres.rec_count,
+        });
+    }
+
+    let mut mismatches = Vec::new();
+    if !ecrit_parametres && apres.rec_count < avant.rec_count {
+        mismatches.push(format!(
+            "le logger annonce {} mesure(s) au lieu de {} : l'appareil a vidé sa mémoire",
+            apres.rec_count, avant.rec_count
+        ));
+    }
+    let mut clock = None;
+    if let Some(tz) = fuseau {
+        let drift_after = apres.clock_drift_seconds(heure_visee(tz));
+        match drift_after {
+            Some(d) if d.abs() <= HEURE_TOLERANCE_S => {}
+            Some(d) => mismatches.push(format!(
+                "l'heure n'a pas été prise en compte : le logger a encore {} d'écart",
+                fmt_duree(d.abs())
+            )),
+            None => mismatches
+                .push("l'heure du logger est illisible après la remise à l'heure".to_string()),
+        }
+        clock = Some(Rc5ClockSet {
+            drift_before_seconds: drift_before,
+            drift_after_seconds: drift_after,
+        });
+    }
+    if let Some(t) = &demande.user_info {
+        let lu = apres.user_info.clone().unwrap_or_default();
+        if lu != t.trim() {
+            mismatches.push(format!("la description lue est « {lu} » au lieu de « {} »", t.trim()));
+        }
+    }
+    if let Some(n) = &demande.device_number {
+        let lu = apres.device_number.clone().unwrap_or_default();
+        if lu != n.trim() {
+            mismatches.push(format!("le numéro de série lu est « {lu} » au lieu de « {} »", n.trim()));
+        }
+    }
+    if ecrit_parametres {
+        mismatches.extend(parametres_modifies(attendu.as_ref().unwrap_or(&gabarit), &apres));
+    }
+
+    Ok(Rc5WriteReport {
+        before: avant,
+        after: apres,
+        recording_stopped,
+        clock,
+        mismatches,
+    })
+}
+
+/// Écrit sur le logger branché sur ce port.
+pub fn write_port(port_name: &str, demande: &Rc5Write) -> Result<Rc5WriteReport, SerialError> {
+    let mut transport = SerialTransport::open(port_name, TIMEOUT)?;
+    write_device(&mut transport, demande, &Utc::now)
+}
+
+//// Ce que la réinitialisation a produit, avant et après.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ResetReport {
     /// Fiche d'identité relevée **avant** l'effacement.
@@ -1741,9 +2407,12 @@ pub struct ResetReport {
     /// Chaque entrée est une phrase (« cadence : 900 s → 0 s »).
     pub changed_parameters: Vec<String>,
     /// `true` si le logger enregistrait encore et a dû être arrêté avant
-    /// l'effacement. L'utilisateur doit le savoir : son logger ne redémarrera
-    /// pas tout seul.
+    /// l'effacement.
     pub recording_stopped: bool,
+    /// Remise à l'heure faite au passage, comme la « Réinitialisation rapide »
+    /// d'ElitechLog. Absente si elle n'était pas demandée.
+    #[serde(default)]
+    pub clock: Option<Rc5ClockSet>,
 }
 
 impl ResetReport {
@@ -1760,28 +2429,33 @@ impl ResetReport {
     /// Phrase de bilan destinée à l'utilisateur.
     pub fn message(&self) -> String {
         let efface = self.before.rec_count;
-        // Phrase ajoutée en tête quand l'appareil enregistrait : il est
-        // maintenant arrêté et, sur un RC-5, seul ElitechLog peut le relancer.
-        // L'utilisateur doit repartir en le sachant.
         let arret = if self.recording_stopped {
-            "Le logger enregistrait : il a été arrêté avant l'effacement, et ne redémarrera pas seul — reprogrammez-le depuis ElitechLog pour relancer un enregistrement. "
+            "Le logger enregistrait : il a été arrêté avant l'effacement. "
         } else {
             ""
+        };
+        let heure = match &self.clock {
+            Some(c) if c.drift_after_seconds.is_some_and(|d| d.abs() <= HEURE_TOLERANCE_S) => {
+                "Il est remis à l'heure. "
+            }
+            _ => "",
         };
         if self.parameters_preserved() {
             format!(
                 "{arret}Mémoire du logger effacée : {efface} mesure(s) supprimées de l'appareil. \
-                 Ses réglages sont inchangés (cadence {} s, seuils {} / {} °C). Les données \
-                 déjà importées dans l'application ne sont pas concernées.",
-                self.after.sample_interval_seconds,
+                 {heure}Ses réglages sont inchangés (cadence {}, seuils {} / {} °C). Pour \
+                 démarrer une nouvelle campagne, maintenez le bouton ▶ du logger environ \
+                 5 secondes. Les données déjà importées dans l'application ne sont pas \
+                 concernées.",
+                fmt_duree(self.after.sample_interval_seconds),
                 self.after.lower_limit_celsius,
                 self.after.upper_limit_celsius,
             )
         } else {
             format!(
                 "{arret}Mémoire du logger effacée ({efface} mesure(s)), mais certains de ses \
-                 réglages ont changé au passage : {}. Reprogrammez l'appareil depuis \
-                 ElitechLog avant de le renvoyer sur le terrain. Les données déjà \
+                 réglages ont changé au passage : {}. Vérifiez-les avec « Modifier les \
+                 réglages » avant de renvoyer le logger sur le terrain. Les données déjà \
                  importées dans l'application ne sont pas concernées.",
                 self.changed_parameters.join(" ; ")
             )
@@ -1793,16 +2467,20 @@ impl ResetReport {
 ///
 /// `rec_count`, `start_time` et `device_clock` sont **attendus** différents après
 /// un effacement : les comparer signalerait un problème à chaque fois.
+///
+/// Depuis la 0.6.0, les octets de bouton d'arrêt, délai, tonalité et alarme sont
+/// comparés aussi : ce sont eux que l'ancien effacement changeait sans le dire.
 fn parametres_modifies(avant: &DevInfo, apres: &DevInfo) -> Vec<String> {
     let mut changes = Vec::new();
     if avant.sample_interval_seconds != apres.sample_interval_seconds {
         changes.push(format!(
-            "cadence d'enregistrement : {} s → {} s",
-            avant.sample_interval_seconds, apres.sample_interval_seconds
+            "cadence d'enregistrement : {} → {}",
+            fmt_duree(avant.sample_interval_seconds),
+            fmt_duree(apres.sample_interval_seconds)
         ));
     }
-    if avant.upper_limit_celsius != apres.upper_limit_celsius
-        || avant.lower_limit_celsius != apres.lower_limit_celsius
+    if dixiemes(avant.upper_limit_celsius) != dixiemes(apres.upper_limit_celsius)
+        || dixiemes(avant.lower_limit_celsius) != dixiemes(apres.lower_limit_celsius)
     {
         changes.push(format!(
             "seuils d'alarme : {} / {} °C → {} / {} °C",
@@ -1812,17 +2490,14 @@ fn parametres_modifies(avant: &DevInfo, apres: &DevInfo) -> Vec<String> {
             apres.upper_limit_celsius
         ));
     }
-    if avant.temperature_calibration != apres.temperature_calibration {
+    if dixiemes(avant.temperature_calibration) != dixiemes(apres.temperature_calibration) {
         changes.push(format!(
             "correction interne : {:+.1} °C → {:+.1} °C",
             avant.temperature_calibration, apres.temperature_calibration
         ));
     }
     if avant.station_no != apres.station_no {
-        changes.push(format!(
-            "numéro de station : {} → {}",
-            avant.station_no, apres.station_no
-        ));
+        changes.push(format!("adresse : {} → {}", avant.station_no, apres.station_no));
     }
     if avant.device_number != apres.device_number {
         changes.push(format!(
@@ -1832,121 +2507,103 @@ fn parametres_modifies(avant: &DevInfo, apres: &DevInfo) -> Vec<String> {
         ));
     }
     if avant.celsius != apres.celsius {
-        changes.push("unité d'affichage (Celsius / Fahrenheit)".to_string());
+        changes.push("unité d'affichage (°C / °F)".to_string());
+    }
+    let (a, b) = (avant.settings(), apres.settings());
+    if a.stop_button_enabled != b.stop_button_enabled {
+        changes.push(format!(
+            "bouton d'arrêt : {} → {}",
+            oui_non_fr(a.stop_button_enabled),
+            oui_non_fr(b.stop_button_enabled)
+        ));
+    }
+    if a.start_delay_half_hours != b.start_delay_half_hours {
+        changes.push(format!(
+            "délai de démarrage : {} → {}",
+            fmt_delai(a.start_delay_half_hours),
+            fmt_delai(b.start_delay_half_hours)
+        ));
+    }
+    if a.key_tone_enabled != b.key_tone_enabled {
+        changes.push(format!(
+            "tonalité des boutons : {} → {}",
+            oui_non_fr(a.key_tone_enabled),
+            oui_non_fr(b.key_tone_enabled)
+        ));
+    }
+    if a.alarm != b.alarm {
+        changes.push(format!("alarme sonore : code {} → code {}", a.alarm, b.alarm));
     }
     changes
 }
 
+fn oui_non_fr(b: bool) -> &'static str {
+    if b {
+        "activé"
+    } else {
+        "désactivé"
+    }
+}
+
+/// « 1 h 30 » pour 3 demi-heures, « aucun » pour 0.
+pub fn fmt_delai(demi_heures: u8) -> String {
+    match (demi_heures / 2, demi_heures % 2) {
+        (0, 0) => "aucun".to_string(),
+        (0, _) => "30 min".to_string(),
+        (h, 0) => format!("{h} h"),
+        (h, _) => format!("{h} h 30"),
+    }
+}
+
 /// Efface la mémoire du logger, puis **vérifie que c'est fait**.
 ///
-/// Trois sessions, imposées par la règle du protocole (une commande `0xCC` clôt
-/// la session — voir [`SESSION_FERMEE_PAR_CC`]) :
+/// C'est une [`write_device`] qui réécrit les réglages actuels à l'identique
+/// (`erase`) : l'écriture de paramètres emporte l'effacement, et c'est la seule
+/// façon de vider la mémoire d'un RC-5.
 ///
-/// | Session | Ce qui s'y passe |
-/// |---|---|
-/// | 1 | `DevInfo` : l'état avant, et la trame qui sert de gabarit |
-/// | 2 | l'écriture de paramètres, qui emporte l'effacement |
-/// | 3 | `DevInfo` : l'état après, seule preuve que l'effacement a eu lieu |
+/// **Si le logger enregistre encore**, il est d'abord arrêté, et l'arrêt est
+/// confirmé par une relecture avant toute écriture (voir [`write_device`]).
 ///
-/// **Si le logger enregistre encore**, deux sessions s'intercalent entre la 1 et
-/// la 2 : l'envoi de [`CMD_STOP`] puis la relecture qui le confirme. Sans cet
-/// arrêt, l'appareil continue d'écrire pendant l'effacement et la relecture
-/// finale ressort en [`SerialError::ResetNotApplied`] — la situation bloquante
-/// rencontrée sur le terrain. La fiche relue après l'arrêt devient alors le
-/// gabarit, à la place de celle de la session 1.
-///
-/// Les temps de repos entre sessions sont ceux de [`REPOS_APRES_FERMETURE`], que
-/// [`SerialTransport::open`] applique déjà — il n'y a pas de temporisation
-/// supplémentaire ici, et il ne doit pas y en avoir : ce serait une seconde règle
-/// à maintenir en parallèle de la première.
+/// `heure` : le fuseau du logger, pour le remettre à l'heure au passage comme le
+/// fait la « Réinitialisation rapide » d'ElitechLog. `None` : horloge intacte.
 ///
 /// La réussite n'est **jamais** déduite de l'absence d'erreur : elle est lue dans
 /// la fiche d'identité relue. Un logger qui n'aurait pas obtempéré ressort en
 /// [`SerialError::ResetNotApplied`], et il n'y a alors rien à défaire.
-pub fn clear_memory<T: Rc5Transport>(transport: &mut T) -> Result<ResetReport, SerialError> {
-    eprintln!("[RC5-CLEAR] == Début clear_memory ==");
-    let trame_avant = transport.exchange(&dev_info_request(), DEV_INFO_LEN)?;
-    let avant = decode_dev_info(&trame_avant)?;
-    eprintln!(
-        "[RC5-CLEAR] 1. Avant : model_no={}, station_no={}, work_status={:?} ({}), rec_count={}",
-        avant.model_no,
-        avant.station_no,
-        avant.work_status,
-        avant.work_status.label_fr(),
-        avant.rec_count
-    );
-    if avant.model_no != RC5_MODEL_NO {
-        return Err(SerialError::UnsupportedModel {
-            model_no: avant.model_no,
-        });
-    }
-
-    let recording_stopped = avant.work_status == WorkStatus::Running;
-    let trame_gabarit = if recording_stopped {
-        eprintln!("[RC5-CLEAR] 2a. Logger en cours d'enregistrement -> envoi commande d'arrêt (CMD_STOP)...");
-        transport.reset_session()?;
-        transport.send(&stop_request(avant.station_no))?;
-
-        transport.reset_session()?;
-        eprintln!("[RC5-CLEAR] 2b. Relecture DevInfo pour confirmer l'arrêt...");
-        let trame_apres_arret = transport.exchange(&dev_info_request(), DEV_INFO_LEN)?;
-        let apres_arret = decode_dev_info(&trame_apres_arret)?;
-        eprintln!(
-            "[RC5-CLEAR] 2c. Statut après arrêt : work_status={:?} ({}), rec_count={}",
-            apres_arret.work_status,
-            apres_arret.work_status.label_fr(),
-            apres_arret.rec_count
-        );
-        if apres_arret.work_status != WorkStatus::Stopped {
-            eprintln!("[RC5-CLEAR] !!! Échec arrêt : état {:?}", apres_arret.work_status);
-            return Err(SerialError::StopNotApplied {
-                etat: apres_arret.work_status.label_fr(),
-            });
-        }
-        trame_apres_arret
-    } else {
-        eprintln!("[RC5-CLEAR] 2. Logger déjà à l'arrêt/non démarré -> pas d'arrêt préalable nécessaire.");
-        trame_avant
+pub fn clear_memory_at<T: Rc5Transport>(
+    transport: &mut T,
+    heure: Option<i64>,
+    maintenant: &dyn Fn() -> DateTime<Utc>,
+) -> Result<ResetReport, SerialError> {
+    let demande = Rc5Write {
+        erase: true,
+        clock_timezone_offset_seconds: heure,
+        ..Rc5Write::default()
     };
-
-    let requete = param_put_request(&trame_gabarit)?;
-    eprintln!("[RC5-CLEAR] 3. Envoi CMD_PARAM_PUT ({} octets)...", requete.len());
-
-    transport.reset_session()?;
-    transport.send(&requete)?;
-
-    transport.reset_session()?;
-    eprintln!("[RC5-CLEAR] 4. Relecture finale DevInfo pour vérifier l'effacement...");
-    let trame_apres = transport.exchange(&dev_info_request(), DEV_INFO_LEN)?;
-    let apres = decode_dev_info(&trame_apres)?;
-    eprintln!(
-        "[RC5-CLEAR] 5. Statut final : work_status={:?} ({}), rec_count={}",
-        apres.work_status,
-        apres.work_status.label_fr(),
-        apres.rec_count
-    );
-
-    if apres.rec_count != 0 {
-        eprintln!("[RC5-CLEAR] !!! Échec effacement : rec_count={}", apres.rec_count);
-        return Err(SerialError::ResetNotApplied {
-            remaining: apres.rec_count,
-        });
-    }
-
-    let changed_parameters = parametres_modifies(&avant, &apres);
-    eprintln!("[RC5-CLEAR] == Succès clear_memory (params modifiés: {:?}) ==", changed_parameters);
+    let r = write_device(transport, &demande, maintenant)?;
+    // Les écarts d'heure ne sont pas des réglages changés : ils restent dans
+    // `clock`, et le message en tient compte. L'arrêt éventuel ne touche aucun
+    // réglage, d'où la comparaison directe avec la fiche de départ.
+    let changed_parameters = parametres_modifies(&r.before, &r.after);
     Ok(ResetReport {
-        before: avant,
-        after: apres,
+        before: r.before,
+        after: r.after,
         changed_parameters,
-        recording_stopped,
+        recording_stopped: r.recording_stopped,
+        clock: r.clock,
     })
 }
 
-/// Efface la mémoire du logger branché sur ce port.
-pub fn reset_port(port_name: &str) -> Result<ResetReport, SerialError> {
+/// [`clear_memory_at`] sans remise à l'heure.
+pub fn clear_memory<T: Rc5Transport>(transport: &mut T) -> Result<ResetReport, SerialError> {
+    clear_memory_at(transport, None, &Utc::now)
+}
+
+/// Efface la mémoire du logger branché sur ce port, et le remet à l'heure si
+/// `heure` (fuseau du logger, en secondes) est donné.
+pub fn reset_port(port_name: &str, heure: Option<i64>) -> Result<ResetReport, SerialError> {
     let mut transport = SerialTransport::open(port_name, TIMEOUT)?;
-    clear_memory(&mut transport)
+    clear_memory_at(&mut transport, heure, &Utc::now)
 }
 
 /// Arrête l'enregistrement en cours, **sans effacer les mesures déjà prises**.
@@ -2010,6 +2667,24 @@ pub fn stop_port(port_name: &str) -> Result<DevInfo, SerialError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn une_operation_attend_que_le_port_soit_libere() {
+        let premiere = reserver_port("TEST-RESERVATION", Duration::from_secs(1)).unwrap();
+        // Tenu : une seconde réservation échoue au bout du délai, avec le
+        // message propre à GWS, pas celui d'un logiciel tiers.
+        let refus = reserver_port("TEST-RESERVATION", Duration::from_millis(50)).unwrap_err();
+        assert!(matches!(refus, SerialError::PortReserve { .. }), "{refus}");
+        assert!(refus.to_string().contains("GWS est déjà"));
+
+        // Libéré pendant l'attente : la seconde passe.
+        let fil = std::thread::spawn(|| reserver_port("TEST-RESERVATION", Duration::from_secs(5)).is_ok());
+        std::thread::sleep(Duration::from_millis(100));
+        drop(premiere);
+        assert!(fil.join().unwrap());
+        // Un autre port n'est jamais bloqué par celui-ci.
+        assert!(reserver_port("TEST-AUTRE-PORT", Duration::from_millis(10)).is_ok());
+    }
 
     /// Trame `DevInfo` du logger réel `EFE205004333`, telle que capturée.
     /// Le fichier committé (`docs/samples/rc5_direct/devinfo.bin`) en est la copie
@@ -2569,8 +3244,8 @@ mod tests {
             rapport.changed_parameters
         );
         assert!(
-            rapport.message().contains("ElitechLog"),
-            "le message doit dire où reprogrammer l'appareil"
+            rapport.message().contains("Modifier les réglages"),
+            "le message doit dire où vérifier les réglages"
         );
     }
 
@@ -2692,7 +3367,7 @@ mod tests {
         ]);
         let message = clear_memory(&mut t).unwrap().message();
         assert!(message.contains("arrêté"), "{message}");
-        assert!(message.contains("ElitechLog"), "{message}");
+        assert!(message.contains("bouton ▶"), "le message doit dire comment redémarrer : {message}");
     }
 
     #[test]
@@ -2706,4 +3381,239 @@ mod tests {
         );
     }
 
+    // -----------------------------------------------------------------------
+    // Écritures (0.6.0)
+    // -----------------------------------------------------------------------
+
+    fn maintenant_fixe() -> DateTime<Utc> {
+        use chrono::TimeZone;
+        Utc.with_ymd_and_hms(2026, 10, 12, 12, 0, 0).unwrap()
+    }
+
+    /// `base` avec l'horloge de l'appareil (octets 31-37) mise à `heure`.
+    fn avec_horloge(mut t: Vec<u8>, heure: NaiveDateTime) -> Vec<u8> {
+        use chrono::{Datelike, Timelike};
+        t[31..33].copy_from_slice(&(heure.year() as u16).to_be_bytes());
+        t[33] = heure.month() as u8;
+        t[34] = heure.day() as u8;
+        t[35] = heure.hour() as u8;
+        t[36] = heure.minute() as u8;
+        t[37] = heure.second() as u8;
+        t[159] = checksum(&t[..159]);
+        t
+    }
+
+    /// `base` avec un octet changé, somme recalculée.
+    fn avec_octet(mut t: Vec<u8>, position: usize, valeur: u8) -> Vec<u8> {
+        t[position] = valeur;
+        t[159] = checksum(&t[..159]);
+        t
+    }
+
+    #[test]
+    fn la_fiche_reelle_donne_firmware_batterie_et_reglages() {
+        let info = decode_dev_info(&DEV_INFO_REEL).unwrap();
+        assert_eq!(info.firmware_label().as_deref(), Some("V1.2"));
+        assert_eq!(info.battery_percent(), Some(100));
+        let r = info.settings();
+        assert!(!r.stop_button_enabled, "bouton d'arrêt désactivé (0x31) sur ce logger");
+        assert!(r.key_tone_enabled, "tonalité activée (0x13) sur ce logger");
+        assert_eq!(r.start_delay_half_hours, 0);
+        assert_eq!(r.alarm, 0);
+        assert!(!r.fahrenheit);
+        assert_eq!(r.station_no, 1);
+    }
+
+    /// Le défaut corrigé en 0.6.0 : l'effacement réécrivait le bouton d'arrêt et
+    /// la tonalité avec des valeurs en dur. Ils doivent repartir à l'identique.
+    #[test]
+    fn l_effacement_recopie_les_reglages_a_l_octet_pres() {
+        let fiche_avant = DEV_INFO_REEL.to_vec();
+        let requete = param_put_request(&fiche_avant).unwrap();
+        assert_eq!(requete[12], fiche_avant[27], "bouton d'arrêt");
+        assert_eq!(requete[13], fiche_avant[148], "délai");
+        assert_eq!(requete[14], fiche_avant[149], "tonalité");
+        assert_eq!(requete[15], fiche_avant[150], "alarme");
+        assert_eq!(requete[16], fiche_avant[151], "unité");
+        assert_eq!(requete[17], fiche_avant[152], "correction");
+    }
+
+    #[test]
+    fn un_bouton_d_arret_change_par_l_appareil_est_nomme() {
+        let avant = fiche(10_307, 60);
+        let apres = avec_octet(fiche(0, 60), 27, OCTET_OUI);
+        let mut t = TransportRejoue::new(vec![avant, apres]);
+        let rapport = clear_memory(&mut t).unwrap();
+        assert!(
+            rapport.changed_parameters.iter().any(|c| c.contains("bouton d'arrêt")),
+            "{:?}",
+            rapport.changed_parameters
+        );
+    }
+
+    #[test]
+    fn le_delai_se_code_comme_dans_elitechlog() {
+        // Table d'ElitechLog : "0.5" → 1, "1.0" → 16, "1.5" → 17, "6.0" → 96.
+        assert_eq!(encoder_delai(1), 0x01);
+        assert_eq!(encoder_delai(2), 0x10);
+        assert_eq!(encoder_delai(3), 0x11);
+        assert_eq!(encoder_delai(12), 0x60);
+        for d in 0..=DELAI_MAX_DEMI_HEURES {
+            assert_eq!(decoder_delai(encoder_delai(d)), d);
+        }
+        assert_eq!(decoder_delai(0x61), 0, "au-delà de 6 h : pas de délai, comme ElitechLog");
+        assert_eq!(fmt_delai(3), "1 h 30");
+    }
+
+    #[test]
+    fn la_trame_d_heure_suit_la_disposition_d_elitechlog() {
+        let heure = NaiveDate::from_ymd_opt(2026, 10, 12)
+            .unwrap()
+            .and_hms_opt(14, 5, 9)
+            .unwrap();
+        let t = clock_set_request(1, heure);
+        assert_eq!(t[..11], [0x33, 0x01, 0x07, 0x00, 0x07, 0xEA, 10, 12, 14, 5, 9]);
+        assert_eq!(t[11], checksum(&t[..11]));
+    }
+
+    #[test]
+    fn la_description_refuse_les_accents_et_les_textes_trop_longs() {
+        let t = user_info_request(1, "Station Lans").unwrap();
+        assert_eq!(t.len(), 105);
+        assert_eq!(&t[4..16], b"Station Lans");
+        assert_eq!(t[16], 0, "le reste du champ est complété de zéros");
+        assert!(matches!(user_info_request(1, "Forêt"), Err(SerialError::InvalidSetting(_))));
+        assert!(matches!(
+            user_info_request(1, &"x".repeat(101)),
+            Err(SerialError::InvalidSetting(_))
+        ));
+        assert!(matches!(dev_num_request(1, "E2050-0433"), Err(SerialError::InvalidSetting(_))));
+        assert_eq!(dev_num_request(1, "E205004333").unwrap()[2], CMD_DEV_NUM);
+    }
+
+    #[test]
+    fn un_reglage_hors_plage_est_refuse_avec_la_plage_permise() {
+        let base = decode_dev_info(&DEV_INFO_REEL).unwrap().settings();
+        let cas = [
+            Rc5Settings { sample_interval_seconds: 5, ..base.clone() },
+            Rc5Settings { start_delay_half_hours: 13, ..base.clone() },
+            Rc5Settings { upper_limit_celsius: 95.0, ..base.clone() },
+            Rc5Settings { lower_limit_celsius: 39.8, upper_limit_celsius: 40.0, ..base.clone() },
+            Rc5Settings { station_no: 255, ..base.clone() },
+            Rc5Settings { alarm: 7, ..base.clone() },
+            Rc5Settings { temperature_calibration: 5.5, ..base.clone() },
+        ];
+        for s in cas {
+            assert!(matches!(s.validate(), Err(SerialError::InvalidSetting(_))), "{s:?}");
+        }
+        assert!(base.validate().is_ok());
+    }
+
+    /// Une remise à l'heure seule : ni arrêt ni écriture de paramètres, donc
+    /// rien d'effacé — c'est tout l'intérêt de la commande.
+    #[test]
+    fn la_remise_a_l_heure_seule_n_efface_rien() {
+        let vise = maintenant_fixe().naive_utc() + chrono::Duration::seconds(3600);
+        let avant = avec_horloge(fiche_etat(10_307, 60, 0x01), vise - chrono::Duration::seconds(125));
+        let apres = avec_horloge(fiche_etat(10_307, 60, 0x01), vise);
+        let mut t = TransportRejoue::new(vec![avant, apres]);
+        let demande = Rc5Write {
+            clock_timezone_offset_seconds: Some(3600),
+            ..Rc5Write::default()
+        };
+        let r = write_device(&mut t, &demande, &maintenant_fixe).unwrap();
+
+        assert_eq!(t.envoyees.len(), 3);
+        assert_eq!(t.envoyees[1][2], CMD_CLOCK_SET);
+        assert!(!r.recording_stopped);
+        assert!(r.mismatches.is_empty(), "{:?}", r.mismatches);
+        let c = r.clock.unwrap();
+        assert_eq!(c.drift_before_seconds, Some(-125), "le logger était en retard de 125 s");
+        assert_eq!(c.drift_after_seconds, Some(0));
+    }
+
+    #[test]
+    fn une_heure_non_prise_en_compte_est_signalee() {
+        let vise = maintenant_fixe().naive_utc();
+        let retard = avec_horloge(fiche(10_307, 60), vise - chrono::Duration::seconds(600));
+        let mut t = TransportRejoue::new(vec![retard.clone(), retard]);
+        let demande = Rc5Write {
+            clock_timezone_offset_seconds: Some(0),
+            ..Rc5Write::default()
+        };
+        let r = write_device(&mut t, &demande, &maintenant_fixe).unwrap();
+        assert!(r.mismatches.iter().any(|m| m.contains("heure")), "{:?}", r.mismatches);
+    }
+
+    /// De nouveaux réglages partent dans la trame de paramètres, et la relecture
+    /// conforme ne produit aucun écart.
+    #[test]
+    fn de_nouveaux_reglages_sont_ecrits_puis_verifies() {
+        let avant = fiche(10_307, 60);
+        let info = decode_dev_info(&avant).unwrap();
+        let voulu = Rc5Settings {
+            sample_interval_seconds: 600,
+            stop_button_enabled: true,
+            start_delay_half_hours: 3,
+            ..info.settings()
+        };
+        let mut attendu = voulu.apply_to(&info);
+        attendu.rec_count = 0;
+        // La fiche relue : mêmes octets que la trame écrite.
+        let mut apres = fiche(0, 0);
+        apres[5] = 0;
+        apres[6] = 10;
+        apres[7] = 0;
+        apres[27] = OCTET_OUI;
+        apres[148] = 0x11;
+        apres[159] = checksum(&apres[..159]);
+
+        let mut t = TransportRejoue::new(vec![avant, apres]);
+        let demande = Rc5Write {
+            settings: Some(voulu),
+            ..Rc5Write::default()
+        };
+        let r = write_device(&mut t, &demande, &maintenant_fixe).unwrap();
+        let trame = &t.envoyees[1];
+        assert_eq!(trame[..7], [0x33, 0x01, 0x05, 0x00, 0, 10, 0]);
+        assert_eq!(trame[12], OCTET_OUI);
+        assert_eq!(trame[13], 0x11);
+        assert!(r.mismatches.is_empty(), "{:?}", r.mismatches);
+        assert_eq!(r.after.settings().sample_interval_seconds, attendu.sample_interval_seconds);
+    }
+
+    /// Un réglage refusé ne laisse partir aucune écriture.
+    #[test]
+    fn un_reglage_refuse_n_ecrit_rien() {
+        let avant = fiche(10_307, 60);
+        let mut s = decode_dev_info(&avant).unwrap().settings();
+        s.sample_interval_seconds = 1;
+        let mut t = TransportRejoue::new(vec![avant]);
+        let demande = Rc5Write {
+            settings: Some(s),
+            clock_timezone_offset_seconds: Some(0),
+            ..Rc5Write::default()
+        };
+        assert!(matches!(
+            write_device(&mut t, &demande, &maintenant_fixe),
+            Err(SerialError::InvalidSetting(_))
+        ));
+        assert_eq!(t.envoyees.len(), 1, "seule la fiche d'identité a été demandée");
+    }
+
+    /// La réinitialisation rapide d'ElitechLog : heure puis paramètres.
+    #[test]
+    fn la_reinitialisation_rapide_remet_aussi_a_l_heure() {
+        let vise = maintenant_fixe().naive_utc();
+        let mut t = TransportRejoue::new(vec![
+            avec_horloge(fiche(10_307, 60), vise - chrono::Duration::seconds(90)),
+            avec_horloge(fiche(0, 60), vise),
+        ]);
+        let r = clear_memory_at(&mut t, Some(0), &maintenant_fixe).unwrap();
+        assert_eq!(t.envoyees.len(), 4);
+        assert_eq!(t.envoyees[1][2], CMD_CLOCK_SET, "l'heure part avant les paramètres");
+        assert_eq!(t.envoyees[2][2], CMD_PARAM_PUT[0]);
+        assert!(r.memory_cleared());
+        assert!(r.message().contains("remis à l'heure"), "{}", r.message());
+    }
 }

@@ -545,7 +545,7 @@ pub struct ElitechAnalysis {
     pub date_order: DateOrderEvidence,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn analyze_elitech(content: String) -> AppResult<ElitechAnalysis> {
     let export = parse_elitech_export_detailed(&content)?;
     let (start, end) = raw_bounds(&export.measurements);
@@ -820,7 +820,7 @@ fn detecter_reimport(
     }))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_elitech(
     state: State<'_, AppState>,
     payload: ElitechImportPayload,
@@ -860,7 +860,7 @@ fn import_elitech_impl(db: &Db, payload: &ElitechImportPayload) -> AppResult<Imp
     )
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_manual(
     state: State<'_, AppState>,
     payload: ManualImportPayload,
@@ -888,7 +888,7 @@ pub fn import_manual(
 pub async fn ign_altitude(latitude: f64, longitude: f64) -> AppResult<f64> {
     tauri::async_runtime::spawn_blocking(move || crate::altimetrie::altitude_ign(latitude, longitude))
         .await
-        .map_err(|e| AppError::Other(format!("Tâche asynchrone interrompue : {e}")))?
+        .map_err(|e| AppError::Other(format!("L'opération s'est interrompue de façon inattendue ({e}). Réessayez.")))?
 }
 
 // ---------------------------------------------------------------------------
@@ -911,7 +911,7 @@ pub async fn ai_analyze_file(
         crate::ai_import::analyze_text_with_ai(&client, &payload)
     })
     .await
-    .map_err(|e| AppError::Other(format!("Tâche asynchrone interrompue : {e}")))?
+    .map_err(|e| AppError::Other(format!("L'opération s'est interrompue de façon inattendue ({e}). Réessayez.")))?
 }
 
 #[tauri::command]
@@ -923,7 +923,7 @@ pub async fn ai_analyze_vision(
         crate::ai_import::analyze_vision_with_ai(&client, &payload)
     })
     .await
-    .map_err(|e| AppError::Other(format!("Tâche vision interrompue : {e}")))?
+    .map_err(|e| AppError::Other(format!("La lecture de l'image s'est interrompue de façon inattendue ({e}). Réessayez.")))?
 }
 
 #[tauri::command]
@@ -942,7 +942,7 @@ pub fn ai_preview_parsed(
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_ai(
     state: State<'_, AppState>,
     payload: crate::ai_import::AiImportPayload,
@@ -1213,7 +1213,7 @@ fn analyser_xlsx(export: ElitechXlsxExport) -> ElitechXlsxAnalysis {
 }
 
 /// Analyse un classeur ElitechLog **sans rien écrire**.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn analyze_elitech_xlsx(bytes: Vec<u8>) -> AppResult<ElitechXlsxAnalysis> {
     Ok(analyser_xlsx(parse_elitech_xlsx(&bytes)?))
 }
@@ -1226,7 +1226,7 @@ pub struct ElitechXlsxImportPayload {
     pub bytes: Vec<u8>,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_elitech_xlsx(
     state: State<'_, AppState>,
     payload: ElitechXlsxImportPayload,
@@ -1351,6 +1351,17 @@ pub struct Rc5Analysis {
     pub lower_limit_celsius: f64,
     /// Correction interne appliquée par le logger, déjà comprise dans les valeurs.
     pub temperature_calibration: f64,
+    /// Tous les réglages modifiables, en clair (fiche « Réglages du logger »).
+    pub settings: elitech_serial::Rc5Settings,
+    /// « V1.2 », comme le résumé d'ElitechLog.
+    pub firmware_label: Option<String>,
+    /// Charge de la pile annoncée par l'appareil, en %.
+    pub battery_percent: Option<u8>,
+    pub work_status: elitech_serial::WorkStatus,
+    /// Instant de départ annoncé par l'appareil (heure brute du logger). Avec le
+    /// numéro de série, il désigne une campagne : c'est la clé sous laquelle
+    /// l'UI retrouve une dérive mesurée avant une remise à l'heure.
+    pub logger_start_time: Option<NaiveDateTime>,
 }
 
 fn analyser_rc5(cache: &Rc5Cache) -> Rc5Analysis {
@@ -1381,6 +1392,11 @@ fn analyser_rc5(cache: &Rc5Cache) -> Rc5Analysis {
         upper_limit_celsius: lecture.device.upper_limit_celsius,
         lower_limit_celsius: lecture.device.lower_limit_celsius,
         temperature_calibration: lecture.device.temperature_calibration,
+        settings: lecture.device.settings(),
+        firmware_label: lecture.device.firmware_label(),
+        battery_percent: lecture.device.battery_percent(),
+        work_status: lecture.device.work_status,
+        logger_start_time: lecture.device.start_time,
     }
 }
 
@@ -1424,6 +1440,9 @@ pub async fn identify_rc5(port_name: Option<String>) -> AppResult<Rc5Identity> {
 
     let (port_name, device) = identite;
     Ok(Rc5Identity {
+        settings: device.settings(),
+        firmware_label: device.firmware_label(),
+        battery_percent: device.battery_percent(),
         model_label: device.model_label(),
         logger_serial: device.device_number.clone(),
         rec_count: device.rec_count,
@@ -1443,6 +1462,9 @@ pub struct Rc5Identity {
     pub rec_count: u16,
     pub work_status_label: String,
     pub sample_interval_seconds: i64,
+    pub settings: elitech_serial::Rc5Settings,
+    pub firmware_label: Option<String>,
+    pub battery_percent: Option<u8>,
     pub device: DevInfo,
 }
 
@@ -1735,6 +1757,8 @@ pub struct Rc5ResetReport {
     /// l'effacement — voir [`crate::elitech_serial::clear_memory`]. L'UI s'en
     /// sert pour prévenir que l'appareil ne redémarrera pas tout seul.
     pub recording_stopped: bool,
+    /// Remise à l'heure faite au passage (réinitialisation rapide).
+    pub clock: Option<elitech_serial::Rc5ClockSet>,
     pub message: String,
 }
 
@@ -1766,6 +1790,7 @@ pub async fn reset_rc5(
     state: State<'_, AppState>,
     port_name: Option<String>,
     confirmation: String,
+    timezone_offset_seconds: Option<i64>,
 ) -> AppResult<Rc5ResetReport> {
     if confirmation.trim() != CONFIRMATION_REINITIALISATION {
         return Err(elitech_serial::SerialError::ResetNotConfirmed.into());
@@ -1776,7 +1801,7 @@ pub async fn reset_rc5(
             Some(n) if !n.trim().is_empty() => n.trim().to_string(),
             _ => elitech_serial::find_rc5()?.0.port_name,
         };
-        elitech_serial::reset_port(&nom).map(|r| (nom, r))
+        elitech_serial::reset_port(&nom, timezone_offset_seconds).map(|r| (nom, r))
     })
     .await
     .map_err(|e| AppError::Other(format!("La réinitialisation n'a pas pu aboutir : {e}")))??;
@@ -1793,8 +1818,109 @@ pub async fn reset_rc5(
         parameters_preserved: rapport.parameters_preserved(),
         changed_parameters: rapport.changed_parameters.clone(),
         recording_stopped: rapport.recording_stopped,
+        clock: rapport.clock.clone(),
         message: rapport.message(),
     })
+}
+
+/// Mot que le frontend renvoie pour une écriture qui efface la mémoire ou
+/// change le numéro de série. Même rôle que [`CONFIRMATION_REINITIALISATION`].
+pub const CONFIRMATION_REGLAGES: &str = "CONFIRMER";
+
+/// Bilan d'une écriture de réglages, tel que la page RC-5 l'affiche.
+#[derive(Debug, Clone, Serialize)]
+pub struct Rc5WriteResult {
+    pub port_name: String,
+    pub report: elitech_serial::Rc5WriteReport,
+    /// Réglages relus après l'écriture.
+    pub settings: elitech_serial::Rc5Settings,
+    pub memory_cleared: bool,
+    pub message: String,
+}
+
+/// **Écrit sur le logger physique** : heure, description, numéro de série,
+/// paramètres — ce qu'ElitechLog sait écrire, et rien d'autre.
+///
+/// Les écritures qui effacent la mémoire (paramètres) ou qui changent
+/// l'identité de l'appareil (numéro de série) exigent la confirmation
+/// [`CONFIRMATION_REGLAGES`]. Une remise à l'heure ou une description seules
+/// n'effacent rien et n'en demandent pas.
+///
+/// Comme `reset_rc5`, la lecture mémorisée de ce port est oubliée dès que la
+/// mémoire a été effacée.
+#[tauri::command(rename_all = "snake_case")]
+pub async fn write_rc5(
+    state: State<'_, AppState>,
+    port_name: Option<String>,
+    request: elitech_serial::Rc5Write,
+    confirmation: Option<String>,
+) -> AppResult<Rc5WriteResult> {
+    let sensible = request.erases_memory() || request.device_number.is_some();
+    if sensible && confirmation.as_deref().map(str::trim) != Some(CONFIRMATION_REGLAGES) {
+        return Err(elitech_serial::SerialError::ResetNotConfirmed.into());
+    }
+
+    let (port_name, report) = tauri::async_runtime::spawn_blocking(move || {
+        let nom = match port_name {
+            Some(n) if !n.trim().is_empty() => n.trim().to_string(),
+            _ => elitech_serial::find_rc5()?.0.port_name,
+        };
+        elitech_serial::write_port(&nom, &request).map(|r| (nom, r))
+    })
+    .await
+    .map_err(|e| AppError::Other(format!("L'écriture sur le logger n'a pas pu aboutir : {e}")))??;
+
+    let memory_cleared = report.after.rec_count == 0 && report.before.rec_count > 0;
+    if report.after.rec_count < report.before.rec_count {
+        state.rc5_reading.lock().unwrap().remove(&port_name);
+    }
+    let message = message_ecriture(&report);
+    Ok(Rc5WriteResult {
+        port_name,
+        settings: report.after.settings(),
+        memory_cleared,
+        report,
+        message,
+    })
+}
+
+/// Phrase de bilan d'une écriture : ce qui a été fait, puis ce qui cloche.
+fn message_ecriture(r: &elitech_serial::Rc5WriteReport) -> String {
+    let mut faits = Vec::new();
+    if let Some(c) = &r.clock {
+        if c.drift_after_seconds.is_some_and(|d| d.abs() <= elitech_serial::HEURE_TOLERANCE_S) {
+            faits.push("le logger est à l'heure".to_string());
+        }
+    }
+    if r.after.rec_count == 0 && r.before.rec_count > 0 {
+        faits.push(format!(
+            "les réglages sont écrits et la mémoire est vidée ({} mesure(s) effacées de l'appareil)",
+            r.before.rec_count
+        ));
+    }
+    if r.recording_stopped {
+        faits.push("l'enregistrement en cours a été arrêté".to_string());
+    }
+    let mut texte = if faits.is_empty() {
+        "Écriture faite.".to_string()
+    } else {
+        let t = faits.join(", ");
+        let mut c = t.chars();
+        let premiere = c.next().map(|x| x.to_uppercase().collect::<String>()).unwrap_or_default();
+        format!("{premiere}{}.", c.as_str())
+    };
+    if !r.mismatches.is_empty() {
+        texte.push_str(&format!(
+            " Attention, le logger relu ne correspond pas à la demande : {}.",
+            r.mismatches.join(" ; ")
+        ));
+    }
+    if r.after.work_status == elitech_serial::WorkStatus::NotStarted {
+        texte.push_str(
+            " Le logger attend son démarrage : maintenez son bouton ▶ environ 5 secondes.",
+        );
+    }
+    texte
 }
 
 /// Bilan d'un arrêt d'enregistrement, tel que la page RC-5 l'affiche.
@@ -1862,7 +1988,7 @@ pub struct ManualEntryPayload {
 ///   choisir permettrait de faire passer une estimation pour une mesure ;
 /// * `raw_file_reference` et le libellé par défaut, qui portent la plage horaire
 ///   et la nature de la valeur — la seule trace de ce qui a été saisi.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_manual_entry(
     state: State<'_, AppState>,
     payload: ManualEntryPayload,
@@ -1993,7 +2119,7 @@ fn analyser_romma_apercu(apercu: &RommaApercu) -> RommaAnalysis {
 }
 
 /// Analyse une archive ROMMA **déjà en mémoire**, sans rien écrire.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn analyze_romma(content: String) -> AppResult<RommaAnalysis> {
     Ok(match lire_romma(&content)? {
         RommaLecture::EnFlux(apercu) => analyser_romma_apercu(&apercu),
@@ -2017,7 +2143,7 @@ pub struct RommaImportPayload {
     pub force_duplicate: bool,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_romma(
     state: State<'_, AppState>,
     payload: RommaImportPayload,
@@ -2852,7 +2978,7 @@ fn analyser(payload: InfoclimatPayload) -> InfoclimatAnalysis {
 }
 
 /// Analyse un JSON Infoclimat **déjà en mémoire**, sans rien écrire.
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command(async, rename_all = "snake_case")]
 pub fn analyze_infoclimat(
     content: String,
     station_id: Option<String>,
@@ -2898,7 +3024,7 @@ pub struct InfoclimatImportPayload {
 /// appellent `infoclimat::parse_infoclimat` sur un `&str`. Aucun code de lecture
 /// ne leur est propre — c'est ce qui garantit qu'un fichier validé à la main se
 /// comporte comme une réponse d'API, et réciproquement.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn import_infoclimat(
     state: State<'_, AppState>,
     payload: InfoclimatImportPayload,

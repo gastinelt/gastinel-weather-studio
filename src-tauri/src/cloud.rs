@@ -48,13 +48,19 @@ pub enum CloudError {
     #[error("Serveur Cloud injoignable : {0}. Vérifiez la connexion Internet.")]
     Network(String),
 
-    #[error("Réponse inattendue du serveur Cloud : {0}")]
+    #[error(
+        "Le serveur Cloud a répondu de façon inattendue ({0}). Réessayez dans quelques \
+         minutes : il est peut-être en maintenance."
+    )]
     BadResponse(String),
 
     #[error("Erreur interne Cloud : {0}")]
     Internal(String),
 
-    #[error("Erreur de base de données : {0}")]
+    #[error(
+        "La base de données locale a refusé l'opération Cloud (détail : {0}). \
+         Réessayez ; si le message revient, fermez puis rouvrez GWS."
+    )]
     Database(#[from] rusqlite::Error),
 }
 
@@ -272,10 +278,12 @@ pub struct CloudSyncResult {
 }
 
 /// Avancement d'une synchro, émis à chaque élément réellement échangé.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct CloudProgress {
-    /// « reception », « envoi » ou « suppression ».
+    /// « verification », « reception », « envoi » ou « suppression ».
     pub phase: &'static str,
+    /// Projet en cours d'envoi ou de vérification ; vide hors de cette étape.
+    pub projet: String,
     /// Ce qui passe, en clair pour l'utilisateur (« Série Darbounouse »).
     pub label: String,
     pub done: usize,
@@ -704,6 +712,7 @@ fn envoyer_mois(
                     label: t.label.clone(),
                     done: faits.load(Ordering::Relaxed),
                     total: liste.len(),
+                    ..Default::default()
                 });
                 // Version lue *avant* les mesures : si elles changent entre-temps,
                 // le repère sera en retard et le mois repartira la fois suivante.
@@ -870,7 +879,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
     // au sein de chaque nature.
     let total_suppr: usize = suppressions.iter().map(Vec::len).sum();
     for (i, key) in suppressions.into_iter().flatten().enumerate() {
-        progres(CloudProgress { phase: "suppression", label: libelle_cle(&key), done: i, total: total_suppr });
+        progres(CloudProgress { phase: "suppression", label: libelle_cle(&key), done: i, total: total_suppr, ..Default::default() });
         let id = match key.split_once(':') {
             Some((_, id)) => id,
             None => continue,
@@ -908,7 +917,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
 
     let total_recu: usize = receptions.iter().map(Vec::len).sum();
     for (i, key) in receptions.into_iter().flatten().enumerate() {
-        progres(CloudProgress { phase: "reception", label: libelle_cle(&key), done: i, total: total_recu });
+        progres(CloudProgress { phase: "reception", label: libelle_cle(&key), done: i, total: total_recu, ..Default::default() });
         let rec_url = format!("{}/cloud/records/{}", api_base(), key);
         let rec_resp = client
             .get(&rec_url)
@@ -1095,6 +1104,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
                     label: format!("Projet « {} »", p.name),
                     done: points_vus,
                     total: total_points,
+                    projet: p.name.clone(),
                 });
                 if let Ok(enc_bytes) = encrypt_record(&data_key, &json_bytes) {
                     let put_url = format!("{}/cloud/records/{p_key}", api_base());
@@ -1121,6 +1131,15 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
         for (pt, local_series) in contenu {
             points_vus += 1;
             let nom_point = pt.name.clone();
+            // Chaque station est d'abord comparée au Cloud : la fenêtre dit
+            // « Vérification » tant que rien n'est à envoyer (0.6.0).
+            progres(CloudProgress {
+                phase: "verification",
+                label: format!("Station « {nom_point} »"),
+                done: points_vus,
+                total: total_points,
+                projet: p.name.clone(),
+            });
             let pt_key = format!("point:{}", pt.id);
             local_known_keys.insert(pt_key.clone());
 
@@ -1155,6 +1174,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
                         label: format!("Station « {nom_point} »"),
                         done: points_vus,
                         total: total_points,
+                        projet: p.name.clone(),
                     });
                     if let Ok(enc_bytes) = encrypt_record(&data_key, &json_bytes) {
                         let put_url = format!("{}/cloud/records/{pt_key}", api_base());
@@ -1214,6 +1234,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
                             label: format!("Série « {nom_point} »"),
                             done: points_vus,
                             total: total_points,
+                            projet: p.name.clone(),
                         });
                         if envoyer(&client, &token, &data_key, &meta_key, &json_bytes) {
                             let _ = db.set_cloud_synced_hash(&meta_key, &hash);
@@ -1257,7 +1278,7 @@ pub fn sync_avec_progression(db: &Db, progres: &(dyn Fn(CloudProgress) + Sync)) 
     let previously_synced_keys = db.list_cloud_synced_keys().unwrap_or_default();
     for prev_key in previously_synced_keys {
         if !local_known_keys.contains(&prev_key) {
-            progres(CloudProgress { phase: "suppression", label: libelle_cle(&prev_key), done: 0, total: 0 });
+            progres(CloudProgress { phase: "suppression", label: libelle_cle(&prev_key), done: 0, total: 0, ..Default::default() });
             let del_url = format!("{}/cloud/records/{prev_key}", api_base());
             let _ = client
                 .delete(&del_url)

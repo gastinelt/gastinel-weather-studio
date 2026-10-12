@@ -1,0 +1,11 @@
+{
+  "id": "couleurs-carte",
+  "name": "Couleurs de la carte",
+  "version": "1.1.0",
+  "description": "Réglage de la luminosité, de la saturation et de la netteté du fond de carte (IGN / Photo).",
+  "api_version": 1,
+  "library": "couleurs_carte.dll",
+  "ui_entry": "index.html",
+  "hook": "settings",
+  "permissions": []
+}

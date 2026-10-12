@@ -106,12 +106,15 @@ pub enum ImportError {
     NoDataRows { inspected_lines: usize },
 
     #[error(
-        "Impossible d'identifier une colonne d'horodatage ni par les intitulés, \
-         ni par le contenu des lignes."
+        "Impossible de trouver la colonne de date et heure, ni par les intitulés, ni \
+         par le contenu des lignes. Utilisez l'import manuel pour la désigner."
     )]
     NoTimestampColumn,
 
-    #[error("Impossible d'identifier une colonne de température.")]
+    #[error(
+        "Impossible de trouver la colonne de température. Utilisez l'import manuel \
+         pour la désigner."
+    )]
     NoTemperatureColumn,
 
     #[error("Mapping de colonnes invalide : {0}")]

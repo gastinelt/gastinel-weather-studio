@@ -921,6 +921,7 @@ mod tests {
                 lower_limit_celsius: -30.0,
                 temperature_calibration: 0.0,
                 celsius: true,
+                raw: Default::default(),
             },
             header: DataHeader {
                 rec_count: 3,

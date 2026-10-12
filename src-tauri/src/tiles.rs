@@ -65,7 +65,10 @@ pub enum TileError {
     #[error("Plage ou zone de téléchargement invalide : {0}")]
     InvalidPlan(String),
 
-    #[error("Erreur d'accès disque : {0}")]
+    #[error(
+        "Le cache des fonds de carte est inaccessible ({0}). Vérifiez l'espace libre \
+         sur le disque."
+    )]
     Io(#[from] std::io::Error),
 }
 

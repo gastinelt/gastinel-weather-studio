@@ -53,15 +53,15 @@ pub fn altitude_ign(lat: f64, lon: f64) -> AppResult<f64> {
     let client = crate::http_client::client_builder()
         .timeout(std::time::Duration::from_secs(15))
         .build()
-        .map_err(|e| AppError::Other(format!("client HTTP : {e}")))?;
+        .map_err(|e| AppError::Other(format!("connexion impossible à préparer ({e})")))?;
     let rep = client
         .get(format!("{URL}?lon={lon:.6}&lat={lat:.6}&resource={RESSOURCE}&zonly=true"))
         .send()
-        .map_err(|e| AppError::Other(format!("service IGN injoignable (connexion ?) : {e}")))?;
+        .map_err(|e| AppError::Other(format!("service IGN injoignable, vérifiez la connexion Internet ({e})")))?;
     let statut = rep.status();
-    let corps = rep.text().map_err(|e| AppError::Other(format!("réponse IGN : {e}")))?;
+    let corps = rep.text().map_err(|e| AppError::Other(format!("réponse de l'IGN interrompue ({e})")))?;
     if !statut.is_success() {
-        return Err(AppError::Other(format!("service IGN indisponible (HTTP {})", statut.as_u16())));
+        return Err(AppError::Other(format!("service IGN indisponible pour l'instant (code {}), réessayez plus tard", statut.as_u16())));
     }
     lire_reponse(&corps)
 }

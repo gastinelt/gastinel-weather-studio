@@ -122,7 +122,7 @@ def envoyer():
     tmp = "/tmp/gws-extensions-envoi"
     subprocess.run(["ssh", HOTE, f"rm -rf {tmp} && mkdir -p {tmp}"], check=True)
     subprocess.run(["scp", "-q", *map(str, archives), str(DIST / "catalogue.json"), f"{HOTE}:{tmp}/"], check=True)
-    subprocess.run(["ssh", HOTE,
+    subprocess.run(["ssh", "-t", HOTE,
                     f"sudo install -d -m 755 {DEST} && "
                     f"sudo install -m 644 {tmp}/*.zip {DEST}/ && "
                     f"sudo install -m 644 {tmp}/catalogue.json {DEST}/ && rm -rf {tmp}"], check=True)

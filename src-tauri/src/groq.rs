@@ -94,10 +94,13 @@ pub enum GroqError {
     #[error("{0}")]
     Quota(String),
 
-    #[error("L'API Groq a répondu {status} : {body}")]
+    #[error(
+        "L'API Groq a refusé la demande (code {status} : {body}). Réessayez dans un \
+         moment ; si cela persiste, le service est peut-être perturbé."
+    )]
     Http { status: u16, body: String },
 
-    #[error("L'appel à l'API Groq a échoué : {0}")]
+    #[error("L'API Groq est injoignable ({0}). Vérifiez la connexion Internet.")]
     Network(String),
 
     #[error("Réponse de l'API Groq illisible : {0}")]
@@ -195,7 +198,7 @@ TON : factuel, direct, aucune formule de politesse, vocabulaire du domaine sans 
 const CONSIGNES_FORMAT: &str = r#"
 CONTRAINTES DE FORMAT :
 - Réponse en français, 120 mots maximum sauf demande explicite de développement.
-- Mise en forme autorisée, et strictement limitée à : puces commençant par un tiret, listes numérotées, **gras** pour un chiffre ou un nom de site. Pas de titres, pas de tableaux, pas de liens, pas de blocs de code : la réponse s'affiche dans un bloc étroit.
+- Mise en forme autorisée, et strictement limitée à : puces commençant par un tiret, listes numérotées, **gras** pour un chiffre ou un nom de site. Pas de titres, pas de tableaux, pas de liens, pas de blocs de code, pas de sous-puces : une puce tient en une seule ligne, précisions comprises. La réponse s'affiche dans un bloc étroit.
 - Les températures sont en degrés Celsius, une décimale.
 - N'invente aucune valeur : si une statistique n'est pas dans le contexte fourni, dis qu'elle manque.
 - Les périodes fournies sont en UTC. Ne les convertis pas."#;

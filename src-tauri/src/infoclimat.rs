@@ -107,10 +107,13 @@ pub enum InfoclimatError {
     #[error("{0}")]
     Auth(String),
 
-    #[error("Le serveur Infoclimat a répondu {status} : {body}")]
+    #[error(
+        "Le serveur Infoclimat a refusé la demande (code {status} : {body}). \
+         Réessayez plus tard : le service est peut-être en maintenance."
+    )]
     Http { status: u16, body: String },
 
-    #[error("Appel à l'API Infoclimat impossible : {0}")]
+    #[error("L'API Infoclimat est injoignable ({0}). Vérifiez la connexion Internet.")]
     Network(String),
 
     #[error("Réponse Infoclimat illisible : {0}")]

@@ -85,20 +85,25 @@ function clear(node) {
 }
 
 let toastTimer = null;
-function toast(message, isError = false) {
+/**
+ * Message bref en bas de l'écran. `action`, si elle est donnée, est appelée au
+ * clic (« voir le bilan ») ; le message reste alors affiché plus longtemps.
+ */
+function toast(message, isError = false, action = null) {
   const t = el("toast");
   t.textContent = message;
   t.classList.toggle("is-error", isError);
-  t.title = "Cliquer pour fermer";
+  t.title = action ? "Cliquer pour voir le détail" : "Cliquer pour fermer";
   t.onclick = () => {
     t.hidden = true;
     clearTimeout(toastTimer);
+    if (action) action();
   };
   t.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     t.hidden = true;
-  }, isError ? 9000 : 3500);
+  }, isError || action ? 9000 : 3500);
 }
 
 function showError(node, message) {
@@ -2449,6 +2454,75 @@ function avantRemiseQuota(maintenant = new Date()) {
  * Bandeau du quota partagé : noir = automatique (serveur), gris = manuel
  * (administrateur), une couleur par appareil. Rien si le relai est éteint.
  */
+/**
+ * Bulle noire instantanée, collée à la souris, pour tout élément `[data-info]`
+ * — comme le survol d'un graphique. Une seule bulle pour toute la page.
+ */
+const bulleSouris = (() => {
+  let bulle = null;
+  document.addEventListener("mousemove", (e) => {
+    const cible = e.target instanceof Element ? e.target.closest("[data-info]") : null;
+    if (!cible) {
+      if (bulle) bulle.hidden = true;
+      return;
+    }
+    if (!bulle) {
+      bulle = h("div", { class: "bulle-souris", role: "tooltip" });
+      // Dans la modale ouverte s'il y en a une : sinon la bulle passerait dessous.
+    }
+    const hote = cible.closest("dialog[open]") || document.body;
+    if (bulle.parentNode !== hote) hote.appendChild(bulle);
+    bulle.textContent = cible.dataset.info;
+    bulle.hidden = false;
+    const l = bulle.offsetWidth;
+    const x = Math.min(e.clientX + 14, window.innerWidth - l - 8);
+    bulle.style.left = `${Math.max(8, x)}px`;
+    bulle.style.top = `${e.clientY - bulle.offsetHeight - 10}px`;
+  });
+  return true;
+})();
+
+/**
+ * Bandeau noir sous la barre du haut quand la limite quotidienne Infoclimat
+ * est atteinte : ce poste (5 000/jour) ou le quota partagé du relai. Relu
+ * chaque minute ; la croix le masque jusqu'à la remise à zéro du lendemain.
+ */
+function surveillerLimiteInfoclimat() {
+  const bandeau = el("bandeau-quota");
+  const CLE = "gws.bandeauQuota.masqueLe";
+  const jourParis = () => new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris" }).format(new Date());
+  el("bandeau-quota-fermer").onclick = () => {
+    bandeau.hidden = true;
+    try { localStorage.setItem(CLE, jourParis()); } catch { /* sans mémoire : réapparaîtra */ }
+  };
+  const verifier = async () => {
+    let masque = null;
+    try { masque = localStorage.getItem(CLE); } catch { /* ignoré */ }
+    let texte = null;
+    try {
+      const partage = await invoke("quota_partage", { forcer: false });
+      if (partage && partage.total >= partage.plafond) {
+        texte = `Limite quotidienne Infoclimat atteinte pour l'ensemble des appareils (${fmtNumber(partage.total)} / ${fmtNumber(partage.plafond)} requêtes).`;
+      }
+    } catch { /* relai injoignable : on regarde le compteur local */ }
+    if (!texte) {
+      try {
+        const local = await invoke("get_infoclimat_quota");
+        if (local.requests_today >= local.max_daily_requests) {
+          texte = `Limite quotidienne Infoclimat atteinte sur cet appareil (${fmtNumber(local.requests_today)} / ${fmtNumber(local.max_daily_requests)} requêtes).`;
+        }
+      } catch { /* compteur illisible : pas de bandeau */ }
+    }
+    if (texte) {
+      el("bandeau-quota-texte").textContent =
+        `${texte} Les récupérations reprendront à minuit, heure de Paris (${avantRemiseQuota()}).`;
+    }
+    bandeau.hidden = !texte || masque === jourParis();
+  };
+  verifier();
+  setInterval(verifier, 60000);
+}
+
 async function afficherQuotaPartage(forcer) {
   const bandeau = el("quota-bandeau");
   let q;
@@ -2469,9 +2543,11 @@ async function afficherQuotaPartage(forcer) {
   const barre = el("quota-barre");
   clear(barre);
   const pct = (n) => `${Math.min(100, (n / q.plafond) * 100)}%`;
+  // Bulle instantanée qui suit la souris (`data-info`, voir `bulleSouris`) :
+  // l'infobulle native demandait d'attendre immobile ~3 s (0.6.0).
   const segment = (n, couleur, titre) => {
     if (n <= 0) return;
-    barre.appendChild(h("span", { class: "quota-seg", style: `width:${pct(n)};background:${couleur}`, title: titre }));
+    barre.appendChild(h("span", { class: "quota-seg", style: `width:${pct(n)};background:${couleur}`, "data-info": titre }));
   };
   segment(q.automatiques, "#202124", `Automatiques (serveur) : ${fmtNumber(q.automatiques)}`);
   segment(q.manuelles, "#9aa0a6", `Manuelles (administrateur) : ${fmtNumber(q.manuelles)}`);
@@ -2893,7 +2969,7 @@ function showFetchError(message, point) {
                 await fetchInfoclimat(point, false);
               }
             } catch (err) {
-              toast("Erreur lors de la désactivation du relai : " + String(err), true);
+              toast("Le relai SSH n'a pas pu être désactivé : " + String(err), true);
             }
           },
         })
@@ -3340,6 +3416,20 @@ async function ongletImportParDefaut() {
 
 const importState = {
   tab: "auto",
+  /**
+   * Import lancé et pas encore terminé, `{ libelle }`, ou `null`.
+   *
+   * Fermer la fenêtre n'interrompt pas un import : la commande tourne côté Rust
+   * jusqu'au bout. Avant la 0.6.0, rien ne le disait — l'import semblait annulé,
+   * et à la réouverture le bouton restait grisé sans explication.
+   */
+  enCours: null,
+  /**
+   * Numéro d'ouverture de la fenêtre. Un import ne touche à la fenêtre (bilan,
+   * fermeture, libellé du bouton) que si elle n'a pas été rouverte depuis son
+   * lancement : sinon il fermerait une fenêtre que l'utilisateur vient d'ouvrir.
+   */
+  session: 0,
   /** Des jours de saisie manuelle ont été tapés et pas encore importés. */
   entryDirty: false,
   fileName: null,
@@ -3417,7 +3507,8 @@ function updateOffsetHint() {
     `Décalage appliqué : ${offset >= 0 ? "+" : ""}${offset} s ` +
     `(fuseau ${tz === 0 ? "UTC" : `UTC+${tz / 3600}`} → UTC, dérive ${drift} s). ` +
     `Chaque mesure sera stockée en UTC = horodatage brut ${offset >= 0 ? "+" : "−"} ${Math.abs(offset)} s ; ` +
-    `le brut est conservé pour permettre un recalibrage ultérieur.`;
+    `le brut est conservé pour permettre un recalibrage ultérieur.` +
+    (importState.avertissementDerive ? ` ${importState.avertissementDerive}` : "");
 }
 
 function importCommon() {
@@ -3570,6 +3661,7 @@ function etapeCloudDemarrage(texte) {
   const boite = el("cloud-demarrage");
   if (!boite.matches(":popover-open")) boite.showPopover();
   el("cloud-demarrage-label").textContent = texte;
+  el("cloud-demarrage-titre").textContent = "Projet Cloud";
   el("cloud-demarrage-count").textContent = "";
   const barre = el("cloud-demarrage-bar");
   barre.classList.add("indetermine");
@@ -3600,7 +3692,7 @@ async function synchroCloudDemarrage() {
 function listenCloudProgress() {
   const evenements = window.__TAURI__ && window.__TAURI__.event;
   if (!evenements) return;
-  const PHASES = { reception: "Réception", envoi: "Envoi", suppression: "Suppression" };
+  const PHASES = { verification: "Vérification", reception: "Réception", envoi: "Envoi", suppression: "Suppression" };
   evenements.listen("cloud-progress", ({ payload: p }) => {
     // Au démarrage, la progression va dans la fenêtre « Projet Cloud ».
     const id = cloudDemarrageEnCours ? "cloud-demarrage" : "cloud-progress";
@@ -3608,6 +3700,7 @@ function listenCloudProgress() {
     if (!boite.matches(":popover-open")) boite.showPopover();
     const phase = PHASES[p.phase] || "Synchronisation";
     if (cloudDemarrageEnCours) {
+      el("cloud-demarrage-titre").textContent = p.projet ? `Projet Cloud : ${p.projet}` : "Projet Cloud";
       el("cloud-demarrage-label").textContent = `${phase} : ${p.label}`;
     } else {
       el("cloud-progress-phase").textContent = phase;
@@ -3831,6 +3924,7 @@ async function avecConfirmationDeReimport(lancer) {
  * sinon, voir `ongletImportParDefaut`.
  */
 async function openImportDialog(onglet = null) {
+  importState.session += 1;
   const tab = ongletImportPresent(onglet) ? onglet : await ongletImportParDefaut();
   const select = el("import-point");
   clear(select);
@@ -3869,7 +3963,15 @@ async function openImportDialog(onglet = null) {
   el("entry-to").value = hier;
   renderEntryDays();
   importState.entryDirty = false;
-  masquerProgressionImport();
+
+  // Ce qui décrit **un** logger ou **une** série ne passe pas d'un import à
+  // l'autre : un numéro de série resté dans le champ l'emporterait sur celui
+  // du fichier suivant, et un « Secours » oublié rangerait les mesures dans la
+  // mauvaise série. Le fuseau, lui, est une habitude de l'utilisateur : il reste.
+  el("import-serial").value = "";
+  el("import-drift").value = "0";
+  importState.avertissementDerive = null;
+  el("import-role").value = "Primary";
 
   updateOffsetHint();
 
@@ -3880,7 +3982,68 @@ async function openImportDialog(onglet = null) {
 
   switchTab(tab);
   remplirStations();
+  majImportEnCoursFenetre();
   if (!el("dlg-import").open) el("dlg-import").showModal();
+}
+
+/**
+ * Fenêtre d'import rouverte pendant qu'un import tourne : la barre le dit, et
+ * le bouton reste indisponible jusqu'à la fin — un second import en même temps
+ * se disputerait la base. Sans import en cours, remet la fenêtre au repos.
+ */
+function majImportEnCoursFenetre() {
+  const bouton = el("btn-do-import");
+  if (importState.enCours) {
+    afficherProgressionImport(
+      `Import précédent en cours (${importState.enCours.libelle})… ` +
+        "Vous pouvez préparer le suivant ; le bouton revient dès qu'il est terminé."
+    );
+    bouton.disabled = true;
+  } else {
+    masquerProgressionImport();
+    bouton.disabled = false;
+  }
+}
+
+/** Vrai si la fenêtre affichée est celle d'où l'import `session` est parti. */
+function fenetreDeLImport(session) {
+  return el("dlg-import").open && importState.session === session;
+}
+
+/** Barre « Import en arrière-plan », en bas à gauche, au-dessus de tout. */
+function afficherImportFond() {
+  const boite = el("import-fond");
+  if (!boite || !importState.enCours) return;
+  el("import-fond-label").textContent = importState.enCours.libelle;
+  if (!boite.matches(":popover-open")) boite.showPopover();
+}
+
+function masquerImportFond() {
+  const boite = el("import-fond");
+  if (boite?.matches(":popover-open")) boite.hidePopover();
+}
+
+/** Fin d'un import dont la fenêtre a été fermée (ou rouverte pour autre chose). */
+function terminerImportEnFond(report) {
+  const resume = `Import terminé : ${fmtNumber(report.imported_count)} mesures sur « ${report.point_name} ».`;
+  if (!rapportAAvertissement(report)) {
+    toast(resume);
+    return;
+  }
+  toast(`${resume} Le bilan contient des avertissements : cliquez ici pour le lire.`, false, () =>
+    montrerBilanImport(report)
+  );
+}
+
+/** Rouvre la fenêtre d'import sur le bilan d'un import fini en arrière-plan. */
+async function montrerBilanImport(report) {
+  const autreModale = [...document.querySelectorAll("dialog[open]")].some((d) => d.id !== "dlg-import");
+  if (autreModale) {
+    toast("Fermez d'abord la fenêtre ouverte, puis cliquez de nouveau sur le message.", true);
+    return;
+  }
+  await openImportDialog(importState.tab);
+  renderReport(report);
 }
 
 // ------------------------------------------- fenêtre « Importer des données » : 3 onglets
@@ -3969,17 +4132,25 @@ async function recupererStations() {
     return;
   }
   const bouton = el("btn-do-import");
+  const session = importState.session;
   bouton.disabled = true;
+  importState.enCours = { libelle: `récupération de ${points.length} station(s)` };
   try {
     for (const [i, p] of points.entries()) {
-      afficherProgressionImport(`Récupération ${i + 1} / ${points.length} : ${p.name}…`);
+      importState.enCours.libelle = `récupération ${i + 1} / ${points.length} : ${p.name}`;
+      if (fenetreDeLImport(session)) {
+        afficherProgressionImport(`Récupération ${i + 1} / ${points.length} : ${p.name}…`);
+      } else {
+        afficherImportFond();
+      }
       await fetchInfoclimat(p, false);
     }
   } finally {
-    masquerProgressionImport();
-    bouton.disabled = false;
+    importState.enCours = null;
+    masquerImportFond();
+    if (el("dlg-import").open) majImportEnCoursFenetre();
   }
-  el("dlg-import").close();
+  if (fenetreDeLImport(session)) el("dlg-import").close();
   toast(`Récupération terminée pour ${points.length} station(s).`);
 }
 
@@ -4322,7 +4493,17 @@ function proposerDeriveRc5(analyse) {
   if (analyse.clock_offset_vs_utc_seconds === null) return;
   const appliquer = () => {
     const tz = Number(el("import-tz").value) || 0;
-    el("import-drift").value = String(analyse.clock_offset_vs_utc_seconds - tz);
+    const derive = analyse.clock_offset_vs_utc_seconds - tz;
+    // Une dérive d'horloge se compte en minutes. Au-delà d'une heure, c'est une
+    // horloge arrêtée ou remise à zéro, ou un fuseau mal choisi : la recopier
+    // décalerait toutes les mesures (une série de 2025 finissait « aujourd'hui »).
+    const plausible = Math.abs(derive) <= 3600;
+    el("import-drift").value = plausible ? String(derive) : "0";
+    importState.avertissementDerive = plausible
+      ? null
+      : `L'horloge du logger s'écarte de ${Math.round(Math.abs(derive) / 3600)} h de l'heure attendue : ` +
+        "trop pour une dérive (horloge arrêtée ou remise à zéro, ou fuseau mal choisi). " +
+        "Elle n'est pas reprise : les dates restent celles du logger.";
     updateOffsetHint();
   };
   appliquer();
@@ -5431,9 +5612,16 @@ async function submitImport(event) {
 
   const button = el("btn-do-import");
   const libelleBouton = button.textContent;
+  const session = importState.session;
+  const pointChoisi = findPoint(el("import-point").value);
   button.disabled = true;
   button.textContent = "Import en cours…";
-  afficherProgressionImport();
+  importState.enCours = {
+    libelle: `${importState.fileName || libelleBouton.toLowerCase()} → ${pointChoisi ? pointChoisi.name : "point"}`,
+  };
+  afficherProgressionImport(
+    "Import en cours… Vous pouvez fermer cette fenêtre : l'import continue en arrière-plan."
+  );
 
   try {
     let lancer;
@@ -5582,26 +5770,42 @@ async function submitImport(event) {
 
     const report = await avecConfirmationDeReimport(lancer);
     if (!report) {
-      toast("Import annulé : ce contenu est déjà enregistré sur ce point.");
+      toast("Import annulé : ce contenu est déjà enregistré sur ce point. Rien n'a été ajouté.");
       return;
     }
 
+    memoriserOngletImport(importState.tab);
+    await loadPoints();
+    importState.enCours = null;
+    masquerImportFond();
+    if (!fenetreDeLImport(session)) {
+      terminerImportEnFond(report);
+      return;
+    }
     renderReport(report);
     // Les jours saisis sont enregistrés : fermer ne perd plus rien.
     if (saisieManuelle) importState.entryDirty = false;
-    memoriserOngletImport(importState.tab);
-    await loadPoints();
     toast(`${fmtNumber(report.imported_count)} mesures importées sur « ${report.point_name} ».`);
     // Import propre : rien à lire dans le bilan, la fenêtre se ferme seule.
     // Un avertissement la garde ouverte, sinon il serait perdu.
     if (!rapportAAvertissement(report)) el("dlg-import").close();
   } catch (e) {
     // Dans la fenêtre, pas dans un toast : un message long doit rester lisible.
-    showError(el("import-error"), String(e));
+    if (fenetreDeLImport(session)) showError(el("import-error"), String(e));
+    else toast(`L'import en arrière-plan a échoué : ${e}`, true);
   } finally {
-    masquerProgressionImport();
-    button.textContent = libelleBouton;
-    button.disabled = false;
+    importState.enCours = null;
+    masquerImportFond();
+    if (fenetreDeLImport(session)) {
+      masquerProgressionImport();
+      button.textContent = libelleBouton;
+      button.disabled = false;
+    } else if (el("dlg-import").open) {
+      // Fenêtre rouverte entre-temps : elle retrouve son bouton, avec le
+      // libellé de **son** onglet.
+      majImportEnCoursFenetre();
+      syncGroupeImport(importState.tab);
+    }
   }
 }
 
@@ -6454,7 +6658,7 @@ async function cloudLogout() {
     renderCloudStatus();
     toast("Déconnecté du Projet Cloud.");
   } catch (e) {
-    toast(`Erreur de déconnexion : ${e}`, true);
+    toast(`La déconnexion du Cloud a échoué : ${e}`, true);
   }
 }
 
@@ -6484,7 +6688,7 @@ async function cloudSync() {
       }
     }
   } catch (e) {
-    toast(`Erreur lors de la synchronisation : ${e}`, true);
+    toast(`La synchronisation Cloud a échoué : ${e} Réessayez plus tard.`, true);
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -6562,6 +6766,12 @@ function wireUp() {
     for (const v of verrous) v.disabled = true;
     el("dlg-settings").showModal();
     afficherQuotaPartage(false);
+    // Un import tourne peut-être en arrière-plan : la barre suit ses requêtes
+    // tant que les Paramètres sont ouverts, au lieu de rester figée (0.6.0).
+    const suivi = setInterval(() => {
+      if (el("dlg-settings").open) afficherQuotaPartage(true);
+      else clearInterval(suivi);
+    }, 10000);
     chargerAppareil();
     // Toujours rouvrir en haut.
     const defil = el("dlg-settings").querySelector(".dialog-form");
@@ -7119,6 +7329,16 @@ function wireUp() {
   }
 
   el("dlg-import").addEventListener("close", depotSuivant);
+  // Fermer pendant un import ne l'annule pas : on le dit, et une barre en bas
+  // à gauche suit la fin. Un clic sur la barre rouvre la fenêtre.
+  el("dlg-import").addEventListener("close", () => {
+    if (!importState.enCours) return;
+    afficherImportFond();
+    toast("L'import continue en arrière-plan. Un message s'affichera quand il sera terminé.");
+  });
+  el("import-fond")?.addEventListener("click", () => {
+    if (!document.querySelector("dialog[open]")) openImportDialog(importState.tab);
+  });
   // Point abandonné : le fichier en attente est oublié.
   el("dlg-point").addEventListener("close", () => {
     if (el("dlg-point").returnValue !== "saved") setTimeout(() => (depotState.apresPoint = null), 0);
@@ -7148,6 +7368,8 @@ async function boot() {
     );
     return;
   }
+
+  surveillerLimiteInfoclimat();
 
   // Tout d'abord : l'interface démarre, le gardien de mise à jour `.gws` ne
   // doit pas restaurer l'ancienne version (sans attendre, sans bloquer).

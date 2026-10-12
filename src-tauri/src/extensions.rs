@@ -56,8 +56,8 @@ pub struct Manifest {
     /// Page HTML du panneau, relative à `ui/`.
     #[serde(default)]
     pub ui_entry: Option<String>,
-    /// Point d'accroche de l'interface. Seul `map_view` existe en v1 : un bouton
-    /// sur la carte du projet qui ouvre le panneau de l'extension.
+    /// Point d'accroche de l'interface : `map_view` (bouton sur la carte du
+    /// projet) ou `settings` (bouton en bas des Paramètres, depuis la 0.6.0).
     #[serde(default)]
     pub hook: Option<String>,
     #[serde(default)]

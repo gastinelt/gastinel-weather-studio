@@ -1000,8 +1000,17 @@ const GwsMap = (() => {
       }
     }
 
-    cadrer(dessinables.length > 0);
+    // Recadrer seulement si les positions ont changé (autre projet, point
+    // ajouté, déplacé ou supprimé). Un import en cours rafraîchit la liste à
+    // chaque série : recadrer alors ramenait la vue d'ensemble en pleine
+    // manipulation de la carte (0.6.0).
+    const signature = dessinables.map((p) => `${p.id}:${p.latitude}:${p.longitude}`).sort().join("|");
+    if (signature !== derniereSignature) {
+      derniereSignature = signature;
+      cadrer(dessinables.length > 0);
+    }
   }
+  let derniereSignature = null;
 
   /** Marqueur d'un point : cible de clic invisible + pastille visible. */
   function creerMarqueur(p) {
@@ -1157,9 +1166,91 @@ const GwsMap = (() => {
     }
   }
 
+  // ------------------------------------------------ couleurs du fond de carte
+
+  /**
+   * Luminosité, saturation et netteté du **fond** (tuiles), de -100 à +100.
+   *
+   * Réglées par l'extension « Couleurs de la carte », appliquées ici : une
+   * extension vit dans une iframe isolée et ne peut pas toucher la carte. Les
+   * marqueurs et les étiquettes ne sont pas dans `.leaflet-tile-pane`, ils
+   * restent intacts. Gardé sur ce poste (localStorage) pour le prochain
+   * démarrage ; tout à 0 = carte d'origine, aucun filtre posé.
+   */
+  const CLE_COULEURS = "gws.carte.couleurs";
+  const borne = (v) => Math.max(-100, Math.min(100, Math.round(Number(v) || 0)));
+
+  function setTileFilters(reglages, memoriser = true) {
+    const lum = borne(reglages && reglages.luminosite);
+    const sat = borne(reglages && reglages.saturation);
+    const net = borne(reglages && reglages.nettete);
+
+    // Netteté : pas de filtre CSS, donc un filtre SVG. Positif = masque de
+    // netteté (convolution), négatif = léger flou.
+    let svg = document.getElementById("gws-filtre-nettete");
+    if (!svg) {
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.id = "gws-filtre-nettete";
+      svg.setAttribute("width", "0");
+      svg.setAttribute("height", "0");
+      svg.style.position = "absolute";
+      document.body.appendChild(svg);
+    }
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const filtres = [];
+    if (net !== 0) {
+      const ns = "http://www.w3.org/2000/svg";
+      const f = document.createElementNS(ns, "filter");
+      f.id = "gws-nettete";
+      if (net > 0) {
+        const k = net / 100;
+        const m = document.createElementNS(ns, "feConvolveMatrix");
+        m.setAttribute("order", "3");
+        m.setAttribute("preserveAlpha", "true");
+        m.setAttribute("kernelMatrix", `0 ${-k} 0 ${-k} ${1 + 4 * k} ${-k} 0 ${-k} 0`);
+        f.appendChild(m);
+      } else {
+        const b = document.createElementNS(ns, "feGaussianBlur");
+        b.setAttribute("stdDeviation", String((-net / 100) * 1.5));
+        f.appendChild(b);
+      }
+      svg.appendChild(f);
+      filtres.push("url(#gws-nettete)");
+    }
+    if (lum !== 0) filtres.push(`brightness(${1 + lum / 200})`);
+    if (sat !== 0) filtres.push(`saturate(${1 + sat / 100})`);
+
+    let style = document.getElementById("gws-style-tuiles");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "gws-style-tuiles";
+      document.head.appendChild(style);
+    }
+    style.textContent = filtres.length ? `.leaflet-tile-pane { filter: ${filtres.join(" ")}; }` : "";
+
+    if (memoriser) {
+      try {
+        window.localStorage.setItem(CLE_COULEURS, JSON.stringify({ luminosite: lum, saturation: sat, nettete: net }));
+      } catch (e) {
+        console.warn("Couleurs de la carte non mémorisées :", e);
+      }
+    }
+  }
+
+  // Réglage du dernier usage, reposé dès le chargement.
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      const brut = window.localStorage.getItem(CLE_COULEURS);
+      if (brut) setTileFilters(JSON.parse(brut), false);
+    } catch (e) {
+      console.warn("Couleurs de la carte illisibles :", e);
+    }
+  });
+
   return {
     ensure,
     setPoints,
+    setTileFilters,
     /** Arme/désarme le mode ajout depuis l'extérieur (raccourci, bouton hôte). */
     setAddMode: basculerModeAjout,
     isAddMode: () => modeAjout,
