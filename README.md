@@ -2,7 +2,7 @@
 
 Application de bureau (Windows, avec une cible Android) pour **centraliser, cartographier et analyser des relevés de température** — en particulier ceux des trous à froid (TAF) du Vercors. Écrite en Rust avec Tauri v2, interface en HTML/CSS/JS sans bundler.
 
-> État : projet personnel en développement (version 0.5.x). Le logiciel fonctionne, mais la lecture USB du logger sur Android n'a pas encore été essayée sur du matériel réel.
+> État : projet personnel en développement (version 0.6.x). Le logiciel fonctionne et a été testé sur le terrain, y compris la lecture USB du logger sur Android.
 
 ## Fonctionnalités
 
