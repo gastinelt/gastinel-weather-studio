@@ -10,12 +10,20 @@
 </p>
 
 <p align="center">
+  <a href="https://gastinel.me/gws/download/"><strong>⬇ Télécharger pour Windows</strong></a>
+  &nbsp;·&nbsp; <a href="#mises-à-jour--paquets-gws-canal-officiel-ou-bêta">Mises à jour</a>
+  &nbsp;·&nbsp; <a href="#feuille-de-route">Feuille de route</a>
+</p>
+
+<p align="center">
   <img src="docs/captures/studio.jpg" alt="Le studio : carte IGN des points de mesure et liste des points" width="900">
 </p>
 
 Application de bureau (Windows, avec une cible Android) pour **centraliser, cartographier et analyser des relevés de température** — en particulier ceux des trous à froid (TAF) du Vercors. Écrite en Rust avec Tauri v2, interface en HTML/CSS/JS sans bundler.
 
-> État : projet personnel en développement (version 0.6.x). Le logiciel fonctionne et a été testé sur le terrain, y compris la lecture USB du logger sur Android.
+> État : projet personnel en développement (version 0.6.x). Le logiciel fonctionne et a été testé sur le terrain.
+>
+> **Android** : une version stable est en préparation et arrive bientôt (la lecture USB du logger y fonctionne déjà).
 
 ## Aperçu
 
@@ -77,6 +85,10 @@ Au démarrage, l'application peut **vous prévenir qu'une nouvelle version exist
 
 <p align="center"><img src="docs/captures/3d.jpg" alt="Extension Carte 3D" width="800"></p>
 
+## Créer une extension
+
+Une extension est un dossier avec un `manifest.json`, une `.dll` Rust et, si besoin, une interface HTML. La crate [`extensions/gws-extension-api`](extensions/gws-extension-api) fournit l'API ; les extensions Carte 3D et Couleurs de la carte servent d'exemples. Format du manifeste, permissions (`db_read`, `db_write`) et risques acceptés : [`extensions/README.md`](extensions/README.md).
+
 ## Compiler
 
 Prérequis : [Rust](https://rustup.rs) (stable, 1.77.2 ou plus), les Build Tools MSVC avec le SDK Windows, WebView2 (présent sur Windows 11) et la CLI Tauri (`cargo install tauri-cli --version "^2"`). Node.js n'est pas nécessaire.
@@ -92,6 +104,20 @@ La première compilation est longue (Tauri et SQLite sont compilés depuis les s
 ## Clés d'API
 
 Aucune clé n'est fournie. Pour utiliser l'API Infoclimat ou l'assistant Groq, créez vos propres clés et déposez-les dans un dossier `Clee.API/` (par exemple `Clee.API/API.Groq.env`), ou saisissez-les dans l'application. Ce dossier est ignoré par git et les clés restent sur votre machine.
+
+## Feuille de route
+
+Objectifs par génération ; les détails peuvent bouger. Version complète : [`docs/roadmap.md`](docs/roadmap.md).
+
+| Version | Cap |
+|---|---|
+| **0.7.0** | Import Elitech par période, optimisation de la mémoire ; application Android (fonctions choisies pour le téléphone, relevé de terrain validé avant d'entrer dans le projet). |
+| **avant 0.8.0** | Écran de mise à jour repensé, avec une animation par génération. |
+| **0.8.0** | Écosystème : téléphone et ordinateurs reliés, projets Cloud publiables en lecture seule. |
+| **0.9.0** | iPhone et Mac, Linux (dont ARM64), téléphones pliables. |
+| **1.0** | Tout importer : RC-5 Pro, Voltcraft DL-101T et DL-121TH, et les autres formats rencontrés. |
+| **1.1** | Logiciel compagnon très léger (moins de 10 Mo) pour lire et régler les loggers sur le terrain. |
+| **1.5 et 2.0** | Extensions et compatibilité avec des outils développés par d'autres. |
 
 ## Licence
 
