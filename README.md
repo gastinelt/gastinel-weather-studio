@@ -19,22 +19,52 @@ Application de bureau (Windows, avec une cible Android) pour **centraliser, cart
 
 ## Aperçu
 
-| Comparer deux sites, avec l'agent d'analyse | Relief 3D (MNT IGN LiDAR HD) |
+### Croiser les séries
+
+Sélectionnez deux points ou plus sur la carte : statistiques côte à côte, courbes superposées et, si vous le souhaitez, une lecture par l'agent d'analyse.
+
+| Dans le studio | En plein écran (moyennes mensuelles sur plusieurs années) |
 |---|---|
-| ![Croisement de données](docs/captures/croisement.jpg) | ![Carte 3D](docs/captures/3d.jpg) |
+| ![Croisement de données et agent d'analyse](docs/captures/croisement.jpg) | ![Croisement en plein écran](docs/captures/croisement-plein-ecran.jpg) |
 
-<p align="center"><img src="docs/captures/projets.jpg" alt="Liste des projets" width="700"></p>
+### Importer des données
 
-## Fonctionnalités
+Un seul panneau pour trois sources : un **fichier** (format reconnu au contenu), une **station en ligne** (API Infoclimat), ou un **relevé sur place** (saisie à la main ou logger RC-5 branché).
 
-- **Carte** interactive sur fonds IGN (orthophoto, TOP25), avec les points de mesure et les stations, et une **vue 3D du relief**.
-- **Import de relevés** : exports ElitechLog (`.xls`), Infoclimat (JSON et CSV), archives ROMMA (`.csv`). Le format est reconnu au contenu.
-- **Lecture directe du logger Elitech RC-5** par le port série USB, sans passer par ElitechLog.
+<p align="center"><img src="docs/captures/import.jpg" alt="Fenêtre d'import de données" width="560"></p>
+
+### Gastinel Weather Elitech : lire un logger RC-5 sans ElitechLog
+
+Branchez un enregistreur **Elitech RC-5** en USB : l'application le détecte toute seule et propose d'importer sa mémoire. La page Elitech lit les mesures directement par le port série, vérifie et remet à l'heure l'horloge du logger, démarre ou arrête l'enregistrement, puis rattache la série à un point d'un projet. Les mesures obtenues sont identiques à celles d'un export ElitechLog (vérifié par un test permanent). Fonctionne aussi sur Android.
+
+<p align="center"><img src="docs/captures/elitech.jpg" alt="Page Gastinel Weather Elitech avec un RC-5 branché" width="800"></p>
+
+## Le logiciel
+
+- **Carte** interactive sur fonds IGN (orthophoto, TOP25), avec les points de mesure et les stations.
+- **Projets** : chaque projet est un espace de travail géographique libre.
+
+<p align="center"><img src="docs/captures/projets.jpg" alt="Liste des projets" width="640"></p>
+
+- **Import de relevés** : exports ElitechLog (`.xls`), Infoclimat (JSON et CSV), archives ROMMA (`.csv`), et tout autre tableau ou capture d'écran lu par l'assistant (aperçu vérifiable avant enregistrement).
+- **Lecture directe du logger Elitech RC-5** par le port série USB (voir plus haut).
 - **API Infoclimat** : récupération des données de stations avec votre propre clé.
-- **Comparaison** : statistiques côte à côte et courbes superposées de plusieurs séries.
-- **Assistant d'analyse** (optionnel) via l'API Groq, avec votre propre clé.
+- **Croisement** : statistiques côte à côte et courbes superposées, vue plein écran.
+- **Agent d'analyse** (optionnel) via l'API Groq, avec votre propre clé.
 - **Export** en CSV, TXT et HTML.
 - Données stockées **localement** (SQLite). Rien n'est envoyé ailleurs sans action de votre part.
+
+## Les extensions
+
+À côté du logiciel, des **extensions natives** (`.dll`) ajoutent des fonctions sans recompiler l'application. Elles s'activent dans **Paramètres → Extensions** ; détails et API dans [`extensions/README.md`](extensions/README.md).
+
+| Extension | Ce qu'elle ajoute |
+|---|---|
+| **Carte 3D** | Relief 3D du terrain (MNT IGN LiDAR HD) avec les points du projet. |
+| **Couleurs de la carte** | Luminosité, saturation et rendu des fonds IGN. |
+| **Analyse thermique** | Trois analyses de température calculées localement, sans réseau ni IA (lecture seule). |
+
+<p align="center"><img src="docs/captures/3d.jpg" alt="Extension Carte 3D" width="800"></p>
 
 ## Compiler
 
