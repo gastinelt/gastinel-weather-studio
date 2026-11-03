@@ -1,12 +1,33 @@
-# Gastinel Weather Studio
+<p align="center">
+  <img src="src-tauri/icons/128x128@2x.png" width="96" alt="">
+</p>
+
+<h1 align="center">Gastinel Weather Studio</h1>
+
+<p align="center">
+  Centraliser, cartographier et analyser des relevés de température — en particulier ceux des trous à froid du Vercors.<br>
+  <strong>Windows · Android · Rust + Tauri v2 · GPL-3.0</strong>
+</p>
+
+<p align="center">
+  <img src="docs/captures/studio.jpg" alt="Le studio : carte IGN des points de mesure et liste des points" width="900">
+</p>
 
 Application de bureau (Windows, avec une cible Android) pour **centraliser, cartographier et analyser des relevés de température** — en particulier ceux des trous à froid (TAF) du Vercors. Écrite en Rust avec Tauri v2, interface en HTML/CSS/JS sans bundler.
 
 > État : projet personnel en développement (version 0.6.x). Le logiciel fonctionne et a été testé sur le terrain, y compris la lecture USB du logger sur Android.
 
+## Aperçu
+
+| Comparer deux sites, avec l'agent d'analyse | Relief 3D (MNT IGN LiDAR HD) |
+|---|---|
+| ![Croisement de données](docs/captures/croisement.jpg) | ![Carte 3D](docs/captures/3d.jpg) |
+
+<p align="center"><img src="docs/captures/projets.jpg" alt="Liste des projets" width="700"></p>
+
 ## Fonctionnalités
 
-- **Carte** interactive sur fonds IGN (orthophoto, TOP25), avec les points de mesure et les stations.
+- **Carte** interactive sur fonds IGN (orthophoto, TOP25), avec les points de mesure et les stations, et une **vue 3D du relief**.
 - **Import de relevés** : exports ElitechLog (`.xls`), Infoclimat (JSON et CSV), archives ROMMA (`.csv`). Le format est reconnu au contenu.
 - **Lecture directe du logger Elitech RC-5** par le port série USB, sans passer par ElitechLog.
 - **API Infoclimat** : récupération des données de stations avec votre propre clé.
