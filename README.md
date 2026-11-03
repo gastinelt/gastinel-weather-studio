@@ -58,6 +58,14 @@ Les **réglages du logger** vont plus loin qu'ElitechLog : intervalle, délai de
 - **Export** en CSV, TXT et HTML.
 - Données stockées **localement** (SQLite). Rien n'est envoyé ailleurs sans action de votre part.
 
+## Mises à jour : paquets `.gws`, canal officiel ou bêta
+
+Les mises à jour arrivent sous forme de **paquet `.gws`** : un double-clic (ou **Installer un paquet .gws…**) suffit, sans réinstaller. Chaque paquet est **signé (Ed25519)** : l'application refuse tout paquet dont la signature ou l'empreinte de l'exécutable ne correspond pas. Détails dans [`docs/signature-maj.md`](docs/signature-maj.md).
+
+Au démarrage, l'application peut **vous prévenir qu'une nouvelle version existe**, sur le **canal officiel** ou, si vous cochez la case, sur le **canal bêta** pour essayer les nouveautés en avance. La vérification n'envoie que le numéro de version ; vous pouvez aussi la désactiver et ne vérifier qu'à la main.
+
+<p align="center"><img src="docs/captures/mises-a-jour.png" alt="Réglages des mises à jour : canal officiel ou bêta" width="640"></p>
+
 ## Les extensions
 
 À côté du logiciel, des **extensions natives** (`.dll`) ajoutent des fonctions sans recompiler l'application. Elles s'activent dans **Paramètres → Extensions** ; détails et API dans [`extensions/README.md`](extensions/README.md).
