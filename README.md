@@ -39,6 +39,10 @@ Branchez un enregistreur **Elitech RC-5** en USB : l'application le détecte tou
 
 <p align="center"><img src="docs/captures/elitech.jpg" alt="Page Gastinel Weather Elitech avec un RC-5 branché" width="800"></p>
 
+Les **réglages du logger** vont plus loin qu'ElitechLog : intervalle, délai de démarrage, bouton d'arrêt, seuils d'alarme, unité de l'écran, et des réglages avancés que le protocole porte mais qu'ElitechLog grise pour le RC-5 (tonalité, correction de température, numéro de série). Tout est relu sur l'appareil avant d'écrire, et rien n'est effacé.
+
+<p align="center"><img src="docs/captures/elitech-reglages.png" alt="Réglages du logger RC-5" width="560"></p>
+
 ## Le logiciel
 
 - **Carte** interactive sur fonds IGN (orthophoto, TOP25), avec les points de mesure et les stations.
