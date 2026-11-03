@@ -74,7 +74,6 @@ Au démarrage, l'application peut **vous prévenir qu'une nouvelle version exist
 |---|---|
 | **Carte 3D** | Relief 3D du terrain (MNT IGN LiDAR HD) avec les points du projet. |
 | **Couleurs de la carte** | Luminosité, saturation et rendu des fonds IGN. |
-| **Analyse thermique** | Trois analyses de température calculées localement, sans réseau ni IA (lecture seule). |
 
 <p align="center"><img src="docs/captures/3d.jpg" alt="Extension Carte 3D" width="800"></p>
 
