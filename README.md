@@ -46,6 +46,7 @@ Un seul panneau pour trois sources : un **fichier** (format reconnu au contenu),
 Branchez un enregistreur **Elitech RC-5** en USB : l'application le détecte toute seule et propose d'importer sa mémoire. La page Elitech lit les mesures directement par le port série, vérifie et remet à l'heure l'horloge du logger, démarre ou arrête l'enregistrement, puis rattache la série à un point d'un projet. Les mesures obtenues sont identiques à celles d'un export ElitechLog (vérifié par un test permanent). Fonctionne aussi sur Android.
 
 <p align="center"><img src="docs/captures/elitech.jpg" alt="Page Gastinel Weather Elitech avec un RC-5 branché" width="800"></p>
+<p align="center"><em>RC-5 connecté : graphique des mesures en mémoire et vérification de l'horloge du logger.</em></p>
 
 Les **réglages du logger** vont plus loin qu'ElitechLog : intervalle, délai de démarrage, bouton d'arrêt, seuils d'alarme, unité de l'écran, et des réglages avancés que le protocole porte mais qu'ElitechLog grise pour le RC-5 (tonalité, correction de température, numéro de série). Tout est relu sur l'appareil avant d'écrire, et rien n'est effacé.
 
